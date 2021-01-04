@@ -1,0 +1,13 @@
+{"level":"info","ts":1609737211.5425684,"msg":"Web server started at 2021-01-04 00:13:31.541947735 -0500 EST"}
+{"level":"info","ts":1609737386.9243653,"msg":"Web server started at 2021-01-04 00:16:26.923738284 -0500 EST"}
+{"level":"info","ts":1609737444.4828494,"msg":"Web server started at 2021-01-04 00:17:24.482012592 -0500 EST"}
+{"level":"info","ts":1609738037.4706116,"msg":"Web server started at 2021-01-04 00:27:17.469930074 -0500 EST"}
+{"level":"info","ts":1609738071.9739785,"msg":"Web server started at 2021-01-04 00:27:51.973343515 -0500 EST"}
+{"level":"info","ts":1609738444.554059,"msg":"Web server started at 2021-01-04 00:34:04.553418464 -0500 EST"}
+{"level":"info","ts":1609738493.7446797,"msg":"Web server started at 2021-01-04 00:34:53.743996638 -0500 EST"}
+{"level":"info","ts":1609738501.8391702,"msg":"Web server started at 2021-01-04 00:35:01.838677493 -0500 EST"}
+{"level":"info","ts":1609740183.726482,"msg":"Web server started at 2021-01-04 01:03:03.725757067 -0500 EST"}
+{"level":"error","ts":1609740260.8859878,"msg":"http: Server closed"}
+{"level":"warn","ts":1609740260.886191,"msg":"Server has been shutdown at 2021-01-04 01:03:03.725757067 -0500 EST"}
+{"level":"info","ts":1609740264.3553572,"msg":"Web server started at 2021-01-04 01:04:24.35470186 -0500 EST"}
+{"level":"info","ts":1609740513.4420085,"msg":"Web server started at 2021-01-04 01:08:33.441461645 -0500 EST"}

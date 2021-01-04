@@ -10,6 +10,7 @@ import (
 	"strconv"
 
 	"github.com/gorilla/mux" //go get -u github.com/gorilla/mux
+	"github.com/itrepablik/itrlog"
 )
 
 type productModel struct {
@@ -35,7 +36,29 @@ var students = allStudents{
 // GetStudents bla bla...
 func GetStudents(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+	var students allStudents
+	var Db, _ = config.MYSQLConnection()
+	rows, err := Db.Query("SELECT Id, Name, Email FROM Students")
+	if err != nil {
+		if err != sql.ErrNoRows {
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+		itrlog.Warn("(SQL) ", err.Error())
+		return
+	}
+	for rows.Next() {
+		var studentID int
+		var Name, Email string
+		if err := rows.Scan(&studentID, &Name, &Email); err != nil {
+			itrlog.Warn("(SQL) ", err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+		var student = student{ID: studentID, Name: Name, Email: Email}
+		students = append(students, student)
+	}
 	json.NewEncoder(w).Encode(students)
+	w.WriteHeader(http.StatusOK)
+	return
 }
 
 // GetStudent bla bla...
@@ -44,76 +67,78 @@ func GetStudent(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	studentID, err := strconv.Atoi(vars["id"])
 	if err != nil {
-		fmt.Fprintf(w, "Invalid ID")
+		w.WriteHeader(http.StatusBadRequest)
+		itrlog.Warn("(USER) ", err.Error())
 		return
 	}
-	for _, student := range students {
-		if student.ID == studentID {
-			json.NewEncoder(w).Encode(student)
+	var Db, _ = config.MYSQLConnection()
+	var Name, Email string
+	err = Db.QueryRow("SELECT Name, Email FROM Students WHERE Id=?", studentID).Scan(&Name, &Email)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			w.WriteHeader(http.StatusOK)
+		} else {
+			w.WriteHeader(http.StatusInternalServerError)
 		}
+		itrlog.Warn("(SQL) ", err.Error())
+		defer Db.Close()
+		return
 	}
+	var student = student{ID: studentID, Name: Name, Email: Email}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(student)
+	w.WriteHeader(http.StatusCreated)
+	return
 }
 
 // CreateStudent bla bla...
 func CreateStudent(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Buenas SQL")
 	var newStudent student
-	var Db, _ = config.MYSQLConnection()
 	reqBody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		fmt.Fprintf(w, "Insert valid student")
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, "(USER) %v", err.Error())
+		return
 	}
+
+	var Db, _ = config.MYSQLConnection()
 	json.Unmarshal(reqBody, &newStudent)
 	_, err = Db.Query("call createStudent(?, ?, ?)", newStudent.ID, newStudent.Name, newStudent.Email)
 	if err != nil {
-		fmt.Fprintf(w, "Something wrong in MySQL")
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(w, "(SQL) %v", err.Error())
+		defer Db.Close()
+		return
 	}
-	defer Db.Close()
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
 	return
-
-	/*
-		var newStudent student
-		reqBody, err := ioutil.ReadAll(r.Body)
-		if err != nil {
-			fmt.Fprintf(w, "Insert valid student")
-		}
-		json.Unmarshal(reqBody, &newStudent)
-		newStudent.ID = len(students) + 1
-		students = append(students, newStudent)
-
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusCreated)
-		json.NewEncoder(w).Encode(newStudent)
-	*/
-
 }
 
 // UpdateStudent bla bla...
 func UpdateStudent(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	vars := mux.Vars(r)
-	studentID, err := strconv.Atoi(vars["id"])
-
-	if err != nil {
-		fmt.Fprintf(w, "Invalid ID")
-		return
-	}
 	reqBody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		fmt.Fprintf(w, "Insert valid student")
+		w.WriteHeader(http.StatusBadRequest)
+		itrlog.Warn("(USER) ", err.Error())
+		return
 	}
 	var updatedStudent student
 	json.Unmarshal(reqBody, &updatedStudent)
 
-	for i, student := range students {
-		if student.ID == studentID {
-			students[len(students)-1], students[i] = students[i], students[len(students)-1]
-			students = students[:len(students)-1]
-			updatedStudent.ID = student.ID
-			students = append(students, updatedStudent)
-			fmt.Fprintf(w, "The student %v was updated succesfully", studentID)
-		}
+	//studentID, err := strconv.Atoi(vars["id"])
+	var Db, _ = config.MYSQLConnection()
+	_, err = Db.Query("call updateStudent(?, ?, ?)", updatedStudent.ID, updatedStudent.Name, updatedStudent.Email)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(w, "(SQL) %v", err.Error())
+		defer Db.Close()
+		return
 	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	return
 }
 
 // DeleteStudent bla bla...
