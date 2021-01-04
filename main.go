@@ -11,8 +11,6 @@ import (
 	"os/signal"
 	"time"
 
-	"github.com/gorilla/csrf"
-	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/itrepablik/itrlog"
 	"github.com/itrepablik/sakto"
@@ -31,23 +29,27 @@ func main() {
 	flag.Parse()
 
 	router := mux.NewRouter()
-	csrfMiddleware := csrf.Protect(
-		[]byte(config.SecretKeyCORS),
-		csrf.TrustedOrigins([]string{config.SiteDomainName}),
-	)
+	// Create cross-site request forgery (CSRF) protection in every http requests
+	// 32-byte-long-auth-key []string{config.SiteDomainName}
+	/*
+		csrfMiddleware := csrf.Protect(
+			[]byte(config.SecretKeyCORS),
+			csrf.Secure(false),
+			csrf.TrustedOrigins([]string{config.SiteDomainName}), // Change this in production
+		)
 
-	// This is related to the CORS config to allow all origins []string{"*"} or specify only allowed IP or hostname.
-	cors := handlers.CORS(
-		handlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization"}),
-		handlers.AllowedMethods([]string{"GET", "POST", "PUT"}),
-		handlers.AllowedOrigins([]string{config.SiteDomainName}),
-	)
+		// This is related to the CORS config to allow all origins []string{"*"} or specify only allowed IP or hostname.
+		cors := handlers.CORS(
+			handlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization"}),
+			handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE"}),
+			handlers.AllowedOrigins([]string{config.SiteDomainName}),
+		)
 
-	router.Use(cors)
-	router.Use(csrfMiddleware)
-	router.Use(loggingMiddleware)
-	router.Use(mux.CORSMethodMiddleware(router))
-
+		router.Use(cors)
+		router.Use(csrfMiddleware)
+		router.Use(loggingMiddleware)
+		router.Use(mux.CORSMethodMiddleware(router))
+	*/
 	// This will serve the files under http://localhost:3000/static/<filename>
 	router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir(dir))))
 
@@ -55,7 +57,8 @@ func main() {
 	api.MainRouters(router) // URLs for the main app.
 
 	srv := &http.Server{
-		Addr: "localhost:4000",
+		Addr: "localhost:3000",
+		//Addr: "192.168.1.18:3000",
 		// Good practice to set timeouts to avoid Slowloris attacks.
 		WriteTimeout: time.Second * 15,
 		ReadTimeout:  time.Second * 15,
@@ -69,7 +72,7 @@ func main() {
 		fmt.Println(msg, CurrentLocalTime)
 		itrlog.Info("Web server started at ", CurrentLocalTime)
 		if err := srv.ListenAndServe(); err != nil {
-			itrlog.Error("Hola ", err)
+			itrlog.Error(err)
 		}
 	}() // Note the parentheses - must call the function.
 

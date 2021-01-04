@@ -1,13 +1,13 @@
 package config
 
 // SiteShortName bla bla...
-const SiteShortName string = "GoWebApp"
+const SiteShortName string = "SimHCN"
 
 // SiteFullName bla bla...
-const SiteFullName string = "Maharlikans Code"
+const SiteFullName string = "Simulador de Historias Clínicas Nutricionales"
 
 // SiteSlogan bla bla...
-const SiteSlogan string = "Hello Maharlikans, Welcome to our Web Development Series"
+const SiteSlogan string = "¡Aliméntate sano!"
 
 // SiteYear bla bla...
 const SiteYear int = 2021
@@ -16,7 +16,7 @@ const SiteYear int = 2021
 const SiteRootTemplate string = "html/"
 
 //SiteDomainName bla bla...
-const SiteDomainName string = "maharlikanscode.com"
+const SiteDomainName string = "*"
 
 //SiteProperDomainName bla bla...
 const SiteProperDomainName string = "MaharlikansCode.com"
@@ -40,7 +40,7 @@ const SiteFooterAccountTemplate = SiteRootTemplate + "layout/footer_account.html
 const SiteFooterDashTemplate = SiteRootTemplate + "layout/footer_dash.html"
 
 //SiteBaseURL bla bla...
-const SiteBaseURL = "http://localhost:4000/"
+const SiteBaseURL = "http://localhost:3000/"
 
 //SiteTopMenuLogo bla bla...
 const SiteTopMenuLogo = "/static/assets/images/maharlikanscode_top_logo.png"
@@ -49,7 +49,7 @@ const SiteTopMenuLogo = "/static/assets/images/maharlikanscode_top_logo.png"
 const EmailLogo = SiteBaseURL + "static/assets/images/maharlikanscode_top_logo.png"
 
 //SiteEmail bla bla...
-const SiteEmail = "support@maharlikanscode.com"
+const SiteEmail = "email@email.com"
 
 //SitePhoneNumbers bla bla...
 const SitePhoneNumbers = ""
@@ -58,10 +58,13 @@ const SitePhoneNumbers = ""
 const SiteCompanyAddress = "Your company address here"
 
 //SiteTimeZone bla bla...
-const SiteTimeZone = "Asia/Manila"
+const SiteTimeZone = "America/New_York"
 
 //SecretKeyCORS bla bla...
 const SecretKeyCORS = "n&@ix77r#^&^cgeb13w@!+pht^6qu-=("
 
 //MyEncryptDecryptSK bla bla...
 const MyEncryptDecryptSK = "mkc&1*~#^8^#s0^=)^^7%a12"
+
+// UserCookieExp is the user's cookie expiration in number of days
+const UserCookieExp = "30"
