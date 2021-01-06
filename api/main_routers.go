@@ -19,7 +19,7 @@ func Home(w http.ResponseWriter, r *http.Request) {
 	tmpl := template.Must(template.ParseFiles(config.SiteRootTemplate + "front/index.html"))
 
 	data := contextData{
-		"PageTitle":    "Welcome to Maharlikans Code Tutorial Series",
+		"PageTitle":    config.SiteFullName,
 		"PageMetaDesc": config.SiteSlogan,
 		"CanonicalURL": r.RequestURI,
 		"CsrfToken":    csrf.Token(r),
@@ -28,6 +28,7 @@ func Home(w http.ResponseWriter, r *http.Request) {
 	tmpl.Execute(w, data)
 }
 
+/*
 func testPage(w http.ResponseWriter, r *http.Request) {
 	tmpl := template.Must(template.ParseFiles(config.SiteRootTemplate + "front/index.html"))
 	data := contextData{
@@ -39,15 +40,16 @@ func testPage(w http.ResponseWriter, r *http.Request) {
 	}
 	tmpl.Execute(w, data)
 }
+*/
 
 // MainRouters are the collection of all URLs for the Main App.
 func MainRouters(router *mux.Router) {
 	router.HandleFunc("/", Home).Methods("GET")
 
 	// Students URLs
-	router.HandleFunc("/Students", myhandlers.GetStudents).Methods("GET")
-	router.HandleFunc("/Students/{id}", myhandlers.GetStudent).Methods("GET")
-	router.HandleFunc("/Students", myhandlers.CreateStudent).Methods("POST")
-	router.HandleFunc("/Students/{id}", myhandlers.UpdateStudent).Methods("PUT")
-	router.HandleFunc("/Students/{id}", myhandlers.DeleteStudent).Methods("DELETE")
+	router.HandleFunc("/Students/GetStudents", myhandlers.GetStudents).Methods("GET")
+	router.HandleFunc("/Students/GetStudent/{id}", myhandlers.GetStudent).Methods("GET")
+	router.HandleFunc("/Students/UpdateStudent", myhandlers.UpdateStudent).Methods("POST")
+	router.HandleFunc("/Students/CreateStudent", myhandlers.CreateStudent).Methods("POST")
+	router.HandleFunc("/Students/DeleteStudent", myhandlers.DeleteStudent).Methods("DELETE")
 }

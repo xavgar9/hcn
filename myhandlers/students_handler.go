@@ -121,39 +121,60 @@ func UpdateStudent(w http.ResponseWriter, r *http.Request) {
 	reqBody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		itrlog.Warn("(USER) ", err.Error())
+		fmt.Fprintf(w, "(USER) %v", err.Error())
 		return
 	}
 	var updatedStudent student
 	json.Unmarshal(reqBody, &updatedStudent)
 
-	//studentID, err := strconv.Atoi(vars["id"])
 	var Db, _ = config.MYSQLConnection()
-	_, err = Db.Query("call updateStudent(?, ?, ?)", updatedStudent.ID, updatedStudent.Name, updatedStudent.Email)
+	row, err := Db.Exec("UPDATE Students SET Name=?, Email=? WHERE Id=?", updatedStudent.Name, updatedStudent.Email, updatedStudent.ID)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprintf(w, "(SQL) %v", err.Error())
 		defer Db.Close()
 		return
 	}
+
+	count, err := row.RowsAffected()
+	if err != nil {
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprintf(w, "(SQL) %v", err.Error())
+		defer Db.Close()
+		return
+	}
+	if count == 1 {
+		w.WriteHeader(http.StatusCreated)
+	} else {
+		w.WriteHeader(http.StatusOK)
+	}
+
+	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
 	return
 }
 
 // DeleteStudent bla bla...
 func DeleteStudent(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	vars := mux.Vars(r)
-	studentID, err := strconv.Atoi(vars["id"])
+	reqBody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		fmt.Fprintf(w, "Invalid ID")
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, "(USER) %v", err.Error())
 		return
 	}
-	for i, student := range students {
-		if student.ID == studentID {
-			students = append(students[:i], students[i+1:]...)
-			fmt.Fprintf(w, "Student %v was deleted succesfully", studentID)
-		}
+	var deletedStudent student
+	json.Unmarshal(reqBody, &deletedStudent)
+
+	var Db, _ = config.MYSQLConnection()
+	_, err = Db.Exec("DELETE FROM Students WHERE Id=?", deletedStudent.ID)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(w, "(SQL) %v", err.Error())
+		defer Db.Close()
+		return
 	}
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	return
 }

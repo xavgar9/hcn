@@ -57,8 +57,8 @@ func main() {
 	api.MainRouters(router) // URLs for the main app.
 
 	srv := &http.Server{
-		Addr: "localhost:3000",
-		//Addr: "192.168.1.18:3000",
+		//Addr: "localhost:3600",
+		Addr: "192.168.1.42:3600",
 		// Good practice to set timeouts to avoid Slowloris attacks.
 		WriteTimeout: time.Second * 15,
 		ReadTimeout:  time.Second * 15,
