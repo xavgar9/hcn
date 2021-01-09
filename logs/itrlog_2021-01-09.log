@@ -1,0 +1,44 @@
+{"level":"info","ts":1610169204.137879,"msg":"Server started at 2021-01-09 00:13:24.136954773 -0500 EST"}
+{"level":"error","ts":1610169204.1753087,"msg":"listen tcp 192.168.1.100:3600: listen: address already in use"}
+{"level":"info","ts":1610169243.8638334,"msg":"Server started at 2021-01-09 00:14:03.863132491 -0500 EST"}
+{"level":"info","ts":1610169243.8677838,"msg":"Server started at 2021-01-09 00:14:03.866783648 -0500 EST"}
+{"level":"error","ts":1610169243.868263,"msg":"listen tcp 192.168.1.100:3600: bind: address already in use"}
+{"level":"info","ts":1610169542.8420448,"msg":"Server started at 2021-01-09 00:19:02.841214655 -0500 EST"}
+{"level":"info","ts":1610169542.842071,"msg":"Server started at 2021-01-09 00:19:02.841198577 -0500 EST"}
+{"level":"error","ts":1610169543.0263636,"msg":"listen tcp 192.168.1.100:3600: bind: address already in use"}
+{"level":"info","ts":1610169559.5958054,"msg":"Server started at 2021-01-09 00:19:19.594907114 -0500 EST"}
+{"level":"error","ts":1610169559.5962017,"msg":"listen tcp 192.168.1.100:3600: bind: address already in use"}
+{"level":"info","ts":1610169559.7911284,"msg":"Server started at 2021-01-09 00:19:19.790510596 -0500 EST"}
+{"level":"info","ts":1610169682.7605643,"msg":"Server started at 2021-01-09 00:21:22.75943728 -0500 EST"}
+{"level":"error","ts":1610169682.761144,"msg":"listen tcp 192.168.1.100:3600: bind: address already in use"}
+{"level":"info","ts":1610169682.8134346,"msg":"Server started at 2021-01-09 00:21:22.812698468 -0500 EST"}
+{"level":"info","ts":1610169765.5226414,"msg":"Server started at 2021-01-09 00:22:45.521773559 -0500 EST"}
+{"level":"error","ts":1610169765.5232317,"msg":"listen tcp 192.168.1.100:3600: bind: address already in use"}
+{"level":"info","ts":1610169765.5389826,"msg":"Server started at 2021-01-09 00:22:45.538171526 -0500 EST"}
+{"level":"info","ts":1610169875.2647116,"msg":"Server started at 2021-01-09 00:24:35.263810857 -0500 EST"}
+{"level":"info","ts":1610169875.270809,"msg":"Server started at 2021-01-09 00:24:35.270108184 -0500 EST"}
+{"level":"error","ts":1610169875.2711492,"msg":"listen tcp 192.168.1.100:3600: bind: address already in use"}
+{"level":"info","ts":1610169926.700752,"msg":"Server started at 2021-01-09 00:25:26.699354254 -0500 EST"}
+{"level":"info","ts":1610169926.709377,"msg":"Server started at 2021-01-09 00:25:26.708482301 -0500 EST"}
+{"level":"error","ts":1610169926.709891,"msg":"listen tcp 192.168.1.100:3600: bind: address already in use"}
+{"level":"info","ts":1610169975.373342,"msg":"Server started at 2021-01-09 00:26:15.372610733 -0500 EST"}
+{"level":"error","ts":1610169975.3738754,"msg":"listen tcp 192.168.1.100:3600: bind: address already in use"}
+{"level":"info","ts":1610169975.4601965,"msg":"Server started at 2021-01-09 00:26:15.459327631 -0500 EST"}
+{"level":"info","ts":1610169977.202628,"msg":"Server started at 2021-01-09 00:26:17.2017062 -0500 EST"}
+{"level":"info","ts":1610169977.2153287,"msg":"Server started at 2021-01-09 00:26:17.214437083 -0500 EST"}
+{"level":"error","ts":1610169977.2158024,"msg":"listen tcp 192.168.1.100:3600: bind: address already in use"}
+{"level":"warn","ts":1610170476.354467,"msg":"Server has been shutdown at 2021-01-09 00:26:17.214437083 -0500 EST"}
+{"level":"info","ts":1610170486.526717,"msg":"Server started at 2021-01-09 00:34:46.525958923 -0500 EST"}
+{"level":"error","ts":1610170486.5273962,"msg":"listen tcp 192.168.1.100:3600: bind: address already in use"}
+{"level":"info","ts":1610170608.5240273,"msg":"Server started at 2021-01-09 00:36:48.523156486 -0500 EST"}
+{"level":"info","ts":1610170608.546304,"msg":"Server started at 2021-01-09 00:36:48.545572627 -0500 EST"}
+{"level":"error","ts":1610170608.547265,"msg":"listen tcp 192.168.1.100:3600: bind: address already in use"}
+{"level":"info","ts":1610170626.5626287,"msg":"Server started at 2021-01-09 00:37:06.561532056 -0500 EST"}
+{"level":"info","ts":1610170626.5842261,"msg":"Server started at 2021-01-09 00:37:06.583426147 -0500 EST"}
+{"level":"error","ts":1610170626.584498,"msg":"listen tcp 192.168.1.100:3600: bind: address already in use"}
+{"level":"info","ts":1610170957.2550805,"msg":"Server started at 2021-01-09 00:42:37.254120986 -0500 EST"}
+{"level":"info","ts":1610170957.2550278,"msg":"Server started at 2021-01-09 00:42:37.253830315 -0500 EST"}
+{"level":"error","ts":1610170957.2556064,"msg":"listen tcp 192.168.1.100:3600: bind: address already in use"}
+{"level":"info","ts":1610171041.0459409,"msg":"Server started at 2021-01-09 00:44:01.045065084 -0500 EST"}
+{"level":"error","ts":1610171086.152326,"msg":"http: Server closed"}
+{"level":"warn","ts":1610171086.6524727,"msg":"Server has been shutdown at 2021-01-09 00:44:01.045065084 -0500 EST"}

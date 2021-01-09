@@ -1,7 +1,5 @@
 # github.com/dustin/go-humanize v1.0.0
 github.com/dustin/go-humanize
-# github.com/felixge/httpsnoop v1.0.1
-github.com/felixge/httpsnoop
 # github.com/go-sql-driver/mysql v1.5.0
 ## explicit
 github.com/go-sql-driver/mysql
@@ -10,7 +8,6 @@ github.com/go-sql-driver/mysql
 github.com/gorilla/csrf
 # github.com/gorilla/handlers v1.5.1
 ## explicit
-github.com/gorilla/handlers
 # github.com/gorilla/mux v1.8.0
 ## explicit
 github.com/gorilla/mux

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"hcn/api"
 	"hcn/config"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
@@ -56,9 +57,18 @@ func main() {
 	// Initialize the APIs here
 	api.MainRouters(router) // URLs for the main app.
 
+	// Initialize IP and PORT of app
+	conn, err := net.Dial("udp", "8.8.8.8:80")
+	if err != nil {
+		itrlog.Error(err)
+	}
+	defer conn.Close()
+	IP := conn.LocalAddr().(*net.UDPAddr).IP.String()
+	var PORT = "3600"
+
 	srv := &http.Server{
 		//Addr: "localhost:3600",
-		Addr: "192.168.1.42:3600",
+		Addr: IP + ":" + PORT,
 		// Good practice to set timeouts to avoid Slowloris attacks.
 		WriteTimeout: time.Second * 15,
 		ReadTimeout:  time.Second * 15,
@@ -68,9 +78,9 @@ func main() {
 
 	// Run our server in a goroutine so that it doesn't block.
 	go func() {
-		msg := `Web server started at `
+		msg := "Server started at " + IP + ":" + PORT
 		fmt.Println(msg, CurrentLocalTime)
-		itrlog.Info("Web server started at ", CurrentLocalTime)
+		itrlog.Info("Server started at ", CurrentLocalTime)
 		if err := srv.ListenAndServe(); err != nil {
 			itrlog.Error(err)
 		}

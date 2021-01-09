@@ -59,4 +59,12 @@ func MainRouters(router *mux.Router) {
 	router.HandleFunc("/Teachers/UpdateTeacher", myhandlers.UpdateTeacher).Methods("POST")
 	router.HandleFunc("/Teachers/CreateTeacher", myhandlers.CreateTeacher).Methods("POST")
 	router.HandleFunc("/Teachers/DeleteTeacher", myhandlers.DeleteTeacher).Methods("DELETE")
+
+	// Annoucements URLs
+	router.HandleFunc("/Announcements/GetAnnouncements", myhandlers.GetAnnouncements).Methods("GET")
+	//router.HandleFunc("/Teachers/GetTeacher/{id}", myhandlers.GetTeacher).Methods("GET")
+	//router.HandleFunc("/Teachers/UpdateTeacher", myhandlers.UpdateTeacher).Methods("POST")
+	router.HandleFunc("/Announcements/CreateAnnouncement", myhandlers.CreateAnnouncement).Methods("POST")
+	//router.HandleFunc("/Teachers/DeleteTeacher", myhandlers.DeleteTeacher).Methods("DELETE")
+
 }

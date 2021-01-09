@@ -14,24 +14,10 @@ import (
 	"github.com/itrepablik/itrlog"
 )
 
-/*
-type productModel struct {
-	Db *sql.DB
-}
-*/
-
-type student struct {
-	ID    *int    `json:"ID"`
-	Name  *string `json:"Name"`
-	Email *string `json:"Email"`
-}
-
-type allStudents []student
-
 // CreateStudent bla bla...
 func CreateStudent(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	var newStudent student
+	var newStudent Student
 	reqBody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -46,6 +32,10 @@ func CreateStudent(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, "ID is empty")
 		return
+	case (*newStudent.ID*1 == 0) || (*newStudent.ID*1 < 0):
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, "%v is not a valid number", *newStudent.ID)
+		return
 	case newStudent.Name == nil:
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, "Name is empty")
@@ -55,14 +45,20 @@ func CreateStudent(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "Email is empty")
 		return
 	default:
-		_, err = Db.Query("call createStudent(?, ?, ?)", newStudent.ID, newStudent.Name, newStudent.Email)
+		rows, err := Db.Query("INSERT INTO Students(Id,Name,Email) VALUES (?, ?, ?)", newStudent.ID, newStudent.Name, newStudent.Email)
 		defer Db.Close()
 		if err != nil {
 			fmt.Fprintf(w, "(SQL) %v", err.Error())
 			return
 		}
-		json.NewEncoder(w).Encode(newStudent)
-		w.WriteHeader(http.StatusCreated)
+		cnt := 0
+		for rows.Next() {
+			cnt++
+		}
+		if cnt == 1 {
+			w.WriteHeader(http.StatusCreated)
+			json.NewEncoder(w).Encode(newStudent)
+		}
 		return
 	}
 }
@@ -70,7 +66,7 @@ func CreateStudent(w http.ResponseWriter, r *http.Request) {
 // GetStudents bla bla...
 func GetStudents(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	var students allStudents
+	var Students AllStudents
 	var Db, _ = config.MYSQLConnection()
 	rows, err := Db.Query("SELECT Id, Name, Email FROM Students")
 	defer Db.Close()
@@ -88,10 +84,10 @@ func GetStudents(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		var student = student{ID: &studentID, Name: &Name, Email: &Email}
-		students = append(students, student)
+		var Student = Student{ID: &studentID, Name: &Name, Email: &Email}
+		Students = append(Students, Student)
 	}
-	json.NewEncoder(w).Encode(students)
+	json.NewEncoder(w).Encode(Students)
 	w.WriteHeader(http.StatusOK)
 	return
 }
@@ -118,8 +114,8 @@ func GetStudent(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	var student = student{ID: &studentID, Name: &Name, Email: &Email}
-	json.NewEncoder(w).Encode(student)
+	var Student = Student{ID: &studentID, Name: &Name, Email: &Email}
+	json.NewEncoder(w).Encode(Student)
 	w.WriteHeader(http.StatusCreated)
 	return
 }
@@ -133,7 +129,7 @@ func UpdateStudent(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "(USER) %v", err.Error())
 		return
 	}
-	var updatedStudent student
+	var updatedStudent Student
 	json.Unmarshal(reqBody, &updatedStudent)
 	switch {
 	case updatedStudent.ID == nil:
@@ -183,7 +179,7 @@ func DeleteStudent(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "(USER) %v", err.Error())
 		return
 	}
-	var deletedStudent student
+	var deletedStudent Student
 	json.Unmarshal(reqBody, &deletedStudent)
 
 	var Db, _ = config.MYSQLConnection()

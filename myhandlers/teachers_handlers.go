@@ -14,24 +14,10 @@ import (
 	"github.com/itrepablik/itrlog"
 )
 
-/*
-type productModel struct {
-	Db *sql.DB
-}
-*/
-
-type teacher struct {
-	ID    *int    `json:"ID"`
-	Name  *string `json:"Name"`
-	Email *string `json:"Email"`
-}
-
-type allTeachers []teacher
-
 // CreateTeacher bla bla...
 func CreateTeacher(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	var newStudent teacher
+	var newTeacher Teacher
 	reqBody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -40,29 +26,39 @@ func CreateTeacher(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var Db, _ = config.MYSQLConnection()
-	json.Unmarshal(reqBody, &newStudent)
+	json.Unmarshal(reqBody, &newTeacher)
 	switch {
-	case newStudent.ID == nil:
+	case newTeacher.ID == nil:
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, "ID is empty")
 		return
-	case newStudent.Name == nil:
+	case (*newTeacher.ID*1 == 0) || (*newTeacher.ID*1 < 0):
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, "%v is not a valid number", *newTeacher.ID)
+		return
+	case newTeacher.Name == nil:
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, "Name is empty")
 		return
-	case newStudent.Email == nil:
+	case newTeacher.Email == nil:
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, "Email is empty")
 		return
 	default:
-		_, err = Db.Query("call createTeacher(?, ?, ?)", newStudent.ID, newStudent.Name, newStudent.Email)
+		rows, err := Db.Query("INSERT INTO Teachers(Id,Name,Email) VALUES (?, ?, ?)", newTeacher.ID, newTeacher.Name, newTeacher.Email)
 		defer Db.Close()
 		if err != nil {
 			fmt.Fprintf(w, "(SQL) %v", err.Error())
 			return
 		}
-		json.NewEncoder(w).Encode(newStudent)
-		w.WriteHeader(http.StatusCreated)
+		cnt := 0
+		for rows.Next() {
+			cnt++
+		}
+		if cnt == 1 {
+			w.WriteHeader(http.StatusCreated)
+			json.NewEncoder(w).Encode(newTeacher)
+		}
 		return
 	}
 }
@@ -70,7 +66,7 @@ func CreateTeacher(w http.ResponseWriter, r *http.Request) {
 // GetTeachers bla bla...
 func GetTeachers(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	var students allTeachers
+	var teachers AllTeachers
 	var Db, _ = config.MYSQLConnection()
 	rows, err := Db.Query("SELECT Id, Name, Email FROM Teachers")
 	defer Db.Close()
@@ -81,17 +77,17 @@ func GetTeachers(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	for rows.Next() {
-		var studentID int
+		var teacherID int
 		var Name, Email string
-		if err := rows.Scan(&studentID, &Name, &Email); err != nil {
+		if err := rows.Scan(&teacherID, &Name, &Email); err != nil {
 			fmt.Fprintf(w, "(SQL) %v", err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		var teacher = teacher{ID: &studentID, Name: &Name, Email: &Email}
-		students = append(students, teacher)
+		var Teacher = Teacher{ID: &teacherID, Name: &Name, Email: &Email}
+		teachers = append(teachers, Teacher)
 	}
-	json.NewEncoder(w).Encode(students)
+	json.NewEncoder(w).Encode(teachers)
 	w.WriteHeader(http.StatusOK)
 	return
 }
@@ -100,7 +96,7 @@ func GetTeachers(w http.ResponseWriter, r *http.Request) {
 func GetTeacher(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	vars := mux.Vars(r)
-	studentID, err := strconv.Atoi(vars["id"])
+	teacherID, err := strconv.Atoi(vars["id"])
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		itrlog.Warn("(USER) ", err.Error())
@@ -108,7 +104,7 @@ func GetTeacher(w http.ResponseWriter, r *http.Request) {
 	}
 	var Name, Email string
 	var Db, _ = config.MYSQLConnection()
-	err = Db.QueryRow("SELECT Name, Email FROM Teachers WHERE Id=?", studentID).Scan(&Name, &Email)
+	err = Db.QueryRow("SELECT Name, Email FROM Teachers WHERE Id=?", teacherID).Scan(&Name, &Email)
 	defer Db.Close()
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -118,8 +114,8 @@ func GetTeacher(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	var teacher = teacher{ID: &studentID, Name: &Name, Email: &Email}
-	json.NewEncoder(w).Encode(teacher)
+	var Teacher = Teacher{ID: &teacherID, Name: &Name, Email: &Email}
+	json.NewEncoder(w).Encode(Teacher)
 	w.WriteHeader(http.StatusCreated)
 	return
 }
@@ -133,7 +129,7 @@ func UpdateTeacher(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "(USER) %v", err.Error())
 		return
 	}
-	var updatedStudent teacher
+	var updatedStudent Teacher
 	json.Unmarshal(reqBody, &updatedStudent)
 	switch {
 	case updatedStudent.ID == nil:
@@ -183,11 +179,11 @@ func DeleteTeacher(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "(USER) %v", err.Error())
 		return
 	}
-	var deletedStudent teacher
-	json.Unmarshal(reqBody, &deletedStudent)
+	var deletedTeacher Teacher
+	json.Unmarshal(reqBody, &deletedTeacher)
 
 	var Db, _ = config.MYSQLConnection()
-	row, err := Db.Exec("DELETE FROM Teachers WHERE Id=?", deletedStudent.ID)
+	row, err := Db.Exec("DELETE FROM Teachers WHERE Id=?", deletedTeacher.ID)
 	defer Db.Close()
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
