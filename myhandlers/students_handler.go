@@ -28,21 +28,17 @@ func CreateStudent(w http.ResponseWriter, r *http.Request) {
 	var Db, _ = config.MYSQLConnection()
 	json.Unmarshal(reqBody, &newStudent)
 	switch {
-	case newStudent.ID == nil:
+	case (newStudent.ID == nil) || (*newStudent.ID*1 == 0) || (*newStudent.ID*1 < 0):
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "ID is empty")
+		fmt.Fprintf(w, "ID is empty or not valid")
 		return
-	case (*newStudent.ID*1 == 0) || (*newStudent.ID*1 < 0):
+	case (newStudent.Name == nil) || (len(*newStudent.Name) == 0):
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "%v is not a valid number", *newStudent.ID)
+		fmt.Fprintf(w, "Name is empty or not valid")
 		return
-	case newStudent.Name == nil:
+	case (newStudent.Email == nil) || (len(*newStudent.Email) == 0):
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "Name is empty")
-		return
-	case newStudent.Email == nil:
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "Email is empty")
+		fmt.Fprintf(w, "Email is empty or not valid")
 		return
 	default:
 		rows, err := Db.Query("INSERT INTO Students(Id,Name,Email) VALUES (?, ?, ?)", newStudent.ID, newStudent.Name, newStudent.Email)
@@ -134,15 +130,15 @@ func UpdateStudent(w http.ResponseWriter, r *http.Request) {
 	switch {
 	case updatedStudent.ID == nil:
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "ID is empty")
+		fmt.Fprintf(w, "ID is empty or not valid")
 		return
-	case updatedStudent.Name == nil:
+	case updatedStudent.Name == nil || len(*updatedStudent.Name) == 0:
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "Name is empty")
+		fmt.Fprintf(w, "Name is empty or not valid")
 		return
-	case updatedStudent.Email == nil:
+	case updatedStudent.Email == nil || len(*updatedStudent.Email) == 0:
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "Email is empty")
+		fmt.Fprintf(w, "Email is empty or not valid")
 		return
 	default:
 		var Db, _ = config.MYSQLConnection()
@@ -181,6 +177,12 @@ func DeleteStudent(w http.ResponseWriter, r *http.Request) {
 	}
 	var deletedStudent Student
 	json.Unmarshal(reqBody, &deletedStudent)
+
+	if (deletedStudent.ID) == nil || (*deletedStudent.ID*1 == 0) || (*deletedStudent.ID*1 < 0) {
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, "ID is empty or not valid")
+		return
+	}
 
 	var Db, _ = config.MYSQLConnection()
 	row, err := Db.Exec("DELETE FROM Students WHERE Id=?", deletedStudent.ID)

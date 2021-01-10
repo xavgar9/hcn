@@ -1,44 +1,40 @@
-{"level":"info","ts":1610169204.137879,"msg":"Server started at 2021-01-09 00:13:24.136954773 -0500 EST"}
-{"level":"error","ts":1610169204.1753087,"msg":"listen tcp 192.168.1.100:3600: listen: address already in use"}
-{"level":"info","ts":1610169243.8638334,"msg":"Server started at 2021-01-09 00:14:03.863132491 -0500 EST"}
-{"level":"info","ts":1610169243.8677838,"msg":"Server started at 2021-01-09 00:14:03.866783648 -0500 EST"}
-{"level":"error","ts":1610169243.868263,"msg":"listen tcp 192.168.1.100:3600: bind: address already in use"}
-{"level":"info","ts":1610169542.8420448,"msg":"Server started at 2021-01-09 00:19:02.841214655 -0500 EST"}
-{"level":"info","ts":1610169542.842071,"msg":"Server started at 2021-01-09 00:19:02.841198577 -0500 EST"}
-{"level":"error","ts":1610169543.0263636,"msg":"listen tcp 192.168.1.100:3600: bind: address already in use"}
-{"level":"info","ts":1610169559.5958054,"msg":"Server started at 2021-01-09 00:19:19.594907114 -0500 EST"}
-{"level":"error","ts":1610169559.5962017,"msg":"listen tcp 192.168.1.100:3600: bind: address already in use"}
-{"level":"info","ts":1610169559.7911284,"msg":"Server started at 2021-01-09 00:19:19.790510596 -0500 EST"}
-{"level":"info","ts":1610169682.7605643,"msg":"Server started at 2021-01-09 00:21:22.75943728 -0500 EST"}
-{"level":"error","ts":1610169682.761144,"msg":"listen tcp 192.168.1.100:3600: bind: address already in use"}
-{"level":"info","ts":1610169682.8134346,"msg":"Server started at 2021-01-09 00:21:22.812698468 -0500 EST"}
-{"level":"info","ts":1610169765.5226414,"msg":"Server started at 2021-01-09 00:22:45.521773559 -0500 EST"}
-{"level":"error","ts":1610169765.5232317,"msg":"listen tcp 192.168.1.100:3600: bind: address already in use"}
-{"level":"info","ts":1610169765.5389826,"msg":"Server started at 2021-01-09 00:22:45.538171526 -0500 EST"}
-{"level":"info","ts":1610169875.2647116,"msg":"Server started at 2021-01-09 00:24:35.263810857 -0500 EST"}
-{"level":"info","ts":1610169875.270809,"msg":"Server started at 2021-01-09 00:24:35.270108184 -0500 EST"}
-{"level":"error","ts":1610169875.2711492,"msg":"listen tcp 192.168.1.100:3600: bind: address already in use"}
-{"level":"info","ts":1610169926.700752,"msg":"Server started at 2021-01-09 00:25:26.699354254 -0500 EST"}
-{"level":"info","ts":1610169926.709377,"msg":"Server started at 2021-01-09 00:25:26.708482301 -0500 EST"}
-{"level":"error","ts":1610169926.709891,"msg":"listen tcp 192.168.1.100:3600: bind: address already in use"}
-{"level":"info","ts":1610169975.373342,"msg":"Server started at 2021-01-09 00:26:15.372610733 -0500 EST"}
-{"level":"error","ts":1610169975.3738754,"msg":"listen tcp 192.168.1.100:3600: bind: address already in use"}
-{"level":"info","ts":1610169975.4601965,"msg":"Server started at 2021-01-09 00:26:15.459327631 -0500 EST"}
-{"level":"info","ts":1610169977.202628,"msg":"Server started at 2021-01-09 00:26:17.2017062 -0500 EST"}
-{"level":"info","ts":1610169977.2153287,"msg":"Server started at 2021-01-09 00:26:17.214437083 -0500 EST"}
-{"level":"error","ts":1610169977.2158024,"msg":"listen tcp 192.168.1.100:3600: bind: address already in use"}
-{"level":"warn","ts":1610170476.354467,"msg":"Server has been shutdown at 2021-01-09 00:26:17.214437083 -0500 EST"}
-{"level":"info","ts":1610170486.526717,"msg":"Server started at 2021-01-09 00:34:46.525958923 -0500 EST"}
-{"level":"error","ts":1610170486.5273962,"msg":"listen tcp 192.168.1.100:3600: bind: address already in use"}
-{"level":"info","ts":1610170608.5240273,"msg":"Server started at 2021-01-09 00:36:48.523156486 -0500 EST"}
-{"level":"info","ts":1610170608.546304,"msg":"Server started at 2021-01-09 00:36:48.545572627 -0500 EST"}
-{"level":"error","ts":1610170608.547265,"msg":"listen tcp 192.168.1.100:3600: bind: address already in use"}
-{"level":"info","ts":1610170626.5626287,"msg":"Server started at 2021-01-09 00:37:06.561532056 -0500 EST"}
-{"level":"info","ts":1610170626.5842261,"msg":"Server started at 2021-01-09 00:37:06.583426147 -0500 EST"}
-{"level":"error","ts":1610170626.584498,"msg":"listen tcp 192.168.1.100:3600: bind: address already in use"}
-{"level":"info","ts":1610170957.2550805,"msg":"Server started at 2021-01-09 00:42:37.254120986 -0500 EST"}
-{"level":"info","ts":1610170957.2550278,"msg":"Server started at 2021-01-09 00:42:37.253830315 -0500 EST"}
-{"level":"error","ts":1610170957.2556064,"msg":"listen tcp 192.168.1.100:3600: bind: address already in use"}
-{"level":"info","ts":1610171041.0459409,"msg":"Server started at 2021-01-09 00:44:01.045065084 -0500 EST"}
-{"level":"error","ts":1610171086.152326,"msg":"http: Server closed"}
-{"level":"warn","ts":1610171086.6524727,"msg":"Server has been shutdown at 2021-01-09 00:44:01.045065084 -0500 EST"}
+{"level":"info","ts":1610234207.051212,"msg":"Server started at 2021-01-09 18:16:47.050160721 -0500 EST"}
+{"level":"info","ts":1610234339.8080544,"msg":"Server started at 2021-01-09 18:18:59.807092886 -0500 EST"}
+{"level":"info","ts":1610234345.5614266,"msg":"Server started at 2021-01-09 18:19:05.560470476 -0500 EST"}
+{"level":"info","ts":1610234617.6392145,"msg":"Server started at 2021-01-09 18:23:37.6384113 -0500 EST"}
+{"level":"info","ts":1610235573.5519972,"msg":"Server started at 2021-01-09 18:39:33.55118672 -0500 EST"}
+{"level":"info","ts":1610235641.5253482,"msg":"Server started at 2021-01-09 18:40:41.524564125 -0500 EST"}
+{"level":"info","ts":1610235698.6738453,"msg":"Server started at 2021-01-09 18:41:38.673038584 -0500 EST"}
+{"level":"info","ts":1610235728.4968603,"msg":"Server started at 2021-01-09 18:42:08.494325026 -0500 EST"}
+{"level":"info","ts":1610236019.5956988,"msg":"Server started at 2021-01-09 18:46:59.594623708 -0500 EST"}
+{"level":"info","ts":1610236708.1916006,"msg":"Server started at 2021-01-09 18:58:28.190639141 -0500 EST"}
+{"level":"info","ts":1610236734.789075,"msg":"Server started at 2021-01-09 18:58:54.788147854 -0500 EST"}
+{"level":"info","ts":1610236841.3147736,"msg":"Server started at 2021-01-09 19:00:41.313571155 -0500 EST"}
+{"level":"info","ts":1610237244.1035774,"msg":"Server started at 2021-01-09 19:07:24.102613259 -0500 EST"}
+{"level":"info","ts":1610237273.4591393,"msg":"Server started at 2021-01-09 19:07:53.458211091 -0500 EST"}
+{"level":"info","ts":1610238381.9381547,"msg":"Server started at 2021-01-09 19:26:21.937247071 -0500 EST"}
+{"level":"info","ts":1610238386.7768497,"msg":"Server started at 2021-01-09 19:26:26.775880226 -0500 EST"}
+{"level":"info","ts":1610238447.5078964,"msg":"Server started at 2021-01-09 19:27:27.507067337 -0500 EST"}
+{"level":"info","ts":1610240176.7235599,"msg":"Server started at 2021-01-09 19:56:16.722683986 -0500 EST"}
+{"level":"info","ts":1610240311.8454173,"msg":"Server started at 2021-01-09 19:58:31.844386755 -0500 EST"}
+{"level":"info","ts":1610240364.0950031,"msg":"Server started at 2021-01-09 19:59:24.094048569 -0500 EST"}
+{"level":"info","ts":1610240409.0286865,"msg":"Server started at 2021-01-09 20:00:09.027800039 -0500 EST"}
+{"level":"info","ts":1610240501.7627065,"msg":"Server started at 2021-01-09 20:01:41.761744362 -0500 EST"}
+{"level":"info","ts":1610240644.8724205,"msg":"Server started at 2021-01-09 20:04:04.871679528 -0500 EST"}
+{"level":"info","ts":1610241795.8304274,"msg":"Server started at 2021-01-09 20:23:15.82910535 -0500 EST"}
+{"level":"info","ts":1610241797.0197182,"msg":"Server started at 2021-01-09 20:23:17.018835143 -0500 EST"}
+{"level":"info","ts":1610241843.5070736,"msg":"Server started at 2021-01-09 20:24:03.506187728 -0500 EST"}
+{"level":"info","ts":1610241854.6027067,"msg":"Server started at 2021-01-09 20:24:14.601856936 -0500 EST"}
+{"level":"info","ts":1610241855.8398292,"msg":"Server started at 2021-01-09 20:24:15.838895816 -0500 EST"}
+{"level":"info","ts":1610242123.4037194,"msg":"Server started at 2021-01-09 20:28:43.402445192 -0500 EST"}
+{"level":"info","ts":1610242209.075136,"msg":"Server started at 2021-01-09 20:30:09.073917502 -0500 EST"}
+{"level":"info","ts":1610242233.203098,"msg":"Server started at 2021-01-09 20:30:33.20193334 -0500 EST"}
+{"level":"info","ts":1610242275.856525,"msg":"Server started at 2021-01-09 20:31:15.855574005 -0500 EST"}
+{"level":"info","ts":1610242485.3831327,"msg":"Server started at 2021-01-09 20:34:45.381704914 -0500 EST"}
+{"level":"info","ts":1610242551.8630745,"msg":"Server started at 2021-01-09 20:35:51.862052932 -0500 EST"}
+{"level":"info","ts":1610242569.1614096,"msg":"Server started at 2021-01-09 20:36:09.160264434 -0500 EST"}
+{"level":"info","ts":1610242630.4929779,"msg":"Server started at 2021-01-09 20:37:10.491811796 -0500 EST"}
+{"level":"info","ts":1610242662.101628,"msg":"Server started at 2021-01-09 20:37:42.100711573 -0500 EST"}
+{"level":"info","ts":1610243747.6540694,"msg":"Server started at 2021-01-09 20:55:47.652947867 -0500 EST"}
+{"level":"info","ts":1610243862.00074,"msg":"Server started at 2021-01-09 20:57:41.999533501 -0500 EST"}
+{"level":"error","ts":1610243864.422872,"msg":"http: Server closed"}

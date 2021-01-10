@@ -28,21 +28,17 @@ func CreateTeacher(w http.ResponseWriter, r *http.Request) {
 	var Db, _ = config.MYSQLConnection()
 	json.Unmarshal(reqBody, &newTeacher)
 	switch {
-	case newTeacher.ID == nil:
+	case (newTeacher.ID == nil) || (*newTeacher.ID*1 == 0) || (*newTeacher.ID*1 < 0):
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "ID is empty")
+		fmt.Fprintf(w, "ID is empty or not valid")
 		return
-	case (*newTeacher.ID*1 == 0) || (*newTeacher.ID*1 < 0):
+	case (newTeacher.Name == nil) || (len(*newTeacher.Name) == 0):
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "%v is not a valid number", *newTeacher.ID)
+		fmt.Fprintf(w, "Name is empty or not valid")
 		return
-	case newTeacher.Name == nil:
+	case (newTeacher.Email == nil) || (len(*newTeacher.Email) == 0):
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "Name is empty")
-		return
-	case newTeacher.Email == nil:
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "Email is empty")
+		fmt.Fprintf(w, "Email is empty or not valid")
 		return
 	default:
 		rows, err := Db.Query("INSERT INTO Teachers(Id,Name,Email) VALUES (?, ?, ?)", newTeacher.ID, newTeacher.Name, newTeacher.Email)
@@ -129,24 +125,24 @@ func UpdateTeacher(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "(USER) %v", err.Error())
 		return
 	}
-	var updatedStudent Teacher
-	json.Unmarshal(reqBody, &updatedStudent)
+	var updatedTeacher Teacher
+	json.Unmarshal(reqBody, &updatedTeacher)
 	switch {
-	case updatedStudent.ID == nil:
+	case updatedTeacher.ID == nil:
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "ID is empty")
+		fmt.Fprintf(w, "ID is empty or not valid")
 		return
-	case updatedStudent.Name == nil:
+	case updatedTeacher.Name == nil || len(*updatedTeacher.Name) == 0:
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "Name is empty")
+		fmt.Fprintf(w, "Name is empty or not valid")
 		return
-	case updatedStudent.Email == nil:
+	case updatedTeacher.Email == nil || len(*updatedTeacher.Email) == 0:
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "Email is empty")
+		fmt.Fprintf(w, "Email is empty or not valid")
 		return
 	default:
 		var Db, _ = config.MYSQLConnection()
-		row, err := Db.Exec("UPDATE Teachers SET Name=?, Email=? WHERE Id=?", updatedStudent.Name, updatedStudent.Email, updatedStudent.ID)
+		row, err := Db.Exec("UPDATE Teachers SET Name=?, Email=? WHERE Id=?", updatedTeacher.Name, updatedTeacher.Email, updatedTeacher.ID)
 		defer Db.Close()
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -181,6 +177,12 @@ func DeleteTeacher(w http.ResponseWriter, r *http.Request) {
 	}
 	var deletedTeacher Teacher
 	json.Unmarshal(reqBody, &deletedTeacher)
+
+	if (deletedTeacher.ID) == nil || (*deletedTeacher.ID*1 == 0) || (*deletedTeacher.ID*1 < 0) {
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, "ID is empty or not valid")
+		return
+	}
 
 	var Db, _ = config.MYSQLConnection()
 	row, err := Db.Exec("DELETE FROM Teachers WHERE Id=?", deletedTeacher.ID)

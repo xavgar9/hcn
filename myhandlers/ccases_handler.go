@@ -1,22 +1,17 @@
 package myhandlers
 
 import (
-	"database/sql"
 	"encoding/json"
 	"fmt"
 	"hcn/config"
 	"io/ioutil"
 	"net/http"
-
-	"strconv"
-
-	"github.com/gorilla/mux"
 )
 
-// CreateAnnouncement bla bla...
-func CreateAnnouncement(w http.ResponseWriter, r *http.Request) {
+// CreateClinicalCase bla bla...
+func CreateClinicalCase(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	var newAnnouncement Announcement
+	var newClinicalCase ClinicalCase
 	reqBody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -25,22 +20,26 @@ func CreateAnnouncement(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var Db, _ = config.MYSQLConnection()
-	json.Unmarshal(reqBody, &newAnnouncement)
+	json.Unmarshal(reqBody, &newClinicalCase)
 	switch {
-	case (*newAnnouncement.CoursesID*1 == 0) || (*newAnnouncement.CoursesID*1 < 0):
+	case (*newClinicalCase.TeachersId*1 == 0) || (*newClinicalCase.TeachersId*1 < 0):
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "%v is not a valid CourseID", *newAnnouncement.CoursesID)
+		fmt.Fprintf(w, "%v is not a valid TeachersID", *newClinicalCase.TeachersId)
 		return
-	case (newAnnouncement.Title == nil) || (len(*newAnnouncement.Title) == 0):
+	case (newClinicalCase.Title == nil) || (len(*newClinicalCase.Title) == 0):
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, "Title is empty or not valid")
 		return
-	case (newAnnouncement.Description == nil) || (len(*newAnnouncement.Description) == 0):
+	case (newClinicalCase.Description == nil) || (len(*newClinicalCase.Description) == 0):
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, "Description is empty or not valid")
 		return
+	case (newClinicalCase.Media == nil) || (len(*newClinicalCase.Media) == 0):
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, "Media is empty or not valid")
+		return
 	default:
-		rows, err := Db.Exec("INSERT INTO Announcements(CoursesID,Title,Description,CreationDate) VALUES (?,?,?,NOW())", newAnnouncement.CoursesID, newAnnouncement.Title, newAnnouncement.Description)
+		rows, err := Db.Exec("INSERT INTO Clinical_Cases(Title,Description,Media,TeachersId) VALUES (?,?,?,?)", newClinicalCase.Title, newClinicalCase.Description, newClinicalCase.Media, newClinicalCase.TeachersId)
 		defer Db.Close()
 		if err != nil {
 			fmt.Fprintf(w, "(SQL) %v", err.Error())
@@ -65,6 +64,7 @@ func CreateAnnouncement(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+/*
 // GetAnnouncements bla bla...
 func GetAnnouncements(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
@@ -217,3 +217,4 @@ func DeleteAnnouncement(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	return
 }
+*/

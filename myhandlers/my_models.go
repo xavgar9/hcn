@@ -40,3 +40,15 @@ type Announcement struct {
 
 // AllAnnouncements bla bla...
 type AllAnnouncements []Announcement
+
+// ClinicalCase bla bla...
+type ClinicalCase struct {
+	ID          *int    `json:"ID"`
+	Title       *string `json:"Title"`
+	Description *string `json:"Description"`
+	Media       *string `json:"CreationDate"`
+	TeachersId  *int    `json:"CreationDate"`
+}
+
+// AllClinicalCases bla bla...
+type AllClinicalCases []ClinicalCase

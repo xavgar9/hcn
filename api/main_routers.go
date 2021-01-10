@@ -60,11 +60,18 @@ func MainRouters(router *mux.Router) {
 	router.HandleFunc("/Teachers/CreateTeacher", myhandlers.CreateTeacher).Methods("POST")
 	router.HandleFunc("/Teachers/DeleteTeacher", myhandlers.DeleteTeacher).Methods("DELETE")
 
-	// Annoucements URLs
+	// Announcements URLs
 	router.HandleFunc("/Announcements/GetAnnouncements", myhandlers.GetAnnouncements).Methods("GET")
-	//router.HandleFunc("/Teachers/GetTeacher/{id}", myhandlers.GetTeacher).Methods("GET")
-	//router.HandleFunc("/Teachers/UpdateTeacher", myhandlers.UpdateTeacher).Methods("POST")
+	router.HandleFunc("/Announcements/GetAnnouncement/{id}", myhandlers.GetAnnouncement).Methods("GET")
+	router.HandleFunc("/Announcements/UpdateAnnouncement", myhandlers.UpdateAnnouncement).Methods("POST")
 	router.HandleFunc("/Announcements/CreateAnnouncement", myhandlers.CreateAnnouncement).Methods("POST")
-	//router.HandleFunc("/Teachers/DeleteTeacher", myhandlers.DeleteTeacher).Methods("DELETE")
+	router.HandleFunc("/Announcements/DeleteAnnouncement", myhandlers.DeleteAnnouncement).Methods("DELETE")
+
+	// Clinical Cases URLs
+	// router.HandleFunc("/ClinicalCases/GetClinicalCases", myhandlers.GetClinicalCases).Methods("GET")
+	// router.HandleFunc("/ClinicalCases/GetClinicalCase/{id}", myhandlers.GetClinicalCase).Methods("GET")
+	// router.HandleFunc("/ClinicalCases/UpdateClinicalCase", myhandlers.UpdateClinicalCase).Methods("POST")
+	router.HandleFunc("/ClinicalCases/CreateClinicalCase", myhandlers.CreateClinicalCase).Methods("POST")
+	// router.HandleFunc("/ClinicalCases/DeleteClinicalCase", myhandlers.DeleteClinicalCase).Methods("DELETE")
 
 }
