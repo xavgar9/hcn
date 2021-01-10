@@ -88,4 +88,11 @@ func MainRouters(router *mux.Router) {
 	router.HandleFunc("/Activities/CreateActivity", myhandlers.CreateActivity).Methods("POST")
 	router.HandleFunc("/Activities/DeleteActivity", myhandlers.DeleteActivity).Methods("DELETE")
 
+	// Feedbacks URLs
+	router.HandleFunc("/Feedbacks/GetFeedbacks", myhandlers.GetFeedbacks).Methods("GET")
+	router.HandleFunc("/Feedbacks/GetFeedback/{id}", myhandlers.GetFeedback).Methods("GET")
+	router.HandleFunc("/Feedbacks/UpdateFeedback", myhandlers.UpdateFeedback).Methods("POST")
+	router.HandleFunc("/Feedbacks/CreateFeedback", myhandlers.CreateFeedback).Methods("POST")
+	router.HandleFunc("/Feedbacks/DeleteFeedback", myhandlers.DeleteFeedback).Methods("DELETE")
+
 }

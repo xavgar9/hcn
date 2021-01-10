@@ -84,7 +84,7 @@ func CreateActivity(w http.ResponseWriter, r *http.Request) {
 // GetActivities bla bla...
 func GetActivities(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	var activities Activities
+	var activities AllActivities
 	var Db, _ = config.MYSQLConnection()
 	rows, err := Db.Query("SELECT Id,Title,Description,Type,CreationDate,LimitDate,CoursesId,ClinicalCasesId,Difficulty FROM Activities")
 	defer Db.Close()

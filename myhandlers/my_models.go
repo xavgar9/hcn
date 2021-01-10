@@ -77,5 +77,15 @@ type Activity struct {
 	Difficulty      *int    `json:"Difficulty"`
 }
 
-// Activities bla bla...
-type Activities []Activity
+// AllActivities bla bla...
+type AllActivities []Activity
+
+// Feedback bla bla...
+type Feedback struct {
+	ID           *int `json:"ID"`
+	ActivitiesID *int `json:"ActivitiesID"`
+	StudentsID   *int `json:"StudentsID"`
+}
+
+// AllFeedbacks bla bla...
+type AllFeedbacks []Feedback
