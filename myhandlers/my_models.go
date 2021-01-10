@@ -52,3 +52,14 @@ type ClinicalCase struct {
 
 // AllClinicalCases bla bla...
 type AllClinicalCases []ClinicalCase
+
+// Course bla bla...
+type Course struct {
+	ID           *int    `json:"ID"`
+	Teacher      *int    `json:"Teacher"`
+	Name         *string `json:"Name"`
+	CreationDate *string `json:"CreationDate"`
+}
+
+// AllCourses bla bla...
+type AllCourses []Course

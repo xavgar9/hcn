@@ -74,4 +74,11 @@ func MainRouters(router *mux.Router) {
 	router.HandleFunc("/ClinicalCases/CreateClinicalCase", myhandlers.CreateClinicalCase).Methods("POST")
 	router.HandleFunc("/ClinicalCases/DeleteClinicalCase", myhandlers.DeleteClinicalCase).Methods("DELETE")
 
+	// Courses URLs
+	router.HandleFunc("/Courses/GetCourses", myhandlers.GetCourses).Methods("GET")
+	router.HandleFunc("/Courses/GetCourse/{id}", myhandlers.GetCourse).Methods("GET")
+	router.HandleFunc("/Courses/UpdateCourse", myhandlers.UpdateCourse).Methods("POST")
+	router.HandleFunc("/Courses/CreateCourse", myhandlers.CreateCourse).Methods("POST")
+	router.HandleFunc("/Courses/DeleteCourses", myhandlers.DeleteCourse).Methods("DELETE")
+
 }
