@@ -81,4 +81,11 @@ func MainRouters(router *mux.Router) {
 	router.HandleFunc("/Courses/CreateCourse", myhandlers.CreateCourse).Methods("POST")
 	router.HandleFunc("/Courses/DeleteCourses", myhandlers.DeleteCourse).Methods("DELETE")
 
+	// Activities URLs
+	router.HandleFunc("/Activities/GetActivities", myhandlers.GetActivities).Methods("GET")
+	router.HandleFunc("/Activities/GetActivity/{id}", myhandlers.GetActivity).Methods("GET")
+	router.HandleFunc("/Activities/UpdateActivity", myhandlers.UpdateActivity).Methods("POST")
+	router.HandleFunc("/Activities/CreateActivity", myhandlers.CreateActivity).Methods("POST")
+	router.HandleFunc("/Activities/DeleteActivity", myhandlers.DeleteActivity).Methods("DELETE")
+
 }

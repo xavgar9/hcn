@@ -63,3 +63,19 @@ type Course struct {
 
 // AllCourses bla bla...
 type AllCourses []Course
+
+// Activity bla bla...
+type Activity struct {
+	ID              *int    `json:"ID"`
+	Title           *string `json:"Title"`
+	Description     *string `json:"Description"`
+	Type            *string `json:"Type"`
+	CreationDate    *string `json:"CreationDate"`
+	LimitDate       *string `json:"LimitDate"`
+	CoursesID       *int    `json:"CoursesID"`
+	ClinicalCasesID *int    `json:"ClinicalCasesID"`
+	Difficulty      *int    `json:"Difficulty"`
+}
+
+// Activities bla bla...
+type Activities []Activity
