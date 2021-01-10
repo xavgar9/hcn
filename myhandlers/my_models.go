@@ -46,8 +46,8 @@ type ClinicalCase struct {
 	ID          *int    `json:"ID"`
 	Title       *string `json:"Title"`
 	Description *string `json:"Description"`
-	Media       *string `json:"CreationDate"`
-	TeachersId  *int    `json:"CreationDate"`
+	Media       *string `json:"Media"`
+	TeachersID  *int    `json:"TeachersID"`
 }
 
 // AllClinicalCases bla bla...

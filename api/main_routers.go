@@ -68,10 +68,10 @@ func MainRouters(router *mux.Router) {
 	router.HandleFunc("/Announcements/DeleteAnnouncement", myhandlers.DeleteAnnouncement).Methods("DELETE")
 
 	// Clinical Cases URLs
-	// router.HandleFunc("/ClinicalCases/GetClinicalCases", myhandlers.GetClinicalCases).Methods("GET")
-	// router.HandleFunc("/ClinicalCases/GetClinicalCase/{id}", myhandlers.GetClinicalCase).Methods("GET")
-	// router.HandleFunc("/ClinicalCases/UpdateClinicalCase", myhandlers.UpdateClinicalCase).Methods("POST")
+	router.HandleFunc("/ClinicalCases/GetClinicalCases", myhandlers.GetClinicalCases).Methods("GET")
+	router.HandleFunc("/ClinicalCases/GetClinicalCase/{id}", myhandlers.GetClinicalCase).Methods("GET")
+	router.HandleFunc("/ClinicalCases/UpdateClinicalCase", myhandlers.UpdateClinicalCase).Methods("POST")
 	router.HandleFunc("/ClinicalCases/CreateClinicalCase", myhandlers.CreateClinicalCase).Methods("POST")
-	// router.HandleFunc("/ClinicalCases/DeleteClinicalCase", myhandlers.DeleteClinicalCase).Methods("DELETE")
+	router.HandleFunc("/ClinicalCases/DeleteClinicalCase", myhandlers.DeleteClinicalCase).Methods("DELETE")
 
 }

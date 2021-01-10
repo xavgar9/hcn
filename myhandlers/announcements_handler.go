@@ -101,7 +101,7 @@ func GetAnnouncement(w http.ResponseWriter, r *http.Request) {
 	announcementID, err := strconv.Atoi(vars["id"])
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "(USER) %v", err.Error())
+		fmt.Fprintf(w, "(USER) %v is not a valid ID", vars["id"])
 		return
 	}
 	var ID, CoursesID int

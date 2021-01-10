@@ -1,11 +1,15 @@
 package myhandlers
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"hcn/config"
 	"io/ioutil"
 	"net/http"
+	"strconv"
+
+	"github.com/gorilla/mux"
 )
 
 // CreateClinicalCase bla bla...
@@ -22,9 +26,9 @@ func CreateClinicalCase(w http.ResponseWriter, r *http.Request) {
 	var Db, _ = config.MYSQLConnection()
 	json.Unmarshal(reqBody, &newClinicalCase)
 	switch {
-	case (*newClinicalCase.TeachersId*1 == 0) || (*newClinicalCase.TeachersId*1 < 0):
+	case (*newClinicalCase.TeachersID*1 == 0) || (*newClinicalCase.TeachersID*1 < 0):
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "%v is not a valid TeachersID", *newClinicalCase.TeachersId)
+		fmt.Fprintf(w, "%v is not a valid TeachersID", *newClinicalCase.TeachersID)
 		return
 	case (newClinicalCase.Title == nil) || (len(*newClinicalCase.Title) == 0):
 		w.WriteHeader(http.StatusBadRequest)
@@ -39,7 +43,7 @@ func CreateClinicalCase(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "Media is empty or not valid")
 		return
 	default:
-		rows, err := Db.Exec("INSERT INTO Clinical_Cases(Title,Description,Media,TeachersId) VALUES (?,?,?,?)", newClinicalCase.Title, newClinicalCase.Description, newClinicalCase.Media, newClinicalCase.TeachersId)
+		rows, err := Db.Exec("INSERT INTO Clinical_Cases(Title,Description,Media,TeachersId) VALUES (?,?,?,?)", newClinicalCase.Title, newClinicalCase.Description, newClinicalCase.Media, newClinicalCase.TeachersID)
 		defer Db.Close()
 		if err != nil {
 			fmt.Fprintf(w, "(SQL) %v", err.Error())
@@ -64,13 +68,12 @@ func CreateClinicalCase(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-/*
-// GetAnnouncements bla bla...
-func GetAnnouncements(w http.ResponseWriter, r *http.Request) {
+// GetClinicalCases bla bla...
+func GetClinicalCases(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	var announcements AllAnnouncements
+	var clinicalCases AllClinicalCases
 	var Db, _ = config.MYSQLConnection()
-	rows, err := Db.Query("SELECT Id, CoursesID, Title, Description, CreationDate FROM Announcements")
+	rows, err := Db.Query("SELECT Id, Title, Description, Media, TeachersId FROM Clinical_Cases")
 	defer Db.Close()
 	if err != nil {
 		if err != sql.ErrNoRows {
@@ -79,35 +82,35 @@ func GetAnnouncements(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	for rows.Next() {
-		var ID, CourseID int
-		var Title, Description, CreationDate string
-		if err := rows.Scan(&ID, &CourseID, &Title, &Description, &CreationDate); err != nil {
+		var ID, TeachersID int
+		var Title, Description, Media string
+		if err := rows.Scan(&ID, &Title, &Description, &Media, &TeachersID); err != nil {
 			fmt.Fprintf(w, "(SQL) %v", err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		var announcement = Announcement{ID: &ID, CoursesID: &CourseID, Title: &Title, Description: &Description, CreationDate: &CreationDate}
-		announcements = append(announcements, announcement)
+		var clinicalCase = ClinicalCase{ID: &ID, Title: &Title, Description: &Description, Media: &Media, TeachersID: &TeachersID}
+		clinicalCases = append(clinicalCases, clinicalCase)
 	}
-	json.NewEncoder(w).Encode(announcements)
+	json.NewEncoder(w).Encode(clinicalCases)
 	w.WriteHeader(http.StatusOK)
 	return
 }
 
-// GetAnnouncement bla bla...
-func GetAnnouncement(w http.ResponseWriter, r *http.Request) {
+// GetClinicalCase bla bla...
+func GetClinicalCase(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	vars := mux.Vars(r)
-	announcementID, err := strconv.Atoi(vars["id"])
+	clinicalCaseID, err := strconv.Atoi(vars["id"])
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "(USER) %v", err.Error())
+		fmt.Fprintf(w, "(USER) %v is not a valid ID", vars["id"])
 		return
 	}
-	var ID, CoursesID int
-	var Title, Description, CreationDate string
+	var ID, TeachersID int
+	var Title, Description, Media string
 	var Db, _ = config.MYSQLConnection()
-	err = Db.QueryRow("SELECT ID,CoursesID,Title,Description,CreationDate FROM Announcements WHERE Id=?", announcementID).Scan(&ID, &CoursesID, &Title, &Description, &CreationDate)
+	err = Db.QueryRow("SELECT ID,Title,Description,Media,TeachersId FROM Clinical_Cases WHERE Id=?", clinicalCaseID).Scan(&ID, &Title, &Description, &Media, &TeachersID)
 	defer Db.Close()
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -117,14 +120,14 @@ func GetAnnouncement(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	var announcement = Announcement{ID: &ID, CoursesID: &CoursesID, Title: &Title, Description: &Description, CreationDate: &CreationDate}
-	json.NewEncoder(w).Encode(announcement)
+	var clinicalCase = ClinicalCase{ID: &ID, Title: &Title, Description: &Description, Media: &Media, TeachersID: &TeachersID}
+	json.NewEncoder(w).Encode(clinicalCase)
 	w.WriteHeader(http.StatusCreated)
 	return
 }
 
-// UpdateAnnouncement bla bla...
-func UpdateAnnouncement(w http.ResponseWriter, r *http.Request) {
+// UpdateClinicalCase bla bla...
+func UpdateClinicalCase(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	reqBody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -132,28 +135,28 @@ func UpdateAnnouncement(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "(USER) %v", err.Error())
 		return
 	}
-	var updatedAnnouncement Announcement
-	json.Unmarshal(reqBody, &updatedAnnouncement)
+	var updatedClinicalCase ClinicalCase
+	json.Unmarshal(reqBody, &updatedClinicalCase)
 	switch {
-	case (updatedAnnouncement.ID) == nil || (*updatedAnnouncement.ID*1 == 0) || (*updatedAnnouncement.ID*1 < 0):
+	case (updatedClinicalCase.ID) == nil || (*updatedClinicalCase.ID*1 == 0) || (*updatedClinicalCase.ID*1 < 0):
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, "ID is empty or not valid")
 		return
-	case updatedAnnouncement.Title == nil || len(*updatedAnnouncement.Title) == 0:
+	case updatedClinicalCase.Title == nil || len(*updatedClinicalCase.Title) == 0:
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, "Title is empty or not valid")
 		return
-	case updatedAnnouncement.Description == nil || len(*updatedAnnouncement.Description) == 0:
+	case updatedClinicalCase.Description == nil || len(*updatedClinicalCase.Description) == 0:
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, "Description is empty or not valid")
 		return
-	case updatedAnnouncement.CreationDate == nil || len(*updatedAnnouncement.CreationDate) == 0:
+	case updatedClinicalCase.Media == nil || len(*updatedClinicalCase.Media) == 0:
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "CreationDate is empty or not valid")
+		fmt.Fprintf(w, "Media is empty or not valid")
 		return
 	default:
 		var Db, _ = config.MYSQLConnection()
-		row, err := Db.Exec("UPDATE Announcements SET Title=?, Description=?, CreationDate=? WHERE Id=?", updatedAnnouncement.Title, updatedAnnouncement.Description, updatedAnnouncement.CreationDate, updatedAnnouncement.ID)
+		row, err := Db.Exec("UPDATE Clinical_Cases SET Title=?, Description=?, Media=? WHERE Id=?", updatedClinicalCase.Title, updatedClinicalCase.Description, updatedClinicalCase.Media, updatedClinicalCase.ID)
 		defer Db.Close()
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -177,8 +180,8 @@ func UpdateAnnouncement(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// DeleteAnnouncement bla bla...
-func DeleteAnnouncement(w http.ResponseWriter, r *http.Request) {
+// DeleteClinicalCase bla bla...
+func DeleteClinicalCase(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	reqBody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -186,17 +189,17 @@ func DeleteAnnouncement(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "(USER) %v", err.Error())
 		return
 	}
-	var deletedAnnouncement Announcement
-	json.Unmarshal(reqBody, &deletedAnnouncement)
+	var deletedClinicalCase ClinicalCase
+	json.Unmarshal(reqBody, &deletedClinicalCase)
 
-	if (deletedAnnouncement.ID) == nil || (*deletedAnnouncement.ID*1 == 0) || (*deletedAnnouncement.ID*1 < 0) {
+	if (deletedClinicalCase.ID) == nil || (*deletedClinicalCase.ID*1 == 0) || (*deletedClinicalCase.ID*1 < 0) {
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, "ID is empty or not valid")
 		return
 	}
 
 	var Db, _ = config.MYSQLConnection()
-	row, err := Db.Exec("DELETE FROM Announcements WHERE Id=?", deletedAnnouncement.ID)
+	row, err := Db.Exec("DELETE FROM Clinical_Cases WHERE Id=?", deletedClinicalCase.ID)
 	defer Db.Close()
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -217,4 +220,3 @@ func DeleteAnnouncement(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	return
 }
-*/

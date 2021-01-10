@@ -11,7 +11,6 @@ import (
 	"strconv"
 
 	"github.com/gorilla/mux"
-	"github.com/itrepablik/itrlog"
 )
 
 // CreateStudent bla bla...
@@ -95,7 +94,7 @@ func GetStudent(w http.ResponseWriter, r *http.Request) {
 	studentID, err := strconv.Atoi(vars["id"])
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		itrlog.Warn("(USER) ", err.Error())
+		fmt.Fprintf(w, "(USER) %v is not a valid ID", vars["id"])
 		return
 	}
 	var Name, Email string
