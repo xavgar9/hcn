@@ -79,7 +79,7 @@ func MainRouters(router *mux.Router) {
 	router.HandleFunc("/Courses/GetCourse/{id}", myhandlers.GetCourse).Methods("GET")
 	router.HandleFunc("/Courses/UpdateCourse", myhandlers.UpdateCourse).Methods("POST")
 	router.HandleFunc("/Courses/CreateCourse", myhandlers.CreateCourse).Methods("POST")
-	router.HandleFunc("/Courses/DeleteCourses", myhandlers.DeleteCourse).Methods("DELETE")
+	router.HandleFunc("/Courses/DeleteCourse", myhandlers.DeleteCourse).Methods("DELETE")
 
 	// Activities URLs
 	router.HandleFunc("/Activities/GetActivities", myhandlers.GetActivities).Methods("GET")
@@ -94,5 +94,12 @@ func MainRouters(router *mux.Router) {
 	router.HandleFunc("/Feedbacks/UpdateFeedback", myhandlers.UpdateFeedback).Methods("POST")
 	router.HandleFunc("/Feedbacks/CreateFeedback", myhandlers.CreateFeedback).Methods("POST")
 	router.HandleFunc("/Feedbacks/DeleteFeedback", myhandlers.DeleteFeedback).Methods("DELETE")
+
+	// HCN URLs
+	router.HandleFunc("/HCN/GetHCNs", myhandlers.GetHCNs).Methods("GET")
+	router.HandleFunc("/HCN/GetHCN/{id}", myhandlers.GetHCN).Methods("GET")
+	router.HandleFunc("/HCN/UpdateHCN", myhandlers.UpdateHCN).Methods("POST")
+	router.HandleFunc("/HCN/CreateHCN", myhandlers.CreateHCN).Methods("POST")
+	router.HandleFunc("/HCN/DeleteHCN", myhandlers.DeleteHCN).Methods("DELETE")
 
 }

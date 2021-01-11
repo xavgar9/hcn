@@ -89,3 +89,12 @@ type Feedback struct {
 
 // AllFeedbacks bla bla...
 type AllFeedbacks []Feedback
+
+// HCN (Historia Clínica Nutricional)...
+type HCN struct {
+	ID         *int `json:"ID"`
+	TeachersID *int `json:"TeachersID"`
+}
+
+// AllHCNs bla bla...
+type AllHCNs []HCN

@@ -81,8 +81,8 @@ func GetFeedbacks(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		var course = Feedback{ID: &ID, ActivitiesID: &ActivitiesID, StudentsID: &StudentsID}
-		feedbacks = append(feedbacks, course)
+		var feedback = Feedback{ID: &ID, ActivitiesID: &ActivitiesID, StudentsID: &StudentsID}
+		feedbacks = append(feedbacks, feedback)
 	}
 	json.NewEncoder(w).Encode(feedbacks)
 	w.WriteHeader(http.StatusOK)
@@ -111,8 +111,8 @@ func GetFeedback(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	var course = Feedback{ID: &ID, ActivitiesID: &ActivitiesID, StudentsID: &StudentsID}
-	json.NewEncoder(w).Encode(course)
+	var feedback = Feedback{ID: &ID, ActivitiesID: &ActivitiesID, StudentsID: &StudentsID}
+	json.NewEncoder(w).Encode(feedback)
 	w.WriteHeader(http.StatusCreated)
 	return
 }
