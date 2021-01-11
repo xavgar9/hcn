@@ -74,6 +74,7 @@ type Activity struct {
 	LimitDate       *string `json:"LimitDate"`
 	CoursesID       *int    `json:"CoursesID"`
 	ClinicalCasesID *int    `json:"ClinicalCasesID"`
+	HCNID           *int    `json:"HCNID"`
 	Difficulty      *int    `json:"Difficulty"`
 }
 

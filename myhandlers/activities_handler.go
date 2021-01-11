@@ -51,12 +51,16 @@ func CreateActivity(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, "%v is not a valid ClinicalCasesID", *newActivity.CoursesID)
 		return
+	case (*newActivity.HCNID*1 == 0) || (*newActivity.HCNID*1 < 0):
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, "%v is not a valid HCNID", *newActivity.CoursesID)
+		return
 	case (*newActivity.Difficulty*1 == 0) || (*newActivity.Difficulty*1 < 0):
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, "%v is not a valid Difficulty", *newActivity.CoursesID)
 		return
 	default:
-		rows, err := Db.Exec("INSERT INTO Activities(Title,Description,Type,CreationDate,LimitDate,CoursesId,ClinicalCasesId,Difficulty) VALUES (?,?,?,NOW(),?,?,?,?)", newActivity.Title, newActivity.Description, newActivity.Type, newActivity.LimitDate, newActivity.CoursesID, newActivity.ClinicalCasesID, newActivity.Difficulty)
+		rows, err := Db.Exec("INSERT INTO Activities(Title,Description,Type,CreationDate,LimitDate,CoursesId,ClinicalCasesId,HCNId,Difficulty) VALUES (?,?,?,NOW(),?,?,?,?,?)", newActivity.Title, newActivity.Description, newActivity.Type, newActivity.LimitDate, newActivity.CoursesID, newActivity.ClinicalCasesID, newActivity.HCNID, newActivity.Difficulty)
 		defer Db.Close()
 		if err != nil {
 			fmt.Fprintf(w, "(SQL) %v", err.Error())
@@ -86,7 +90,7 @@ func GetActivities(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var activities AllActivities
 	var Db, _ = config.MYSQLConnection()
-	rows, err := Db.Query("SELECT Id,Title,Description,Type,CreationDate,LimitDate,CoursesId,ClinicalCasesId,Difficulty FROM Activities")
+	rows, err := Db.Query("SELECT Id,Title,Description,Type,CreationDate,LimitDate,CoursesId,ClinicalCasesId,HCNId,Difficulty FROM Activities")
 	defer Db.Close()
 	if err != nil {
 		if err != sql.ErrNoRows {
@@ -95,14 +99,14 @@ func GetActivities(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	for rows.Next() {
-		var ID, CoursesID, ClinicalCasesID, Difficulty int
+		var ID, CoursesID, ClinicalCasesID, HCNID, Difficulty int
 		var Title, Description, Type, CreationDate, LimitDate string
-		if err := rows.Scan(&ID, &Title, &Description, &Type, &CreationDate, &LimitDate, &CoursesID, &ClinicalCasesID, &Difficulty); err != nil {
+		if err := rows.Scan(&ID, &Title, &Description, &Type, &CreationDate, &LimitDate, &CoursesID, &ClinicalCasesID, &HCNID, &Difficulty); err != nil {
 			fmt.Fprintf(w, "(SQL) %v", err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		var activity = Activity{ID: &ID, Title: &Title, Description: &Description, Type: &Type, CreationDate: &CreationDate, LimitDate: &LimitDate, CoursesID: &CoursesID, ClinicalCasesID: &ClinicalCasesID, Difficulty: &Difficulty}
+		var activity = Activity{ID: &ID, Title: &Title, Description: &Description, Type: &Type, CreationDate: &CreationDate, LimitDate: &LimitDate, CoursesID: &CoursesID, ClinicalCasesID: &ClinicalCasesID, HCNID: &HCNID, Difficulty: &Difficulty}
 		activities = append(activities, activity)
 	}
 	json.NewEncoder(w).Encode(activities)
@@ -120,10 +124,10 @@ func GetActivity(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "(USER) %v is not a valid ID", vars["id"])
 		return
 	}
-	var ID, CoursesID, ClinicalCasesID, Difficulty int
+	var ID, CoursesID, ClinicalCasesID, HCNID, Difficulty int
 	var Title, Description, Type, CreationDate, LimitDate string
 	var Db, _ = config.MYSQLConnection()
-	err = Db.QueryRow("SELECT Id,Title,Description,Type,CreationDate,LimitDate,CoursesId,ClinicalCasesId,Difficulty FROM Activities WHERE Id=?", activityID).Scan(&ID, &Title, &Description, &Type, &CreationDate, &LimitDate, &CoursesID, &ClinicalCasesID, &Difficulty)
+	err = Db.QueryRow("SELECT Id,Title,Description,Type,CreationDate,LimitDate,CoursesId,ClinicalCasesId,HCNID,Difficulty FROM Activities WHERE Id=?", activityID).Scan(&ID, &Title, &Description, &Type, &CreationDate, &LimitDate, &CoursesID, &ClinicalCasesID, &HCNID, &Difficulty)
 	defer Db.Close()
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -134,7 +138,7 @@ func GetActivity(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	var activity = Activity{ID: &ID, Title: &Title, Description: &Description, Type: &Type, CreationDate: &CreationDate, LimitDate: &LimitDate, CoursesID: &CoursesID, ClinicalCasesID: &ClinicalCasesID, Difficulty: &Difficulty}
+	var activity = Activity{ID: &ID, Title: &Title, Description: &Description, Type: &Type, CreationDate: &CreationDate, LimitDate: &LimitDate, CoursesID: &CoursesID, ClinicalCasesID: &ClinicalCasesID, HCNID: &HCNID, Difficulty: &Difficulty}
 	json.NewEncoder(w).Encode(activity)
 	w.WriteHeader(http.StatusCreated)
 	return
@@ -172,13 +176,17 @@ func UpdateActivity(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, "%v is not a valid ClinicalCasesID", *updatedActivity.CoursesID)
 		return
+	case (*updatedActivity.HCNID*1 == 0) || (*updatedActivity.HCNID*1 < 0):
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, "%v is not a valid HCNID", *updatedActivity.CoursesID)
+		return
 	case (*updatedActivity.Difficulty*1 == 0) || (*updatedActivity.Difficulty*1 < 0):
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, "%v is not a valid Difficulty", *updatedActivity.CoursesID)
 		return
 	default:
 		var Db, _ = config.MYSQLConnection()
-		row, err := Db.Exec("UPDATE Activities SET Title=?, Description=?, Type=?, LimitDate=?, ClinicalCasesId=?, Difficulty=? WHERE Id=?", updatedActivity.Title, updatedActivity.Description, updatedActivity.Type, updatedActivity.LimitDate, updatedActivity.ClinicalCasesID, updatedActivity.Difficulty, updatedActivity.ID)
+		row, err := Db.Exec("UPDATE Activities SET Title=?, Description=?, Type=?, LimitDate=?, ClinicalCasesId=?, HCNId=?, Difficulty=? WHERE Id=?", updatedActivity.Title, updatedActivity.Description, updatedActivity.Type, updatedActivity.LimitDate, updatedActivity.ClinicalCasesID, updatedActivity.HCNID, updatedActivity.Difficulty, updatedActivity.ID)
 		defer Db.Close()
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)

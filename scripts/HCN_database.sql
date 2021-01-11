@@ -1,17 +1,18 @@
 -- Created by Vertabelo (http://vertabelo.com)
--- Last modification date: 2021-01-09 05:03:22.631
+-- Last modification date: 2021-01-11 04:33:55.608
 
 -- tables
 -- Table: Activities
 CREATE TABLE Activities (
     Id int NOT NULL AUTO_INCREMENT,
     Title varchar(50) NOT NULL,
-    Description varchar(1000) NOT NULL,
-    Type varchar(25) NOT NULL,
+    Description varchar(3000) NOT NULL,
+    Type varchar(50) NOT NULL,
     CreationDate datetime NOT NULL,
     LimitDate datetime NOT NULL,
     CoursesId int NOT NULL,
     ClinicalCasesId int NOT NULL,
+    HCNId int NOT NULL,
     Difficulty int NOT NULL,
     CONSTRAINT Activities_pk PRIMARY KEY (Id)
 );
@@ -20,8 +21,8 @@ CREATE TABLE Activities (
 CREATE TABLE Announcements (
     Id int NOT NULL AUTO_INCREMENT,
     CoursesId int NOT NULL,
-    Title varchar(50) NOT NULL,
-    Description varchar(1000) NOT NULL,
+    Title varchar(100) NOT NULL,
+    Description varchar(2000) NOT NULL,
     CreationDate datetime NOT NULL,
     CONSTRAINT Announcements_pk PRIMARY KEY (Id)
 );
@@ -29,10 +30,11 @@ CREATE TABLE Announcements (
 -- Table: Clinical_Cases
 CREATE TABLE Clinical_Cases (
     Id int NOT NULL AUTO_INCREMENT,
-    Title varchar(50) NOT NULL,
-    Description varchar(1000) NOT NULL,
+    Title varchar(100) NOT NULL,
+    Description varchar(3000) NOT NULL,
     Media varchar(2000) NOT NULL,
     TeachersId int NOT NULL,
+    HCNId int NOT NULL,
     CONSTRAINT Clinical_Cases_pk PRIMARY KEY (Id)
 );
 
@@ -50,6 +52,7 @@ CREATE TABLE Courses_CCases (
     Id int NOT NULL AUTO_INCREMENT,
     ClinicalCasesId int NOT NULL,
     CoursesId int NOT NULL,
+    Dispayable bool NOT NULL,
     CONSTRAINT Courses_CCases_pk PRIMARY KEY (Id)
 );
 
@@ -58,6 +61,7 @@ CREATE TABLE Courses_HCN (
     Id int NOT NULL AUTO_INCREMENT,
     CoursesId int NOT NULL,
     HcnId int NOT NULL,
+    Displayable bool NOT NULL,
     CONSTRAINT Courses_HCN_pk PRIMARY KEY (Id)
 );
 
@@ -109,9 +113,17 @@ ALTER TABLE Activities ADD CONSTRAINT Activities_Clinical_Cases FOREIGN KEY Acti
 ALTER TABLE Activities ADD CONSTRAINT Activities_Courses FOREIGN KEY Activities_Courses (CoursesId)
     REFERENCES Courses (Id);
 
+-- Reference: Activities_HCN (table: Activities)
+ALTER TABLE Activities ADD CONSTRAINT Activities_HCN FOREIGN KEY Activities_HCN (HCNId)
+    REFERENCES HCN (Id);
+
 -- Reference: Announcements_Courses (table: Announcements)
 ALTER TABLE Announcements ADD CONSTRAINT Announcements_Courses FOREIGN KEY Announcements_Courses (CoursesId)
     REFERENCES Courses (Id);
+
+-- Reference: Clinical_Cases_HCN (table: Clinical_Cases)
+ALTER TABLE Clinical_Cases ADD CONSTRAINT Clinical_Cases_HCN FOREIGN KEY Clinical_Cases_HCN (HCNId)
+    REFERENCES HCN (Id);
 
 -- Reference: Clinical_Cases_Teachers (table: Clinical_Cases)
 ALTER TABLE Clinical_Cases ADD CONSTRAINT Clinical_Cases_Teachers FOREIGN KEY Clinical_Cases_Teachers (TeachersId)
@@ -157,8 +169,6 @@ ALTER TABLE HCN ADD CONSTRAINT HCN_Teachers FOREIGN KEY HCN_Teachers (TeachersId
 ALTER TABLE Courses ADD CONSTRAINT Techers_Courses FOREIGN KEY Techers_Courses (Teacher)
     REFERENCES Teachers (Id);
 
--- End of file.
-
 
 -- Adding some data
 -- Students
@@ -197,18 +207,18 @@ INSERT INTO HCN(Id,TeachersId) VALUES (4,2);
 INSERT INTO HCN(Id,TeachersId) VALUES (5,3);
 
 -- Clinical_Cases
-INSERT INTO Clinical_Cases(Id,Title,Description,Media,TeachersId) VALUES
-    (1,"El joven parchado","Benjamón era un joven con IMC PARCHADO.","../activitiesresources/img1.png",1);
-INSERT INTO Clinical_Cases(Id,Title,Description,Media,TeachersId) VALUES
-    (2,"El pianista de la selva","Re La Mi Do#","../activitiesresources/img2.png",2);
-INSERT INTO Clinical_Cases(Id,Title,Description,Media,TeachersId) VALUES
-    (3,"Muerte accidental","¿Por qué se fue? ¿Y por qué murió? ¿Por qué el Señor me la quitó? Se ha ido al cielo y para poder ir yo...","../activitiesresources/ElUltimoBeso.mp3",3);
+INSERT INTO Clinical_Cases(Id,Title,Description,Media,TeachersId,HCNId) VALUES
+    (1,"El joven parchado","Benjamón era un joven con IMC PARCHADO.","../activitiesresources/img1.png",1,1);
+INSERT INTO Clinical_Cases(Id,Title,Description,Media,TeachersId,HCNId) VALUES
+    (2,"El pianista de la selva","Re La Mi Do#","../activitiesresources/img2.png",2,2);
+INSERT INTO Clinical_Cases(Id,Title,Description,Media,TeachersId,HCNId) VALUES
+    (3,"Muerte accidental","¿Por qué se fue? ¿Y por qué murió? ¿Por qué el Señor me la quitó? Se ha ido al cielo y para poder ir yo...","../activitiesresources/ElUltimoBeso.mp3",3,3);
 
 -- Activities
-INSERT INTO Activities(Id,Title,Description,Type,CreationDate,LimitDate,CoursesId,ClinicalCasesId,Difficulty) VALUES
-    (1,'Primera tarea, matrices dispersas','Re easy pri, solo busquen en Google.','Calificable','2021-01-08 12:00:00','2021-01-08 20:00:00',1,1,3);
-INSERT INTO Activities(Id,Title,Description,Type,CreationDate,LimitDate,CoursesId,ClinicalCasesId,Difficulty) VALUES
-    (2,'Actividad de prueba','Por favor ignoren esta actividad, gracias.','Prueba','2021-01-09 11:43:21','2021-01-19 10:59:59',2,2,1);
+INSERT INTO Activities(Id,Title,Description,Type,CreationDate,LimitDate,CoursesId,ClinicalCasesId,HCNId,Difficulty) VALUES
+    (1,'Primera tarea, matrices dispersas','Re easy pri, solo busquen en Google.','Calificable','2021-01-08 12:00:00','2021-01-08 20:00:00',1,1,1,3);
+INSERT INTO Activities(Id,Title,Description,Type,CreationDate,LimitDate,CoursesId,ClinicalCasesId,HCNId,Difficulty) VALUES
+    (2,'Actividad de prueba','Por favor ignoren esta actividad, gracias.','Prueba','2021-01-09 11:43:21','2021-01-19 10:59:59',2,2,2,1);
 
 -- Feedbacks
 INSERT INTO Feedbacks(Id,ActivitiesId,StudentsId) VALUES (1,1,1);
