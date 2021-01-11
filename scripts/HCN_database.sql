@@ -1,5 +1,5 @@
 -- Created by Vertabelo (http://vertabelo.com)
--- Last modification date: 2021-01-11 04:33:55.608
+-- Last modification date: 2021-01-11 05:29:42.27
 
 -- tables
 -- Table: Activities
@@ -27,6 +27,14 @@ CREATE TABLE Announcements (
     CONSTRAINT Announcements_pk PRIMARY KEY (Id)
 );
 
+-- Table: CCases_HCN
+CREATE TABLE CCases_HCN (
+    Id int NOT NULL AUTO_INCREMENT,
+    ClinicalCasesId int NOT NULL,
+    HCNId int NOT NULL,
+    CONSTRAINT CCases_HCN_pk PRIMARY KEY (Id)
+);
+
 -- Table: Clinical_Cases
 CREATE TABLE Clinical_Cases (
     Id int NOT NULL AUTO_INCREMENT,
@@ -34,7 +42,6 @@ CREATE TABLE Clinical_Cases (
     Description varchar(3000) NOT NULL,
     Media varchar(2000) NOT NULL,
     TeachersId int NOT NULL,
-    HCNId int NOT NULL,
     CONSTRAINT Clinical_Cases_pk PRIMARY KEY (Id)
 );
 
@@ -121,8 +128,12 @@ ALTER TABLE Activities ADD CONSTRAINT Activities_HCN FOREIGN KEY Activities_HCN 
 ALTER TABLE Announcements ADD CONSTRAINT Announcements_Courses FOREIGN KEY Announcements_Courses (CoursesId)
     REFERENCES Courses (Id);
 
--- Reference: Clinical_Cases_HCN (table: Clinical_Cases)
-ALTER TABLE Clinical_Cases ADD CONSTRAINT Clinical_Cases_HCN FOREIGN KEY Clinical_Cases_HCN (HCNId)
+-- Reference: CCases_HCN_Clinical_Cases (table: CCases_HCN)
+ALTER TABLE CCases_HCN ADD CONSTRAINT CCases_HCN_Clinical_Cases FOREIGN KEY CCases_HCN_Clinical_Cases (ClinicalCasesId)
+    REFERENCES Clinical_Cases (Id);
+
+-- Reference: CCases_HCN_HCN (table: CCases_HCN)
+ALTER TABLE CCases_HCN ADD CONSTRAINT CCases_HCN_HCN FOREIGN KEY CCases_HCN_HCN (HCNId)
     REFERENCES HCN (Id);
 
 -- Reference: Clinical_Cases_Teachers (table: Clinical_Cases)
@@ -207,12 +218,12 @@ INSERT INTO HCN(Id,TeachersId) VALUES (4,2);
 INSERT INTO HCN(Id,TeachersId) VALUES (5,3);
 
 -- Clinical_Cases
-INSERT INTO Clinical_Cases(Id,Title,Description,Media,TeachersId,HCNId) VALUES
-    (1,"El joven parchado","Benjamón era un joven con IMC PARCHADO.","../activitiesresources/img1.png",1,1);
-INSERT INTO Clinical_Cases(Id,Title,Description,Media,TeachersId,HCNId) VALUES
-    (2,"El pianista de la selva","Re La Mi Do#","../activitiesresources/img2.png",2,2);
-INSERT INTO Clinical_Cases(Id,Title,Description,Media,TeachersId,HCNId) VALUES
-    (3,"Muerte accidental","¿Por qué se fue? ¿Y por qué murió? ¿Por qué el Señor me la quitó? Se ha ido al cielo y para poder ir yo...","../activitiesresources/ElUltimoBeso.mp3",3,3);
+INSERT INTO Clinical_Cases(Id,Title,Description,Media,TeachersId) VALUES
+    (1,"El joven parchado","Benjamón era un joven con IMC PARCHADO.","../activitiesresources/img1.png",1);
+INSERT INTO Clinical_Cases(Id,Title,Description,Media,TeachersId) VALUES
+    (2,"El pianista de la selva","Re La Mi Do#","../activitiesresources/img2.png",2);
+INSERT INTO Clinical_Cases(Id,Title,Description,Media,TeachersId) VALUES
+    (3,"Muerte accidental","¿Por qué se fue? ¿Y por qué murió? ¿Por qué el Señor me la quitó? Se ha ido al cielo y para poder ir yo...","../activitiesresources/ElUltimoBeso.mp3",3);
 
 -- Activities
 INSERT INTO Activities(Id,Title,Description,Type,CreationDate,LimitDate,CoursesId,ClinicalCasesId,HCNId,Difficulty) VALUES

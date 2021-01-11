@@ -102,4 +102,9 @@ func MainRouters(router *mux.Router) {
 	router.HandleFunc("/HCN/CreateHCN", myhandlers.CreateHCN).Methods("POST")
 	router.HandleFunc("/HCN/DeleteHCN", myhandlers.DeleteHCN).Methods("DELETE")
 
+	router.HandleFunc("/HCN/GetCoursesHCNs", myhandlers.GetCoursesHCNs).Methods("GET")
+	router.HandleFunc("/HCN/GetCourseHCN/{id}", myhandlers.GetCourseHCN).Methods("GET")
+	router.HandleFunc("/HCN/UpdateCourseHCN", myhandlers.UpdateCourseHCN).Methods("POST")
+	router.HandleFunc("/HCN/CreateCourseHCN", myhandlers.CreateCourseHCN).Methods("POST")
+	router.HandleFunc("/HCN/DeleteCourseHCN", myhandlers.DeleteCourseHCN).Methods("DELETE")
 }

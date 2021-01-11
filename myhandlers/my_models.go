@@ -99,3 +99,14 @@ type HCN struct {
 
 // AllHCNs bla bla...
 type AllHCNs []HCN
+
+// CourseHCN struct that represents the new relationship between a HCN and a course ...
+type CourseHCN struct {
+	ID          *int `json:"ID"`
+	CoursesID   *int `json:"CoursesID"`
+	HCNID       *int `json:"HCNID"`
+	Displayable *int `json:"Displayable"`
+}
+
+// AllCoursesHCNs bla bla...
+type AllCoursesHCNs []CourseHCN

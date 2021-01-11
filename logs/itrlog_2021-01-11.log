@@ -1,0 +1,22 @@
+{"level":"info","ts":1610344151.3375473,"msg":"Server started at 2021-01-11 00:49:11.335086119 -0500 EST"}
+{"level":"info","ts":1610344178.5969584,"msg":"Server started at 2021-01-11 00:49:38.594792318 -0500 EST"}
+{"level":"info","ts":1610346134.4473314,"msg":"Server started at 2021-01-11 01:22:14.445768921 -0500 EST"}
+{"level":"info","ts":1610346152.0982082,"msg":"Server started at 2021-01-11 01:22:32.095825765 -0500 EST"}
+{"level":"info","ts":1610346227.1130538,"msg":"Server started at 2021-01-11 01:23:47.110537498 -0500 EST"}
+{"level":"info","ts":1610346394.1915054,"msg":"Server started at 2021-01-11 01:26:34.189328695 -0500 EST"}
+{"level":"info","ts":1610346770.030855,"msg":"Server started at 2021-01-11 01:32:50.029113294 -0500 EST"}
+{"level":"info","ts":1610346823.7845576,"msg":"Server started at 2021-01-11 01:33:43.78308225 -0500 EST"}
+{"level":"info","ts":1610347137.8442767,"msg":"Server started at 2021-01-11 01:38:57.842794085 -0500 EST"}
+{"level":"info","ts":1610347307.5878885,"msg":"Server started at 2021-01-11 01:41:47.585663473 -0500 EST"}
+{"level":"info","ts":1610347318.8686516,"msg":"Server started at 2021-01-11 01:41:58.866641023 -0500 EST"}
+{"level":"info","ts":1610347385.9424114,"msg":"Server started at 2021-01-11 01:43:05.940767661 -0500 EST"}
+{"level":"info","ts":1610347862.0378933,"msg":"Server started at 2021-01-11 01:51:02.035664934 -0500 EST"}
+{"level":"info","ts":1610347973.1196585,"msg":"Server started at 2021-01-11 01:52:53.11777929 -0500 EST"}
+{"level":"info","ts":1610347974.3310947,"msg":"Server started at 2021-01-11 01:52:54.329159614 -0500 EST"}
+{"level":"info","ts":1610348081.663338,"msg":"Server started at 2021-01-11 01:54:41.66105286 -0500 EST"}
+{"level":"info","ts":1610348125.927271,"msg":"Server started at 2021-01-11 01:55:25.925511153 -0500 EST"}
+{"level":"info","ts":1610348168.4728131,"msg":"Server started at 2021-01-11 01:56:08.470781861 -0500 EST"}
+{"level":"info","ts":1610348205.6145837,"msg":"Server started at 2021-01-11 01:56:45.607404694 -0500 EST"}
+{"level":"info","ts":1610348224.956466,"msg":"Server started at 2021-01-11 01:57:04.953945064 -0500 EST"}
+{"level":"info","ts":1610348509.502979,"msg":"Server started at 2021-01-11 02:01:49.500804084 -0500 EST"}
+{"level":"error","ts":1610348540.7474291,"msg":"http: Server closed"}
