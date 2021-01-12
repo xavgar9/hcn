@@ -26,16 +26,16 @@ func CreateFeedback(w http.ResponseWriter, r *http.Request) {
 	var Db, _ = config.MYSQLConnection()
 	json.Unmarshal(reqBody, &newFeedback)
 	switch {
-	case (*newFeedback.ActivitiesID*1 == 0) || (*newFeedback.ActivitiesID*1 < 0):
+	case (*newFeedback.ActivityID*1 == 0) || (*newFeedback.ActivityID*1 < 0):
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "ActivitiesID is empty or not valid")
+		fmt.Fprintf(w, "ActivityID is empty or not valid")
 		return
-	case (*newFeedback.StudentsID*1 == 0) || (*newFeedback.StudentsID*1 < 0):
+	case (*newFeedback.StudentID*1 == 0) || (*newFeedback.StudentID*1 < 0):
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "StudentsID is empty or not valid")
+		fmt.Fprintf(w, "StudentID is empty or not valid")
 		return
 	default:
-		rows, err := Db.Exec("INSERT INTO Feedbacks(ActivitiesID,StudentsID) VALUES (?,?)", newFeedback.ActivitiesID, newFeedback.StudentsID)
+		rows, err := Db.Exec("INSERT INTO Feedbacks(ActivityID,StudentID) VALUES (?,?)", newFeedback.ActivityID, newFeedback.StudentID)
 		defer Db.Close()
 		if err != nil {
 			fmt.Fprintf(w, "(SQL) %v", err.Error())
@@ -60,12 +60,12 @@ func CreateFeedback(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// GetFeedbacks bla bla...
-func GetFeedbacks(w http.ResponseWriter, r *http.Request) {
+// GetAllFeedbacks bla bla...
+func GetAllFeedbacks(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var feedbacks AllFeedbacks
 	var Db, _ = config.MYSQLConnection()
-	rows, err := Db.Query("SELECT Id, ActivitiesId, StudentsId FROM Feedbacks")
+	rows, err := Db.Query("SELECT ID, ActivityID, StudentID FROM Feedbacks")
 	defer Db.Close()
 	if err != nil {
 		if err != sql.ErrNoRows {
@@ -75,13 +75,13 @@ func GetFeedbacks(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	for rows.Next() {
-		var ID, ActivitiesID, StudentsID int
-		if err := rows.Scan(&ID, &ActivitiesID, &StudentsID); err != nil {
+		var ID, ActivityID, StudentID int
+		if err := rows.Scan(&ID, &ActivityID, &StudentID); err != nil {
 			fmt.Fprintf(w, "(SQL) %v", err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		var feedback = Feedback{ID: &ID, ActivitiesID: &ActivitiesID, StudentsID: &StudentsID}
+		var feedback = Feedback{ID: &ID, ActivityID: &ActivityID, StudentID: &StudentID}
 		feedbacks = append(feedbacks, feedback)
 	}
 	json.NewEncoder(w).Encode(feedbacks)
@@ -99,9 +99,9 @@ func GetFeedback(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "(USER) %v is not a valid ID", vars["id"])
 		return
 	}
-	var ID, ActivitiesID, StudentsID int
+	var ID, ActivityID, StudentID int
 	var Db, _ = config.MYSQLConnection()
-	err = Db.QueryRow("SELECT Id, ActivitiesId, StudentsId FROM Feedbacks WHERE Id=?", feedbackID).Scan(&ID, &ActivitiesID, &StudentsID)
+	err = Db.QueryRow("SELECT ID, ActivityID, StudentID FROM Feedbacks WHERE ID=?", feedbackID).Scan(&ID, &ActivityID, &StudentID)
 	defer Db.Close()
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -111,7 +111,7 @@ func GetFeedback(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	var feedback = Feedback{ID: &ID, ActivitiesID: &ActivitiesID, StudentsID: &StudentsID}
+	var feedback = Feedback{ID: &ID, ActivityID: &ActivityID, StudentID: &StudentID}
 	json.NewEncoder(w).Encode(feedback)
 	w.WriteHeader(http.StatusCreated)
 	return
@@ -129,17 +129,17 @@ func UpdateFeedback(w http.ResponseWriter, r *http.Request) {
 	var updatedFeedback Feedback
 	json.Unmarshal(reqBody, &updatedFeedback)
 	switch {
-	case (*updatedFeedback.ActivitiesID*1 == 0) || (*updatedFeedback.ActivitiesID*1 < 0):
+	case (*updatedFeedback.ActivityID*1 == 0) || (*updatedFeedback.ActivityID*1 < 0):
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "ActivitiesID is empty or not valid")
+		fmt.Fprintf(w, "ActivityID is empty or not valid")
 		return
-	case (*updatedFeedback.StudentsID*1 == 0) || (*updatedFeedback.StudentsID*1 < 0):
+	case (*updatedFeedback.StudentID*1 == 0) || (*updatedFeedback.StudentID*1 < 0):
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "StudentsID is empty or not valid")
+		fmt.Fprintf(w, "StudentID is empty or not valid")
 		return
 	default:
 		var Db, _ = config.MYSQLConnection()
-		row, err := Db.Exec("UPDATE Feedbacks SET ActivitiesId=?, StudentsId=? WHERE Id=?", updatedFeedback.ActivitiesID, updatedFeedback.StudentsID, updatedFeedback.ID)
+		row, err := Db.Exec("UPDATE Feedbacks SET ActivityID=?, StudentID=? WHERE ID=?", updatedFeedback.ActivityID, updatedFeedback.StudentID, updatedFeedback.ID)
 		defer Db.Close()
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -182,7 +182,7 @@ func DeleteFeedback(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var Db, _ = config.MYSQLConnection()
-	row, err := Db.Exec("DELETE FROM Feedbacks WHERE Id=?", deletedFeedback.ID)
+	row, err := Db.Exec("DELETE FROM Feedbacks WHERE ID=?", deletedFeedback.ID)
 	defer Db.Close()
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)

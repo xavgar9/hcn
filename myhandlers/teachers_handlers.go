@@ -40,7 +40,7 @@ func CreateTeacher(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "Email is empty or not valid")
 		return
 	default:
-		rows, err := Db.Query("INSERT INTO Teachers(Id,Name,Email) VALUES (?, ?, ?)", newTeacher.ID, newTeacher.Name, newTeacher.Email)
+		rows, err := Db.Query("INSERT INTO Teachers(ID,Name,Email) VALUES (?, ?, ?)", newTeacher.ID, newTeacher.Name, newTeacher.Email)
 		defer Db.Close()
 		if err != nil {
 			fmt.Fprintf(w, "(SQL) %v", err.Error())
@@ -58,12 +58,12 @@ func CreateTeacher(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// GetTeachers bla bla...
-func GetTeachers(w http.ResponseWriter, r *http.Request) {
+// GetAllTeachers bla bla...
+func GetAllTeachers(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var teachers AllTeachers
 	var Db, _ = config.MYSQLConnection()
-	rows, err := Db.Query("SELECT Id, Name, Email FROM Teachers")
+	rows, err := Db.Query("SELECT ID, Name, Email FROM Teachers")
 	defer Db.Close()
 	if err != nil {
 		if err != sql.ErrNoRows {
@@ -99,7 +99,7 @@ func GetTeacher(w http.ResponseWriter, r *http.Request) {
 	}
 	var Name, Email string
 	var Db, _ = config.MYSQLConnection()
-	err = Db.QueryRow("SELECT Name, Email FROM Teachers WHERE Id=?", teacherID).Scan(&Name, &Email)
+	err = Db.QueryRow("SELECT Name, Email FROM Teachers WHERE ID=?", teacherID).Scan(&Name, &Email)
 	defer Db.Close()
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -141,7 +141,7 @@ func UpdateTeacher(w http.ResponseWriter, r *http.Request) {
 		return
 	default:
 		var Db, _ = config.MYSQLConnection()
-		row, err := Db.Exec("UPDATE Teachers SET Name=?, Email=? WHERE Id=?", updatedTeacher.Name, updatedTeacher.Email, updatedTeacher.ID)
+		row, err := Db.Exec("UPDATE Teachers SET Name=?, Email=? WHERE ID=?", updatedTeacher.Name, updatedTeacher.Email, updatedTeacher.ID)
 		defer Db.Close()
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -184,7 +184,7 @@ func DeleteTeacher(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var Db, _ = config.MYSQLConnection()
-	row, err := Db.Exec("DELETE FROM Teachers WHERE Id=?", deletedTeacher.ID)
+	row, err := Db.Exec("DELETE FROM Teachers WHERE ID=?", deletedTeacher.ID)
 	defer Db.Close()
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)

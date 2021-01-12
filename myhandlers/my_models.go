@@ -29,10 +29,31 @@ type Teacher struct {
 // AllTeachers bla bla...
 type AllTeachers []Teacher
 
+// Course bla bla...
+type Course struct {
+	ID           *int    `json:"ID"`
+	TeacherID    *int    `json:"TeacherID"`
+	Name         *string `json:"Name"`
+	CreationDate *string `json:"CreationDate"`
+}
+
+// AllCourses bla bla...
+type AllCourses []Course
+
+// StudentTuition bla bla...
+type StudentTuition struct {
+	ID        *int `json:"ID"`
+	CourseID  *int `json:"CourseID"`
+	StudentID *int `json:"StudentID"`
+}
+
+// AllStudentTuition bla bla...
+type AllStudentTuition []StudentTuition
+
 // Announcement bla bla...
 type Announcement struct {
 	ID           *int    `json:"ID"`
-	CoursesID    *int    `json:"CoursesID"`
+	CourseID     *int    `json:"CourseID"`
 	Title        *string `json:"Title"`
 	Description  *string `json:"Description"`
 	CreationDate *string `json:"CreationDate"`
@@ -47,35 +68,24 @@ type ClinicalCase struct {
 	Title       *string `json:"Title"`
 	Description *string `json:"Description"`
 	Media       *string `json:"Media"`
-	TeachersID  *int    `json:"TeachersID"`
+	TeacherID   *int    `json:"TeacherID"`
 }
 
 // AllClinicalCases bla bla...
 type AllClinicalCases []ClinicalCase
 
-// Course bla bla...
-type Course struct {
-	ID           *int    `json:"ID"`
-	Teacher      *int    `json:"Teacher"`
-	Name         *string `json:"Name"`
-	CreationDate *string `json:"CreationDate"`
-}
-
-// AllCourses bla bla...
-type AllCourses []Course
-
 // Activity bla bla...
 type Activity struct {
-	ID              *int    `json:"ID"`
-	Title           *string `json:"Title"`
-	Description     *string `json:"Description"`
-	Type            *string `json:"Type"`
-	CreationDate    *string `json:"CreationDate"`
-	LimitDate       *string `json:"LimitDate"`
-	CoursesID       *int    `json:"CoursesID"`
-	ClinicalCasesID *int    `json:"ClinicalCasesID"`
-	HCNID           *int    `json:"HCNID"`
-	Difficulty      *int    `json:"Difficulty"`
+	ID             *int    `json:"ID"`
+	Title          *string `json:"Title"`
+	Description    *string `json:"Description"`
+	Type           *string `json:"Type"`
+	CreationDate   *string `json:"CreationDate"`
+	LimitDate      *string `json:"LimitDate"`
+	CourseID       *int    `json:"CourseID"`
+	ClinicalCaseID *int    `json:"ClinicalCaseID"`
+	HCNID          *int    `json:"HCNID"`
+	Difficulty     *int    `json:"Difficulty"`
 }
 
 // AllActivities bla bla...
@@ -83,9 +93,9 @@ type AllActivities []Activity
 
 // Feedback bla bla...
 type Feedback struct {
-	ID           *int `json:"ID"`
-	ActivitiesID *int `json:"ActivitiesID"`
-	StudentsID   *int `json:"StudentsID"`
+	ID         *int `json:"ID"`
+	ActivityID *int `json:"ActivityID"`
+	StudentID  *int `json:"StudentID"`
 }
 
 // AllFeedbacks bla bla...
@@ -93,20 +103,39 @@ type AllFeedbacks []Feedback
 
 // HCN (Historia Clínica Nutricional)...
 type HCN struct {
-	ID         *int `json:"ID"`
-	TeachersID *int `json:"TeachersID"`
+	ID        *int `json:"ID"`
+	TeacherID *int `json:"TeacherID"`
 }
 
-// AllHCNs bla bla...
-type AllHCNs []HCN
+// HCNVinculation bla bla...
+type HCNVinculation struct {
+	ID             *int `json:"ID"`
+	ClinicalCaseID *int `json:"ClinicalCaseID"`
+	HCNID          *int `json:"HCNID"`
+}
 
-// CourseHCN struct that represents the new relationship between a HCN and a course ...
-type CourseHCN struct {
+// AllHCN bla bla...
+type AllHCN []HCN
+
+/*
+// HCNCourse struct that represents the new relationship between a HCN and a Course ...
+type HCNCourse struct {
 	ID          *int `json:"ID"`
 	CoursesID   *int `json:"CoursesID"`
 	HCNID       *int `json:"HCNID"`
 	Displayable *int `json:"Displayable"`
 }
 
-// AllCoursesHCNs bla bla...
-type AllCoursesHCNs []CourseHCN
+// AllHCNsCourses bla bla...
+type AllHCNsCourses []HCNCourse
+
+// HCNCCase struct that represents the new relationship between a HCN and a Clinical Case ...
+type HCNCCase struct {
+	ID              *int `json:"ID"`
+	ClinicalCasesID *int `json:"ClinicalCasesID"`
+	HCNID           *int `json:"HCNID"`
+}
+
+// AllHCNsCCases bla bla...
+type AllHCNsCCases []HCNCCase
+*/

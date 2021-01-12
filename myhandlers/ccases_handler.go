@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"hcn/config"
+	"hcn/helpers"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -26,9 +27,9 @@ func CreateClinicalCase(w http.ResponseWriter, r *http.Request) {
 	var Db, _ = config.MYSQLConnection()
 	json.Unmarshal(reqBody, &newClinicalCase)
 	switch {
-	case (*newClinicalCase.TeachersID*1 == 0) || (*newClinicalCase.TeachersID*1 < 0):
+	case (*newClinicalCase.TeacherID*1 == 0) || (*newClinicalCase.TeacherID*1 < 0):
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "%v is not a valid TeachersID", *newClinicalCase.TeachersID)
+		fmt.Fprintf(w, "%v is not a valid TeacherID", *newClinicalCase.TeacherID)
 		return
 	case (newClinicalCase.Title == nil) || (len(*newClinicalCase.Title) == 0):
 		w.WriteHeader(http.StatusBadRequest)
@@ -43,7 +44,7 @@ func CreateClinicalCase(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "Media is empty or not valid")
 		return
 	default:
-		rows, err := Db.Exec("INSERT INTO Clinical_Cases(Title,Description,Media,TeachersId) VALUES (?,?,?,?)", newClinicalCase.Title, newClinicalCase.Description, newClinicalCase.Media, newClinicalCase.TeachersID)
+		rows, err := Db.Exec("INSERT INTO Clinical_Cases(Title,Description,Media,TeacherID) VALUES (?,?,?,?)", newClinicalCase.Title, newClinicalCase.Description, newClinicalCase.Media, newClinicalCase.TeacherID)
 		defer Db.Close()
 		if err != nil {
 			fmt.Fprintf(w, "(SQL) %v", err.Error())
@@ -68,12 +69,12 @@ func CreateClinicalCase(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// GetClinicalCases bla bla...
-func GetClinicalCases(w http.ResponseWriter, r *http.Request) {
+// GetAllClinicalCases bla bla...
+func GetAllClinicalCases(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var clinicalCases AllClinicalCases
 	var Db, _ = config.MYSQLConnection()
-	rows, err := Db.Query("SELECT Id, Title, Description, Media, TeachersId FROM Clinical_Cases")
+	rows, err := Db.Query("SELECT ID, Title, Description, Media, TeacherID FROM Clinical_Cases")
 	defer Db.Close()
 	if err != nil {
 		if err != sql.ErrNoRows {
@@ -82,14 +83,14 @@ func GetClinicalCases(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	for rows.Next() {
-		var ID, TeachersID int
+		var ID, TeacherID int
 		var Title, Description, Media string
-		if err := rows.Scan(&ID, &Title, &Description, &Media, &TeachersID); err != nil {
+		if err := rows.Scan(&ID, &Title, &Description, &Media, &TeacherID); err != nil {
 			fmt.Fprintf(w, "(SQL) %v", err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		var clinicalCase = ClinicalCase{ID: &ID, Title: &Title, Description: &Description, Media: &Media, TeachersID: &TeachersID}
+		var clinicalCase = ClinicalCase{ID: &ID, Title: &Title, Description: &Description, Media: &Media, TeacherID: &TeacherID}
 		clinicalCases = append(clinicalCases, clinicalCase)
 	}
 	json.NewEncoder(w).Encode(clinicalCases)
@@ -107,10 +108,10 @@ func GetClinicalCase(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "(USER) %v is not a valid ID", vars["id"])
 		return
 	}
-	var ID, TeachersID int
+	var ID, TeacherID int
 	var Title, Description, Media string
 	var Db, _ = config.MYSQLConnection()
-	err = Db.QueryRow("SELECT ID,Title,Description,Media,TeachersId FROM Clinical_Cases WHERE Id=?", clinicalCaseID).Scan(&ID, &Title, &Description, &Media, &TeachersID)
+	err = Db.QueryRow("SELECT ID,Title,Description,Media,TeacherID FROM Clinical_Cases WHERE ID=?", clinicalCaseID).Scan(&ID, &Title, &Description, &Media, &TeacherID)
 	defer Db.Close()
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -120,7 +121,7 @@ func GetClinicalCase(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	var clinicalCase = ClinicalCase{ID: &ID, Title: &Title, Description: &Description, Media: &Media, TeachersID: &TeachersID}
+	var clinicalCase = ClinicalCase{ID: &ID, Title: &Title, Description: &Description, Media: &Media, TeacherID: &TeacherID}
 	json.NewEncoder(w).Encode(clinicalCase)
 	w.WriteHeader(http.StatusCreated)
 	return
@@ -156,7 +157,7 @@ func UpdateClinicalCase(w http.ResponseWriter, r *http.Request) {
 		return
 	default:
 		var Db, _ = config.MYSQLConnection()
-		row, err := Db.Exec("UPDATE Clinical_Cases SET Title=?, Description=?, Media=? WHERE Id=?", updatedClinicalCase.Title, updatedClinicalCase.Description, updatedClinicalCase.Media, updatedClinicalCase.ID)
+		row, err := Db.Exec("UPDATE Clinical_Cases SET Title=?, Description=?, Media=? WHERE ID=?", updatedClinicalCase.Title, updatedClinicalCase.Description, updatedClinicalCase.Media, updatedClinicalCase.ID)
 		defer Db.Close()
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -199,7 +200,103 @@ func DeleteClinicalCase(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var Db, _ = config.MYSQLConnection()
-	row, err := Db.Exec("DELETE FROM Clinical_Cases WHERE Id=?", deletedClinicalCase.ID)
+	row, err := Db.Exec("DELETE FROM Clinical_Cases WHERE ID=?", deletedClinicalCase.ID)
+	defer Db.Close()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(w, "(SQL) %v", err.Error())
+		return
+	}
+
+	count, err := row.RowsAffected()
+	if err != nil {
+		fmt.Fprintf(w, "(SQL) %v", err.Error())
+		return
+	}
+	if count == 1 {
+		fmt.Fprintf(w, "One row deleted")
+	} else {
+		fmt.Fprintf(w, "No rows deleted")
+	}
+	w.Header().Set("Content-Type", "application/json")
+	return
+}
+
+// AddHCN adds an HCN into a Clinical Case...
+func AddHCN(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	if !helpers.VerifyRequest(r) {
+		w.WriteHeader(http.StatusForbidden)
+		return
+	}
+	var newHCNVinculation HCNVinculation
+	reqBody, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, "(USER) %v", err.Error())
+		return
+	}
+	var Db, _ = config.MYSQLConnection()
+	json.Unmarshal(reqBody, &newHCNVinculation)
+	switch {
+	case (newHCNVinculation.ClinicalCaseID == nil) || (*newHCNVinculation.ClinicalCaseID*1 <= 0):
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, "ClinicalCaseID is empty or not valid")
+		return
+	case (newHCNVinculation.HCNID == nil) || (*newHCNVinculation.HCNID*1 <= 0):
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, "HCNID is empty or not valid")
+		return
+	default:
+		rows, err := Db.Exec("INSERT INTO CCases_HCN(ClinicalCaseID,HCNID) VALUES (?,?)", newHCNVinculation.ClinicalCaseID, newHCNVinculation.HCNID)
+		defer Db.Close()
+		if err != nil {
+			fmt.Fprintf(w, "(SQL) %v", err.Error())
+			return
+		}
+		cnt, err := rows.RowsAffected()
+		if err != nil {
+			fmt.Fprintf(w, "(SQL) %v", err.Error())
+			return
+		} else if cnt < 1 {
+			fmt.Fprintf(w, "No rows affected")
+			return
+		}
+		lastID, err := rows.LastInsertId()
+		if err != nil {
+			fmt.Fprintf(w, "(SQL) %v", err.Error())
+			return
+		}
+		fmt.Fprintf(w, "ID inserted: %v", lastID)
+		w.WriteHeader(http.StatusCreated)
+		return
+	}
+}
+
+// RemoveHCN from a Clnical Case...
+func RemoveHCN(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	reqBody, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, "(USER) %v", err.Error())
+		return
+	}
+	var removeHCNVinculation HCNVinculation
+	json.Unmarshal(reqBody, &removeHCNVinculation)
+	if (removeHCNVinculation.ClinicalCaseID) == nil || (*removeHCNVinculation.ClinicalCaseID*1 == 0) || (*removeHCNVinculation.ClinicalCaseID*1 < 0) {
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, "ClinicalCaseID is empty or not valid")
+		return
+	}
+	if (removeHCNVinculation.HCNID) == nil || (*removeHCNVinculation.HCNID*1 == 0) || (*removeHCNVinculation.HCNID*1 < 0) {
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, "HCNID is empty or not valid")
+		return
+	}
+
+	var Db, _ = config.MYSQLConnection()
+	row, err := Db.Exec("DELETE FROM CCases_HCN WHERE ClinicalCaseID=? AND HCNID=?", removeHCNVinculation.ClinicalCaseID, removeHCNVinculation.HCNID)
 	defer Db.Close()
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)

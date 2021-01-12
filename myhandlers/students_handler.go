@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"hcn/config"
+	"hcn/helpers"
 	"io/ioutil"
 	"net/http"
 
@@ -16,6 +17,11 @@ import (
 // CreateStudent bla bla...
 func CreateStudent(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+	if !helpers.VerifyRequest(r) {
+		w.WriteHeader(http.StatusForbidden)
+		return
+	}
+
 	var newStudent Student
 	reqBody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -40,7 +46,7 @@ func CreateStudent(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "Email is empty or not valid")
 		return
 	default:
-		rows, err := Db.Query("INSERT INTO Students(Id,Name,Email) VALUES (?, ?, ?)", newStudent.ID, newStudent.Name, newStudent.Email)
+		rows, err := Db.Query("INSERT INTO Students(ID,Name,Email) VALUES (?, ?, ?)", newStudent.ID, newStudent.Name, newStudent.Email)
 		defer Db.Close()
 		if err != nil {
 			fmt.Fprintf(w, "(SQL) %v", err.Error())
@@ -58,12 +64,17 @@ func CreateStudent(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// GetStudents bla bla...
-func GetStudents(w http.ResponseWriter, r *http.Request) {
+// GetAllStudents bla bla...
+func GetAllStudents(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+	if !helpers.VerifyRequest(r) {
+		w.WriteHeader(http.StatusForbidden)
+		return
+	}
+
 	var Students AllStudents
 	var Db, _ = config.MYSQLConnection()
-	rows, err := Db.Query("SELECT Id, Name, Email FROM Students")
+	rows, err := Db.Query("SELECT ID, Name, Email FROM Students")
 	defer Db.Close()
 	if err != nil {
 		if err != sql.ErrNoRows {
@@ -90,6 +101,11 @@ func GetStudents(w http.ResponseWriter, r *http.Request) {
 // GetStudent bla bla...
 func GetStudent(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+	if !helpers.VerifyRequest(r) {
+		w.WriteHeader(http.StatusForbidden)
+		return
+	}
+
 	vars := mux.Vars(r)
 	studentID, err := strconv.Atoi(vars["id"])
 	if err != nil {
@@ -99,7 +115,7 @@ func GetStudent(w http.ResponseWriter, r *http.Request) {
 	}
 	var Name, Email string
 	var Db, _ = config.MYSQLConnection()
-	err = Db.QueryRow("SELECT Name, Email FROM Students WHERE Id=?", studentID).Scan(&Name, &Email)
+	err = Db.QueryRow("SELECT Name, Email FROM Students WHERE ID=?", studentID).Scan(&Name, &Email)
 	defer Db.Close()
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -118,6 +134,11 @@ func GetStudent(w http.ResponseWriter, r *http.Request) {
 // UpdateStudent bla bla...
 func UpdateStudent(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+	if !helpers.VerifyRequest(r) {
+		w.WriteHeader(http.StatusForbidden)
+		return
+	}
+
 	reqBody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -141,7 +162,7 @@ func UpdateStudent(w http.ResponseWriter, r *http.Request) {
 		return
 	default:
 		var Db, _ = config.MYSQLConnection()
-		row, err := Db.Exec("UPDATE Students SET Name=?, Email=? WHERE Id=?", updatedStudent.Name, updatedStudent.Email, updatedStudent.ID)
+		row, err := Db.Exec("UPDATE Students SET Name=?, Email=? WHERE ID=?", updatedStudent.Name, updatedStudent.Email, updatedStudent.ID)
 		defer Db.Close()
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -168,6 +189,11 @@ func UpdateStudent(w http.ResponseWriter, r *http.Request) {
 // DeleteStudent bla bla...
 func DeleteStudent(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+	if !helpers.VerifyRequest(r) {
+		w.WriteHeader(http.StatusForbidden)
+		return
+	}
+
 	reqBody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -184,7 +210,7 @@ func DeleteStudent(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var Db, _ = config.MYSQLConnection()
-	row, err := Db.Exec("DELETE FROM Students WHERE Id=?", deletedStudent.ID)
+	row, err := Db.Exec("DELETE FROM Students WHERE ID=?", deletedStudent.ID)
 	defer Db.Close()
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)

@@ -3,7 +3,7 @@ package config
 // Settings is where the common settings.go constant variables.
 type Settings struct {
 	SiteFullName, SiteSlogan, SiteBaseURL, SiteTopMenuLogo, SiteProperDomainName,
-	SiteShortName, SiteEmail, SitePhoneNumbers, SiteCompanyAddress string
+	SiteShortName, SiteEmail, SitePhoneNumbers, SiteCompanyAddress, ServerIP, ServerPort string
 	SiteYear int
 }
 
@@ -19,4 +19,6 @@ var SiteSettings = Settings{
 	SitePhoneNumbers:     SitePhoneNumbers,
 	SiteCompanyAddress:   SiteCompanyAddress,
 	SiteYear:             SiteYear,
+	ServerIP:             ServerIP,
+	ServerPort:           ServerPort,
 }
