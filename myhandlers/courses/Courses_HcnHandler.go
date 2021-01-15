@@ -107,7 +107,6 @@ func GetAllHCN(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(allCourseHCN)
 	w.WriteHeader(http.StatusOK)
 	return
-
 }
 
 // RemoveHCN deletes a relationship between a course and a HCN...

@@ -22,6 +22,17 @@ type CourseHCN struct {
 // AllCourseHCN bla bla...
 type AllCourseHCN []CourseHCN
 
+// CourseClinicalCase struct that represents the new relationship between a Clinical Case and a Course ...
+type CourseClinicalCase struct {
+	ID             *int `json:"ID"`
+	CourseID       *int `json:"CourseID"`
+	ClinicalCaseID *int `json:"ClinicalCaseID"`
+	Displayable    *int `json:"Displayable"`
+}
+
+// AllCourseClinicalCase bla bla...
+type AllCourseClinicalCase []CourseClinicalCase
+
 /*
 // HCNCCase struct that represents the new relationship between a HCN and a Clinical Case ...
 type HCNCCase struct {
