@@ -183,6 +183,7 @@ ALTER TABLE Courses ADD CONSTRAINT Techers_Courses FOREIGN KEY Techers_Courses (
 -- Constraints
 ALTER TABLE Students_Courses ADD CONSTRAINT uq_Students_Courses UNIQUE(CourseID, StudentID);
 ALTER TABLE CCases_HCN ADD CONSTRAINT uq_CCases_HCN UNIQUE(ClinicalCaseID, HCNID);
+ALTER TABLE Courses_HCN ADD CONSTRAINT uq_CCases_HCN UNIQUE(CourseID, HCNID);
 
 
 

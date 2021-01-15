@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"hcn/config"
+	"hcn/helpers"
 	"hcn/mymodels"
 	"io/ioutil"
 	"net/http"
@@ -68,30 +69,45 @@ func AddHCN(w http.ResponseWriter, r *http.Request) {
 // GetAllHCN bla bla...
 func GetAllHCN(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+	if !helpers.VerifyRequest(r) {
+		w.WriteHeader(http.StatusForbidden)
+		return
+	}
+
 	vars := mux.Vars(r)
-	courseHCNID, err := strconv.Atoi(vars["id"])
+	courseID, err := strconv.Atoi(vars["id"])
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, "(USER) %v is not a valid ID", vars["id"])
 		return
 	}
-	var ID, CourseID, HCNID, Displayable int
+
+	var allCourseHCN mymodels.AllCourseHCN
 	var Db, _ = config.MYSQLConnection()
-	err = Db.QueryRow("SELECT ID, CourseID, HCNID, Displayable FROM Courses_HCN WHERE ID=? AND CourseID", courseHCNID).Scan(&ID, &CourseID, &HCNID, &Displayable)
+	//rows, err := Db.Query("SELECT ID, TeacherID FROM HCN WHERE ID IN (SELECT HCNID FROM Courses_HCN WHERE CourseID = ?)", courseID)
+	rows, err := Db.Query("SELECT ID, CourseID, HCNID, Displayable FROM Courses_HCN WHERE CourseID = ?", courseID)
 	defer Db.Close()
 	if err != nil {
-		if err == sql.ErrNoRows {
-			w.WriteHeader(http.StatusOK)
-		} else {
+		if err != sql.ErrNoRows {
 			fmt.Fprintf(w, "(SQL) %v", err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
 		}
 		return
 	}
-	var courseHcn = mymodels.CourseHCN{ID: &ID, CourseID: &CourseID, HCNID: &HCNID, Displayable: &Displayable}
-	json.NewEncoder(w).Encode(courseHcn)
-	w.WriteHeader(http.StatusCreated)
+	for rows.Next() {
+		var ID, CourseID, HCNID, Displayable int
+		if err := rows.Scan(&ID, &CourseID, &HCNID, &Displayable); err != nil {
+			fmt.Fprintf(w, "(SQL) %v", err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		var courseHCN = mymodels.CourseHCN{ID: &ID, CourseID: &CourseID, HCNID: &HCNID, Displayable: &Displayable}
+		allCourseHCN = append(allCourseHCN, courseHCN)
+	}
+	json.NewEncoder(w).Encode(allCourseHCN)
+	w.WriteHeader(http.StatusOK)
 	return
+
 }
 
 // RemoveHCN deletes a relationship between a course and a HCN...
@@ -103,36 +119,41 @@ func RemoveHCN(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "(USER) %v", err.Error())
 		return
 	}
-	var deletedCourseHCN mymodels.CourseHCN
-	json.Unmarshal(reqBody, &deletedCourseHCN)
+	var removedCourseHCN mymodels.CourseHCN
+	json.Unmarshal(reqBody, &removedCourseHCN)
 
-	if (deletedCourseHCN.ID) == nil || (*deletedCourseHCN.ID*1 == 0) || (*deletedCourseHCN.ID*1 < 0) {
+	switch {
+	case (removedCourseHCN.HCNID) == nil || (*removedCourseHCN.HCNID*1 == 0) || (*removedCourseHCN.HCNID*1 < 0):
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "ID is empty or not valid")
+		fmt.Fprintf(w, "HCNID is empty or not valid")
 		return
-	}
+	case (removedCourseHCN.CourseID) == nil || (*removedCourseHCN.CourseID*1 == 0) || (*removedCourseHCN.CourseID*1 < 0):
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, "CourseID is empty or not valid")
+		return
+	default:
+		var Db, _ = config.MYSQLConnection()
+		row, err := Db.Exec("DELETE FROM Courses_HCN WHERE CourseID=? AND HCNID=?", removedCourseHCN.CourseID, removedCourseHCN.HCNID)
+		defer Db.Close()
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			fmt.Fprintf(w, "(SQL) %v", err.Error())
+			return
+		}
 
-	var Db, _ = config.MYSQLConnection()
-	row, err := Db.Exec("DELETE FROM Courses_HCN WHERE ID=?", deletedCourseHCN.ID)
-	defer Db.Close()
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(w, "(SQL) %v", err.Error())
+		count, err := row.RowsAffected()
+		if err != nil {
+			fmt.Fprintf(w, "(SQL) %v", err.Error())
+			return
+		}
+		if count == 1 {
+			fmt.Fprintf(w, "One row deleted")
+		} else {
+			fmt.Fprintf(w, "No rows deleted")
+		}
+		w.Header().Set("Content-Type", "application/json")
 		return
 	}
-
-	count, err := row.RowsAffected()
-	if err != nil {
-		fmt.Fprintf(w, "(SQL) %v", err.Error())
-		return
-	}
-	if count == 1 {
-		fmt.Fprintf(w, "One row deleted")
-	} else {
-		fmt.Fprintf(w, "No rows deleted")
-	}
-	w.Header().Set("Content-Type", "application/json")
-	return
 }
 
 // VisibilityHCN bla bla...
@@ -147,13 +168,13 @@ func VisibilityHCN(w http.ResponseWriter, r *http.Request) {
 	var updatedCourseHCN mymodels.CourseHCN
 	json.Unmarshal(reqBody, &updatedCourseHCN)
 	switch {
-	case (*updatedCourseHCN.Displayable*1 <= 2):
+	case (*updatedCourseHCN.Displayable*1 > 1):
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, "%v is not a valid display status", *updatedCourseHCN.Displayable)
 		return
 	default:
 		var Db, _ = config.MYSQLConnection()
-		row, err := Db.Exec("UPDATE Courses_HCN SET Displayable=? WHERE ID=?", updatedCourseHCN.Displayable, updatedCourseHCN.ID)
+		row, err := Db.Exec("UPDATE Courses_HCN SET Displayable=? WHERE CourseID=? AND HCNID=?", updatedCourseHCN.Displayable, updatedCourseHCN.CourseID, updatedCourseHCN.HCNID)
 		defer Db.Close()
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)

@@ -75,13 +75,13 @@ func MainRouters(router *mux.Router) {
 	router.HandleFunc("/Courses/DeleteCourse", courses.DeleteCourse).Methods("DELETE")
 
 	router.HandleFunc("/Courses/AddHCN", courses.AddHCN).Methods("POST")
-	router.HandleFunc("/Courses/GetHCN", courses.GetHCN).Methods("GET")
-	router.HandleFunc("/Courses/RemoveHCN", courses.RemoveHCN).Methods("POST")
+	router.HandleFunc("/Courses/GetAllHCN/{id}", courses.GetAllHCN).Methods("GET")
+	router.HandleFunc("/Courses/RemoveHCN", courses.RemoveHCN).Methods("DELETE")
 	router.HandleFunc("/Courses/VisibilityHCN", courses.VisibilityHCN).Methods("POST")
 
 	//router.HandleFunc("/Courses/AddClinicalCase", myhandlers.AddClinicalCAse).Methods("POST")
 	//router.HandleFunc("/Courses/GetAllClinicalCases/{id}", myhandlers.GetAllClinicalCases).Methods("GET")
-	//router.HandleFunc("/Courses/RemoveClinicalCase", myhandlers.RemoveClinicalCase).Methods("POST")
+	//router.HandleFunc("/Courses/RemoveClinicalCase", myhandlers.RemoveClinicalCase).Methods("DELETE")
 	//router.HandleFunc("/Courses/VisibilityClinicalCase", myhandlers.VisibilityClinicalCase).Methods("POST")
 
 	router.HandleFunc("/Courses/AddStudent", courses.AddStudent).Methods("POST")
