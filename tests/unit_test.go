@@ -55,6 +55,7 @@ func runTestWithBody(t *testing.T, allTest mymodels.AllTest) {
 	}
 }
 
+/*
 // Teachers test
 func TestGetAllTeachers(t *testing.T) {
 	runTest(t, testhelpers.CasesGetAllTeachers())
@@ -116,4 +117,26 @@ func TestUpdateCourses(t *testing.T) {
 
 func TestDeleteCourses(t *testing.T) {
 	runTestWithBody(t, testhelpers.CasesDeleteCourse())
+}
+*/
+
+// Announcements test
+func TestGetAllAnnouncements(t *testing.T) {
+	runTest(t, testhelpers.CasesGetAllAnnouncements())
+}
+
+func TestGetAnnouncement(t *testing.T) {
+	runTest(t, testhelpers.CasesGetAnnouncement())
+}
+
+func TestCreateAnnouncement(t *testing.T) {
+	runTestWithBody(t, testhelpers.CasesCreateAnnouncement())
+}
+
+func TestUpdateAnnouncements(t *testing.T) {
+	runTestWithBody(t, testhelpers.CasesUpdateAnnouncement())
+}
+
+func TestDeleteAnnouncement(t *testing.T) {
+	runTestWithBody(t, testhelpers.CasesDeleteAnnouncement())
 }

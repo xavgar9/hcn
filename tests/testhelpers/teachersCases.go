@@ -25,6 +25,22 @@ func CasesGetTeacher() mymodels.AllTest {
 	return mymodels.AllTest{
 		{
 			Method:       "GET",
+			URL:          "/Teachers/GetTeacher?idddd=1",
+			Function:     teachers.GetTeacher,
+			Body:         "",
+			ExpectedBody: `Url Param 'id' is missing or is invalid`,
+			StatusCode:   http.StatusBadRequest,
+		},
+		{
+			Method:       "GET",
+			URL:          "/Teachers/GetTeacher?id=",
+			Function:     teachers.GetTeacher,
+			Body:         "",
+			ExpectedBody: `Url Param 'id' is missing or is invalid`,
+			StatusCode:   http.StatusBadRequest,
+		},
+		{
+			Method:       "GET",
 			URL:          "/Teachers/GetTeacher?id=1",
 			Function:     teachers.GetTeacher,
 			Body:         "",
@@ -93,6 +109,30 @@ func CasesUpdateTeacher() mymodels.AllTest {
 			ExpectedBody: `No rows updated`,
 			StatusCode:   http.StatusOK,
 		},
+		{
+			Method:       "POST",
+			URL:          "/Teachers/UpdateTeacher",
+			Function:     teachers.UpdateTeacher,
+			Body:         `{"Name":"Ghost User","Email":"Ghost@email.com"}`,
+			ExpectedBody: `ID is empty or not valid`,
+			StatusCode:   http.StatusBadRequest,
+		},
+		{
+			Method:       "POST",
+			URL:          "/Teachers/UpdateTeacher",
+			Function:     teachers.UpdateTeacher,
+			Body:         `{"ID":55,"Email":"Ghost@email.com"}`,
+			ExpectedBody: `Name is empty or not valid`,
+			StatusCode:   http.StatusBadRequest,
+		},
+		{
+			Method:       "POST",
+			URL:          "/Teachers/UpdateTeacher",
+			Function:     teachers.UpdateTeacher,
+			Body:         `{"ID":55,"Name":"Ghost User"}`,
+			ExpectedBody: `Email is empty or not valid`,
+			StatusCode:   http.StatusBadRequest,
+		},
 	}
 }
 
@@ -121,6 +161,30 @@ func CasesCreateTeacher() mymodels.AllTest {
 			Function:     teachers.CreateTeacher,
 			Body:         `{"ID":AA,"Name":"Mariana Ramos","Email":"mariana@email.com"}`,
 			ExpectedBody: `ID is empty or not valid`,
+			StatusCode:   http.StatusBadRequest,
+		},
+		{
+			Method:       "POST",
+			URL:          "/Teachers/CreateTeacher",
+			Function:     teachers.CreateTeacher,
+			Body:         `{Name":"Mariana Ramos","Email":"mariana@email.com"}`,
+			ExpectedBody: `ID is empty or not valid`,
+			StatusCode:   http.StatusBadRequest,
+		},
+		{
+			Method:       "POST",
+			URL:          "/Teachers/CreateTeacher",
+			Function:     teachers.CreateTeacher,
+			Body:         `{"ID":55,"Email":"mariana@email.com"}`,
+			ExpectedBody: `Name is empty or not valid`,
+			StatusCode:   http.StatusBadRequest,
+		},
+		{
+			Method:       "POST",
+			URL:          "/Teachers/CreateTeacher",
+			Function:     teachers.CreateTeacher,
+			Body:         `{"ID":56,"Name":"Mariana Ramos"}`,
+			ExpectedBody: `Email is empty or not valid`,
 			StatusCode:   http.StatusBadRequest,
 		},
 	}

@@ -25,6 +25,22 @@ func CasesGetStudent() mymodels.AllTest {
 	return mymodels.AllTest{
 		{
 			Method:       "GET",
+			URL:          "/Students/GetStudent?idddd=1",
+			Function:     students.GetStudent,
+			Body:         "",
+			ExpectedBody: `Url Param 'id' is missing or is invalid`,
+			StatusCode:   http.StatusBadRequest,
+		},
+		{
+			Method:       "GET",
+			URL:          "/Students/GetStudent?id=",
+			Function:     students.GetStudent,
+			Body:         "",
+			ExpectedBody: `Url Param 'id' is missing or is invalid`,
+			StatusCode:   http.StatusBadRequest,
+		},
+		{
+			Method:       "GET",
 			URL:          "/Students/GetStudent?id=1",
 			Function:     students.GetStudent,
 			Body:         "",
@@ -145,6 +161,30 @@ func CasesCreateStudent() mymodels.AllTest {
 			Function:     students.CreateStudent,
 			Body:         `{"ID":Antonia,"Name":"Antonia Vélez","Email":"antonia@email.com"}`,
 			ExpectedBody: `ID is empty or not valid`,
+			StatusCode:   http.StatusBadRequest,
+		},
+		{
+			Method:       "POST",
+			URL:          "/Students/CreateStudent",
+			Function:     students.CreateStudent,
+			Body:         `{Name":"Antonia Vélez","Email":"antonia@email.com"}`,
+			ExpectedBody: `ID is empty or not valid`,
+			StatusCode:   http.StatusBadRequest,
+		},
+		{
+			Method:       "POST",
+			URL:          "/Students/CreateStudent",
+			Function:     students.CreateStudent,
+			Body:         `{"ID":15,"Email":"antonia@email.com"}`,
+			ExpectedBody: `Name is empty or not valid`,
+			StatusCode:   http.StatusBadRequest,
+		},
+		{
+			Method:       "POST",
+			URL:          "/Students/CreateStudent",
+			Function:     students.CreateStudent,
+			Body:         `{"ID":21,"Name":"Antonia Vélez"}`,
+			ExpectedBody: `Email is empty or not valid`,
 			StatusCode:   http.StatusBadRequest,
 		},
 	}
