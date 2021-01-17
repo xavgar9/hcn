@@ -7,11 +7,12 @@ import (
 	"strings"
 	"testing"
 
+	"hcn/mymodels"
 	"hcn/tests/testhelpers"
 )
 
 // runTest basic test for running endpoints test.
-func runTest(t *testing.T, allTest testhelpers.AllTest) {
+func runTest(t *testing.T, allTest mymodels.AllTest) {
 	for _, test := range allTest {
 		req, err := http.NewRequest(test.Method, test.URL, nil)
 		if err != nil {
@@ -33,7 +34,7 @@ func runTest(t *testing.T, allTest testhelpers.AllTest) {
 }
 
 // runUpdateTest basic test for running endpoints test.
-func runTestWithBody(t *testing.T, allTest testhelpers.AllTest) {
+func runTestWithBody(t *testing.T, allTest mymodels.AllTest) {
 	for i, test := range allTest {
 		req, err := http.NewRequest(test.Method, test.URL, bytes.NewBuffer([]byte(test.Body)))
 		if err != nil {
@@ -54,6 +55,7 @@ func runTestWithBody(t *testing.T, allTest testhelpers.AllTest) {
 	}
 }
 
+// Teachers test
 func TestGetAllTeachers(t *testing.T) {
 	runTest(t, testhelpers.CasesGetAllTeachers())
 }
@@ -72,4 +74,25 @@ func TestUpdateTeacher(t *testing.T) {
 
 func TestDeleteTeacher(t *testing.T) {
 	runTestWithBody(t, testhelpers.CasesDeleteTeacher())
+}
+
+// Students test
+func TestGetAllStudents(t *testing.T) {
+	runTest(t, testhelpers.CasesGetAllStudents())
+}
+
+func TestGetStudent(t *testing.T) {
+	runTest(t, testhelpers.CasesGetStudent())
+}
+
+func TestCreateStudent(t *testing.T) {
+	runTestWithBody(t, testhelpers.CasesCreateStudent())
+}
+
+func TestUpdateStudent(t *testing.T) {
+	runTestWithBody(t, testhelpers.CasesUpdateStudent())
+}
+
+func TestDeleteStudent(t *testing.T) {
+	runTestWithBody(t, testhelpers.CasesDeleteStudent())
 }

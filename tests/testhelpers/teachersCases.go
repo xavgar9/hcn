@@ -2,25 +2,13 @@ package testhelpers
 
 import (
 	"hcn/myhandlers/teachers"
+	"hcn/mymodels"
 	"net/http"
 )
 
-// Test bla bla...
-type Test struct {
-	Method       string                                   `json:"Method"`
-	URL          string                                   `json:"URL"`
-	Function     func(http.ResponseWriter, *http.Request) `json:"Function"`
-	Body         string                                   `json:"Body"`
-	ExpectedBody string                                   `json:"BodyResponse"`
-	StatusCode   int                                      `json:"StatusCode"`
-}
-
-// AllTest bla bla...
-type AllTest []Test
-
 // CasesGetAllTeachers bla bla...
-func CasesGetAllTeachers() AllTest {
-	return AllTest{
+func CasesGetAllTeachers() mymodels.AllTest {
+	return mymodels.AllTest{
 		{
 			Method:       "GET",
 			URL:          "/Teachers/GetAllTeachers",
@@ -33,8 +21,8 @@ func CasesGetAllTeachers() AllTest {
 }
 
 // CasesGetTeacher bla bla...
-func CasesGetTeacher() AllTest {
-	return AllTest{
+func CasesGetTeacher() mymodels.AllTest {
+	return mymodels.AllTest{
 		{
 			Method:       "GET",
 			URL:          "/Teachers/GetTeacher?id=1",
@@ -71,8 +59,8 @@ func CasesGetTeacher() AllTest {
 }
 
 // CasesUpdateTeacher bla bla...
-func CasesUpdateTeacher() AllTest {
-	return AllTest{
+func CasesUpdateTeacher() mymodels.AllTest {
+	return mymodels.AllTest{
 		{
 			Method:       "POST",
 			URL:          "/Teachers/UpdateTeacher",
@@ -109,8 +97,8 @@ func CasesUpdateTeacher() AllTest {
 }
 
 // CasesCreateTeacher bla bla...
-func CasesCreateTeacher() AllTest {
-	return AllTest{
+func CasesCreateTeacher() mymodels.AllTest {
+	return mymodels.AllTest{
 		{
 			Method:       "POST",
 			URL:          "/Teachers/CreateTeacher",
@@ -139,8 +127,8 @@ func CasesCreateTeacher() AllTest {
 }
 
 // CasesDeleteTeacher bla bla...
-func CasesDeleteTeacher() AllTest {
-	return AllTest{
+func CasesDeleteTeacher() mymodels.AllTest {
+	return mymodels.AllTest{
 		{
 			Method:       "DELETE",
 			URL:          "/Teachers/DeleteTeacher",
