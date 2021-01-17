@@ -96,3 +96,24 @@ func TestUpdateStudent(t *testing.T) {
 func TestDeleteStudent(t *testing.T) {
 	runTestWithBody(t, testhelpers.CasesDeleteStudent())
 }
+
+// Courses test
+func TestGetAllCourses(t *testing.T) {
+	runTest(t, testhelpers.CasesGetAllCourses())
+}
+
+func TestGetCourse(t *testing.T) {
+	runTest(t, testhelpers.CasesGetCourse())
+}
+
+func TestCreateCourse(t *testing.T) {
+	runTestWithBody(t, testhelpers.CasesCreateCourse())
+}
+
+func TestUpdateCourses(t *testing.T) {
+	runTestWithBody(t, testhelpers.CasesUpdateCourse())
+}
+
+func TestDeleteCourses(t *testing.T) {
+	runTestWithBody(t, testhelpers.CasesDeleteCourse())
+}
