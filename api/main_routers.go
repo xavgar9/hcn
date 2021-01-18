@@ -121,7 +121,7 @@ func MainRouters(router *mux.Router) {
 
 	// HCN URLs
 	router.HandleFunc("/HCN/GetAllHCN", hcn.GetAllHCN).Methods("GET")
-	router.HandleFunc("/HCN/GetHCN/{id}", hcn.GetHCN).Methods("GET")
+	router.HandleFunc("/HCN/GetHCN", hcn.GetHCN).Methods("GET")
 	router.HandleFunc("/HCN/UpdateHCN", hcn.UpdateHCN).Methods("POST")
 	router.HandleFunc("/HCN/CreateHCN", hcn.CreateHCN).Methods("POST")
 	router.HandleFunc("/HCN/DeleteHCN", hcn.DeleteHCN).Methods("DELETE")

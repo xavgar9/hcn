@@ -30,11 +30,11 @@ func CreateFeedback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	switch {
-	case (*newFeedback.ActivityID*1 == 0) || (*newFeedback.ActivityID*1 < 0):
+	case (newFeedback.ActivityID == nil) || (*newFeedback.ActivityID*1 == 0) || (*newFeedback.ActivityID*1 < 0):
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, "ActivityID is empty or not valid")
 		return
-	case (*newFeedback.StudentID*1 == 0) || (*newFeedback.StudentID*1 < 0):
+	case (newFeedback.StudentID == nil) || (*newFeedback.StudentID*1 == 0) || (*newFeedback.StudentID*1 < 0):
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, "StudentID is empty or not valid")
 		return

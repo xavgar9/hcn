@@ -159,3 +159,24 @@ func TestUpdateFeedback(t *testing.T) {
 func TestDeleteFeedback(t *testing.T) {
 	runTestWithBody(t, testhelpers.CasesDeleteFeedback())
 }
+
+// HCN test
+func TestGetAllHCN(t *testing.T) {
+	runTest(t, testhelpers.CasesGetAllHCN())
+}
+
+func TestGetHCN(t *testing.T) {
+	runTest(t, testhelpers.CasesGetHCN())
+}
+
+func TestCreateHCN(t *testing.T) {
+	runTestWithBody(t, testhelpers.CasesCreateHCN())
+}
+
+func TestUpdateHCN(t *testing.T) {
+	runTestWithBody(t, testhelpers.CasesUpdateHCN())
+}
+
+func TestDeleteHCN(t *testing.T) {
+	runTestWithBody(t, testhelpers.CasesDeleteHCN())
+}
