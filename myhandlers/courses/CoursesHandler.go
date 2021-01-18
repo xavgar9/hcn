@@ -26,9 +26,14 @@ func CreateCourse(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var Db, _ = config.MYSQLConnection()
-	json.Unmarshal(reqBody, &newCourse)
+	err = json.Unmarshal(reqBody, &newCourse)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, "%v", err)
+		return
+	}
 	switch {
-	case (*newCourse.TeacherID*1 == 0) || (*newCourse.TeacherID*1 < 0):
+	case (newCourse.TeacherID == nil) || (*newCourse.TeacherID*1 == 0) || (*newCourse.TeacherID*1 < 0):
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, "Teacher is empty or not valid")
 		return
@@ -38,26 +43,20 @@ func CreateCourse(w http.ResponseWriter, r *http.Request) {
 		return
 	default:
 		rows, err := Db.Exec("INSERT INTO Courses(TeacherID,Name,CreationDate) VALUES (?,?,NOW())", newCourse.TeacherID, newCourse.Name)
-		defer Db.Close()
 		if err != nil {
+			defer Db.Close()
+			w.WriteHeader(http.StatusConflict)
 			fmt.Fprintf(w, "(SQL) %v", err.Error())
 			return
 		}
-		cnt, err := rows.RowsAffected()
-		if err != nil {
-			fmt.Fprintf(w, "(SQL) %v", err.Error())
-			return
-		} else if cnt < 1 {
-			fmt.Fprintf(w, "No rows affected")
-			return
+		cnt, _ := rows.RowsAffected()
+		if cnt == 1 {
+			int64ID, _ := rows.LastInsertId()
+			intID := int(int64ID)
+			newCourse.ID = &intID
+			w.WriteHeader(http.StatusCreated)
+			json.NewEncoder(w).Encode(newCourse)
 		}
-		lastID, err := rows.LastInsertId()
-		if err != nil {
-			fmt.Fprintf(w, "(SQL) %v", err.Error())
-			return
-		}
-		fmt.Fprintf(w, "ID inserted: %v", lastID)
-		w.WriteHeader(http.StatusCreated)
 		return
 	}
 }
@@ -94,11 +93,16 @@ func GetAllCourses(w http.ResponseWriter, r *http.Request) {
 // GetCourse bla bla...
 func GetCourse(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	vars := mux.Vars(r)
-	courseID, err := strconv.Atoi(vars["id"])
+	keys, ok := r.URL.Query()["id"]
+	if !ok || len(keys[0]) < 1 {
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, "Url Param 'id' is missing or is invalid")
+		return
+	}
+	courseID, err := strconv.Atoi(keys[0])
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "(USER) %v is not a valid ID", vars["id"])
+		fmt.Fprintf(w, "Url Param 'id' is missing or is invalid")
 		return
 	}
 	var ID, TeacherID int
@@ -132,7 +136,11 @@ func UpdateCourse(w http.ResponseWriter, r *http.Request) {
 	var updatedCourse mymodels.Course
 	json.Unmarshal(reqBody, &updatedCourse)
 	switch {
-	case updatedCourse.Name == nil || len(*updatedCourse.Name) == 0:
+	case (updatedCourse.ID == nil) || (*updatedCourse.ID*1 == 0) || (*updatedCourse.ID*1 < 0):
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, "ID is empty or not valid")
+		return
+	case (updatedCourse.Name == nil) || len(*updatedCourse.Name) == 0:
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, "Name is empty or not valid")
 		return
@@ -152,12 +160,10 @@ func UpdateCourse(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		if count == 1 {
-			fmt.Fprintf(w, "One row updated")
+			json.NewEncoder(w).Encode(updatedCourse)
 		} else {
 			fmt.Fprintf(w, "No rows updated")
 		}
-
-		w.Header().Set("Content-Type", "application/json")
 		return
 	}
 }
@@ -199,7 +205,6 @@ func DeleteCourse(w http.ResponseWriter, r *http.Request) {
 	} else {
 		fmt.Fprintf(w, "No rows deleted")
 	}
-	w.Header().Set("Content-Type", "application/json")
 	return
 }
 

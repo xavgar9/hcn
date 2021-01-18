@@ -9,8 +9,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strconv"
-
-	"github.com/gorilla/mux"
 )
 
 // CreateFeedback bla bla...
@@ -25,7 +23,12 @@ func CreateFeedback(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var Db, _ = config.MYSQLConnection()
-	json.Unmarshal(reqBody, &newFeedback)
+	err = json.Unmarshal(reqBody, &newFeedback)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, "%v", err)
+		return
+	}
 	switch {
 	case (*newFeedback.ActivityID*1 == 0) || (*newFeedback.ActivityID*1 < 0):
 		w.WriteHeader(http.StatusBadRequest)
@@ -42,21 +45,14 @@ func CreateFeedback(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprintf(w, "(SQL) %v", err.Error())
 			return
 		}
-		cnt, err := rows.RowsAffected()
-		if err != nil {
-			fmt.Fprintf(w, "(SQL) %v", err.Error())
-			return
-		} else if cnt < 1 {
-			fmt.Fprintf(w, "No rows affected")
-			return
+		cnt, _ := rows.RowsAffected()
+		if cnt == 1 {
+			int64ID, _ := rows.LastInsertId()
+			intID := int(int64ID)
+			newFeedback.ID = &intID
+			w.WriteHeader(http.StatusCreated)
+			json.NewEncoder(w).Encode(newFeedback)
 		}
-		lastID, err := rows.LastInsertId()
-		if err != nil {
-			fmt.Fprintf(w, "(SQL) %v", err.Error())
-			return
-		}
-		fmt.Fprintf(w, "ID inserted: %v", lastID)
-		w.WriteHeader(http.StatusCreated)
 		return
 	}
 }
@@ -93,11 +89,16 @@ func GetAllFeedbacks(w http.ResponseWriter, r *http.Request) {
 // GetFeedback bla bla...
 func GetFeedback(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	vars := mux.Vars(r)
-	feedbackID, err := strconv.Atoi(vars["id"])
+	keys, ok := r.URL.Query()["id"]
+	if !ok || len(keys[0]) < 1 {
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, "Url Param 'id' is missing or is invalid")
+		return
+	}
+	feedbackID, err := strconv.Atoi(keys[0])
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "(USER) %v is not a valid ID", vars["id"])
+		fmt.Fprintf(w, "Url Param 'id' is missing or is invalid")
 		return
 	}
 	var ID, ActivityID, StudentID int
@@ -130,11 +131,15 @@ func UpdateFeedback(w http.ResponseWriter, r *http.Request) {
 	var updatedFeedback mymodels.Feedback
 	json.Unmarshal(reqBody, &updatedFeedback)
 	switch {
-	case (*updatedFeedback.ActivityID*1 == 0) || (*updatedFeedback.ActivityID*1 < 0):
+	case (updatedFeedback.ID == nil) || (*updatedFeedback.ID*1 == 0) || (*updatedFeedback.ID*1 < 0):
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, "ID is empty or not valid")
+		return
+	case (updatedFeedback.ActivityID == nil) || (*updatedFeedback.ActivityID*1 == 0) || (*updatedFeedback.ActivityID*1 < 0):
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, "ActivityID is empty or not valid")
 		return
-	case (*updatedFeedback.StudentID*1 == 0) || (*updatedFeedback.StudentID*1 < 0):
+	case (updatedFeedback.StudentID == nil) || (*updatedFeedback.StudentID*1 == 0) || (*updatedFeedback.StudentID*1 < 0):
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, "StudentID is empty or not valid")
 		return
@@ -154,12 +159,10 @@ func UpdateFeedback(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		if count == 1 {
-			fmt.Fprintf(w, "One row updated")
+			json.NewEncoder(w).Encode(updatedFeedback)
 		} else {
 			fmt.Fprintf(w, "No rows updated")
 		}
-
-		w.Header().Set("Content-Type", "application/json")
 		return
 	}
 }

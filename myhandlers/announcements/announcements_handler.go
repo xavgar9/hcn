@@ -10,8 +10,6 @@ import (
 	"net/http"
 
 	"strconv"
-
-	"github.com/gorilla/mux"
 )
 
 // CreateAnnouncement bla bla...
@@ -28,9 +26,9 @@ func CreateAnnouncement(w http.ResponseWriter, r *http.Request) {
 	var Db, _ = config.MYSQLConnection()
 	json.Unmarshal(reqBody, &newAnnouncement)
 	switch {
-	case (*newAnnouncement.CourseID*1 == 0) || (*newAnnouncement.CourseID*1 < 0):
+	case (newAnnouncement.CourseID == nil) || (*newAnnouncement.CourseID*1 == 0) || (*newAnnouncement.CourseID*1 < 0):
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "%v is not a valid CourseID", *newAnnouncement.CourseID)
+		fmt.Fprintf(w, "CourseID is empty or not valid")
 		return
 	case (newAnnouncement.Title == nil) || (len(*newAnnouncement.Title) == 0):
 		w.WriteHeader(http.StatusBadRequest)
@@ -44,24 +42,18 @@ func CreateAnnouncement(w http.ResponseWriter, r *http.Request) {
 		rows, err := Db.Exec("INSERT INTO Announcements(CourseID,Title,Description,CreationDate) VALUES (?,?,?,NOW())", newAnnouncement.CourseID, newAnnouncement.Title, newAnnouncement.Description)
 		defer Db.Close()
 		if err != nil {
+			w.WriteHeader(http.StatusConflict)
 			fmt.Fprintf(w, "(SQL) %v", err.Error())
 			return
 		}
-		cnt, err := rows.RowsAffected()
-		if err != nil {
-			fmt.Fprintf(w, "(SQL) %v", err.Error())
-			return
-		} else if cnt < 1 {
-			fmt.Fprintf(w, "No rows affected")
-			return
+		cnt, _ := rows.RowsAffected()
+		if cnt == 1 {
+			int64ID, _ := rows.LastInsertId()
+			intID := int(int64ID)
+			newAnnouncement.ID = &intID
+			w.WriteHeader(http.StatusCreated)
+			json.NewEncoder(w).Encode(newAnnouncement)
 		}
-		lastID, err := rows.LastInsertId()
-		if err != nil {
-			fmt.Fprintf(w, "(SQL) %v", err.Error())
-			return
-		}
-		fmt.Fprintf(w, "ID inserted: %v", lastID)
-		w.WriteHeader(http.StatusCreated)
 		return
 	}
 }
@@ -98,17 +90,22 @@ func GetAllAnnouncements(w http.ResponseWriter, r *http.Request) {
 // GetAnnouncement bla bla...
 func GetAnnouncement(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	vars := mux.Vars(r)
-	announcementID, err := strconv.Atoi(vars["id"])
+	keys, ok := r.URL.Query()["id"]
+	if !ok || len(keys[0]) < 1 {
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, "Url Param 'id' is missing or is invalid")
+		return
+	}
+	announcementID, err := strconv.Atoi(keys[0])
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "(USER) %v is not a valid ID", vars["id"])
+		fmt.Fprintf(w, "Url Param 'id' is missing or is invalid")
 		return
 	}
 	var ID, CourseID int
 	var Title, Description, CreationDate string
 	var Db, _ = config.MYSQLConnection()
-	err = Db.QueryRow("SELECT ID,CoursesID,Title,Description,CreationDate FROM Announcements WHERE ID=?", announcementID).Scan(&ID, &CourseID, &Title, &Description, &CreationDate)
+	err = Db.QueryRow("SELECT ID,CourseID,Title,Description,CreationDate FROM Announcements WHERE ID=?", announcementID).Scan(&ID, &CourseID, &Title, &Description, &CreationDate)
 	defer Db.Close()
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -136,19 +133,19 @@ func UpdateAnnouncement(w http.ResponseWriter, r *http.Request) {
 	var updatedAnnouncement mymodels.Announcement
 	json.Unmarshal(reqBody, &updatedAnnouncement)
 	switch {
-	case (updatedAnnouncement.ID) == nil || (*updatedAnnouncement.ID*1 == 0) || (*updatedAnnouncement.ID*1 < 0):
+	case (updatedAnnouncement.ID == nil) || (*updatedAnnouncement.ID*1 == 0) || (*updatedAnnouncement.ID*1 < 0):
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, "ID is empty or not valid")
 		return
-	case updatedAnnouncement.Title == nil || len(*updatedAnnouncement.Title) == 0:
+	case (updatedAnnouncement.Title == nil) || len(*updatedAnnouncement.Title) == 0:
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, "Title is empty or not valid")
 		return
-	case updatedAnnouncement.Description == nil || len(*updatedAnnouncement.Description) == 0:
+	case (updatedAnnouncement.Description == nil) || len(*updatedAnnouncement.Description) == 0:
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, "Description is empty or not valid")
 		return
-	case updatedAnnouncement.CreationDate == nil || len(*updatedAnnouncement.CreationDate) == 0:
+	case (updatedAnnouncement.CreationDate == nil) || len(*updatedAnnouncement.CreationDate) == 0:
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, "CreationDate is empty or not valid")
 		return
@@ -168,12 +165,10 @@ func UpdateAnnouncement(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		if count == 1 {
-			fmt.Fprintf(w, "One row updated")
+			json.NewEncoder(w).Encode(updatedAnnouncement)
 		} else {
 			fmt.Fprintf(w, "No rows updated")
 		}
-
-		w.Header().Set("Content-Type", "application/json")
 		return
 	}
 }

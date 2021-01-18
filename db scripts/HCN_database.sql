@@ -184,8 +184,7 @@ ALTER TABLE Courses ADD CONSTRAINT Techers_Courses FOREIGN KEY Techers_Courses (
 ALTER TABLE Students_Courses ADD CONSTRAINT uq_Students_Courses UNIQUE(CourseID, StudentID);
 ALTER TABLE CCases_HCN ADD CONSTRAINT uq_CCases_HCN UNIQUE(ClinicalCaseID, HCNID);
 ALTER TABLE Courses_HCN ADD CONSTRAINT uq_CCases_HCN UNIQUE(CourseID, HCNID);
-
-
+ALTER TABLE Feedbacks ADD CONSTRAINT uq_CCases_HCN UNIQUE(ActivityID, StudentID);
 
 
 -- Adding some data
@@ -204,10 +203,10 @@ INSERT INTO Teachers(ID,Name,Email) VALUES (2,'Oscar David Hurtado Zapata','oscr
 INSERT INTO Teachers(ID,Name,Email) VALUES (3,'Christian Camilo Ortiz','camilorto@email.com');
 
 -- Courses
-INSERT INTO Courses(ID,TeacherID,Name, CreationDate) VALUES (1,1,'Introducción a Matlab', '2021-01-01 12:00:00');
-INSERT INTO Courses(ID,TeacherID,Name, CreationDate) VALUES (2,1,'Matlab avanzado', '2021-01-01 12:20:08');
-INSERT INTO Courses(ID,TeacherID,Name, CreationDate) VALUES (3,2,'Clases de piano', '2021-01-06 15:21:50');
-INSERT INTO Courses(ID,TeacherID,Name, CreationDate) VALUES (4,3,'Manejando en Cali', '2021-01-05 11:40:12');
+INSERT INTO Courses(TeacherID,Name, CreationDate) VALUES (1,'Introducción a Matlab', '2021-01-01 12:00:00');
+INSERT INTO Courses(TeacherID,Name, CreationDate) VALUES (1,'Matlab avanzado', '2021-01-01 12:20:08');
+INSERT INTO Courses(TeacherID,Name, CreationDate) VALUES (2,'Clases de piano', '2021-01-06 15:21:50');
+INSERT INTO Courses(TeacherID,Name, CreationDate) VALUES (3,'Manejando en Cali', '2021-01-05 11:40:12');
 
 -- Announcements
 INSERT INTO Announcements(ID,CourseID,Title,Description,CreationDate) VALUES
@@ -275,5 +274,3 @@ INSERT INTO Students_Courses(ID,CourseID,StudentID) VALUES (7,2,7);
 INSERT INTO Students_Courses(ID,CourseID,StudentID) VALUES (8,3,1);
 INSERT INTO Students_Courses(ID,CourseID,StudentID) VALUES (9,3,2);
 INSERT INTO Students_Courses(ID,CourseID,StudentID) VALUES (10,3,7);
-
--- End of file.

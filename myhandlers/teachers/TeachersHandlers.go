@@ -10,8 +10,6 @@ import (
 	"net/http"
 
 	"strconv"
-
-	"github.com/gorilla/mux"
 )
 
 // CreateTeacher bla bla...
@@ -41,16 +39,14 @@ func CreateTeacher(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "Email is empty or not valid")
 		return
 	default:
-		rows, err := Db.Query("INSERT INTO Teachers(ID,Name,Email) VALUES (?, ?, ?)", newTeacher.ID, newTeacher.Name, newTeacher.Email)
+		rows, err := Db.Exec("INSERT INTO Teachers(ID,Name,Email) VALUES (?, ?, ?)", newTeacher.ID, newTeacher.Name, newTeacher.Email)
 		defer Db.Close()
 		if err != nil {
+			w.WriteHeader(http.StatusConflict)
 			fmt.Fprintf(w, "(SQL) %v", err.Error())
 			return
 		}
-		cnt := 0
-		for rows.Next() {
-			cnt++
-		}
+		cnt, err := rows.RowsAffected()
 		if cnt == 1 {
 			w.WriteHeader(http.StatusCreated)
 			json.NewEncoder(w).Encode(newTeacher)
@@ -91,13 +87,19 @@ func GetAllTeachers(w http.ResponseWriter, r *http.Request) {
 // GetTeacher bla bla...
 func GetTeacher(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	vars := mux.Vars(r)
-	teacherID, err := strconv.Atoi(vars["id"])
-	if err != nil {
+	keys, ok := r.URL.Query()["id"]
+	if !ok || len(keys[0]) < 1 {
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "(USER) %v is not a valid ID", vars["id"])
+		fmt.Fprintf(w, "Url Param 'id' is missing or is invalid")
 		return
 	}
+	teacherID, err := strconv.Atoi(keys[0])
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, "(USER) %v is not a valid ID", keys[0])
+		return
+	}
+
 	var Name, Email string
 	var Db, _ = config.MYSQLConnection()
 	err = Db.QueryRow("SELECT Name, Email FROM Teachers WHERE ID=?", teacherID).Scan(&Name, &Email)
@@ -128,15 +130,15 @@ func UpdateTeacher(w http.ResponseWriter, r *http.Request) {
 	var updatedTeacher mymodels.Teacher
 	json.Unmarshal(reqBody, &updatedTeacher)
 	switch {
-	case updatedTeacher.ID == nil:
+	case (updatedTeacher.ID == nil) || (*updatedTeacher.ID*1 == 0) || (*updatedTeacher.ID*1 < 0):
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, "ID is empty or not valid")
 		return
-	case updatedTeacher.Name == nil || len(*updatedTeacher.Name) == 0:
+	case (updatedTeacher.Name == nil) || (len(*updatedTeacher.Name) == 0):
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, "Name is empty or not valid")
 		return
-	case updatedTeacher.Email == nil || len(*updatedTeacher.Email) == 0:
+	case (updatedTeacher.Email == nil) || (len(*updatedTeacher.Email) == 0):
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, "Email is empty or not valid")
 		return
@@ -156,12 +158,10 @@ func UpdateTeacher(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		if count == 1 {
-			fmt.Fprintf(w, "One row updated")
+			json.NewEncoder(w).Encode(updatedTeacher)
 		} else {
 			fmt.Fprintf(w, "No rows updated")
 		}
-
-		w.Header().Set("Content-Type", "application/json")
 		return
 	}
 }
@@ -172,7 +172,6 @@ func DeleteTeacher(w http.ResponseWriter, r *http.Request) {
 	reqBody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "(USER) %v", err.Error())
 		return
 	}
 	var deletedTeacher mymodels.Teacher
@@ -188,7 +187,7 @@ func DeleteTeacher(w http.ResponseWriter, r *http.Request) {
 	row, err := Db.Exec("DELETE FROM Teachers WHERE ID=?", deletedTeacher.ID)
 	defer Db.Close()
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		w.WriteHeader(http.StatusConflict)
 		fmt.Fprintf(w, "(SQL) %v", err.Error())
 		return
 	}
@@ -203,6 +202,5 @@ func DeleteTeacher(w http.ResponseWriter, r *http.Request) {
 	} else {
 		fmt.Fprintf(w, "No rows deleted")
 	}
-	w.Header().Set("Content-Type", "application/json")
 	return
 }

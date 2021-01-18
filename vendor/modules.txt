@@ -6,8 +6,6 @@ github.com/go-sql-driver/mysql
 # github.com/gorilla/csrf v1.7.0
 ## explicit
 github.com/gorilla/csrf
-# github.com/gorilla/handlers v1.5.1
-## explicit
 # github.com/gorilla/mux v1.8.0
 ## explicit
 github.com/gorilla/mux

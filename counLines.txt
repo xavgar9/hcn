@@ -1,0 +1,1 @@
+find . -not -path '*/gen*' -a \( -name '*.java' -o -name '*.xml' \) | xargs cat | wc -l

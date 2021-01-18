@@ -55,21 +55,21 @@ func MainRouters(router *mux.Router) {
 
 	// Teachers URLs
 	router.HandleFunc("/Teachers/GetAllTeachers", teachers.GetAllTeachers).Methods("GET")
-	router.HandleFunc("/Teachers/GetTeacher/{id}", teachers.GetTeacher).Methods("GET")
+	router.HandleFunc("/Teachers/GetTeacher", teachers.GetTeacher).Methods("GET")
 	router.HandleFunc("/Teachers/UpdateTeacher", teachers.UpdateTeacher).Methods("POST")
 	router.HandleFunc("/Teachers/CreateTeacher", teachers.CreateTeacher).Methods("POST")
 	router.HandleFunc("/Teachers/DeleteTeacher", teachers.DeleteTeacher).Methods("DELETE")
 
 	// Students URLs
 	router.HandleFunc("/Students/GetAllStudents", students.GetAllStudents).Methods("GET")
-	router.HandleFunc("/Students/GetStudent/{id}", students.GetStudent).Methods("GET")
+	router.HandleFunc("/Students/GetStudent", students.GetStudent).Methods("GET")
 	router.HandleFunc("/Students/UpdateStudent", students.UpdateStudent).Methods("POST")
 	router.HandleFunc("/Students/CreateStudent", students.CreateStudent).Methods("POST")
 	router.HandleFunc("/Students/DeleteStudent", students.DeleteStudent).Methods("DELETE")
 
 	// Courses URLs
 	router.HandleFunc("/Courses/GetAllCourses", courses.GetAllCourses).Methods("GET")
-	router.HandleFunc("/Courses/GetCourse/{id}", courses.GetCourse).Methods("GET")
+	router.HandleFunc("/Courses/GetCourse", courses.GetCourse).Methods("GET")
 	router.HandleFunc("/Courses/UpdateCourse", courses.UpdateCourse).Methods("POST")
 	router.HandleFunc("/Courses/CreateCourse", courses.CreateCourse).Methods("POST")
 	router.HandleFunc("/Courses/DeleteCourse", courses.DeleteCourse).Methods("DELETE")
@@ -90,7 +90,7 @@ func MainRouters(router *mux.Router) {
 
 	// Announcements URLs
 	router.HandleFunc("/Announcements/GetAllAnnouncements", announcements.GetAllAnnouncements).Methods("GET")
-	router.HandleFunc("/Announcements/GetAnnouncement/{id}", announcements.GetAnnouncement).Methods("GET")
+	router.HandleFunc("/Announcements/GetAnnouncement", announcements.GetAnnouncement).Methods("GET")
 	router.HandleFunc("/Announcements/UpdateAnnouncement", announcements.UpdateAnnouncement).Methods("POST")
 	router.HandleFunc("/Announcements/CreateAnnouncement", announcements.CreateAnnouncement).Methods("POST")
 	router.HandleFunc("/Announcements/DeleteAnnouncement", announcements.DeleteAnnouncement).Methods("DELETE")
@@ -104,7 +104,7 @@ func MainRouters(router *mux.Router) {
 
 	// Feedbacks URLs
 	router.HandleFunc("/Feedbacks/GetAllFeedbacks", feedbacks.GetAllFeedbacks).Methods("GET")
-	router.HandleFunc("/Feedbacks/GetFeedback/{id}", feedbacks.GetFeedback).Methods("GET")
+	router.HandleFunc("/Feedbacks/GetFeedback", feedbacks.GetFeedback).Methods("GET")
 	router.HandleFunc("/Feedbacks/UpdateFeedback", feedbacks.UpdateFeedback).Methods("POST")
 	router.HandleFunc("/Feedbacks/CreateFeedback", feedbacks.CreateFeedback).Methods("POST")
 	router.HandleFunc("/Feedbacks/DeleteFeedback", feedbacks.DeleteFeedback).Methods("DELETE")
