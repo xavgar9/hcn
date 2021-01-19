@@ -111,7 +111,7 @@ func MainRouters(router *mux.Router) {
 
 	// Clinical Cases URLs
 	router.HandleFunc("/ClinicalCases/GetAllClinicalCases", ccases.GetAllClinicalCases).Methods("GET")
-	router.HandleFunc("/ClinicalCases/GetClinicalCase/{id}", ccases.GetClinicalCase).Methods("GET")
+	router.HandleFunc("/ClinicalCases/GetClinicalCase", ccases.GetClinicalCase).Methods("GET")
 	router.HandleFunc("/ClinicalCases/UpdateClinicalCase", ccases.UpdateClinicalCase).Methods("POST")
 	router.HandleFunc("/ClinicalCases/CreateClinicalCase", ccases.CreateClinicalCase).Methods("POST")
 	router.HandleFunc("/ClinicalCases/DeleteClinicalCase", ccases.DeleteClinicalCase).Methods("DELETE")

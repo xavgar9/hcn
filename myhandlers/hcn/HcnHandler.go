@@ -191,6 +191,5 @@ func DeleteHCN(w http.ResponseWriter, r *http.Request) {
 	} else {
 		fmt.Fprintf(w, "No rows deleted")
 	}
-	w.Header().Set("Content-Type", "application/json")
 	return
 }

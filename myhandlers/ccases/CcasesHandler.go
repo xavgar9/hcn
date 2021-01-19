@@ -10,8 +10,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strconv"
-
-	"github.com/gorilla/mux"
 )
 
 // CreateClinicalCase bla bla...
@@ -28,9 +26,9 @@ func CreateClinicalCase(w http.ResponseWriter, r *http.Request) {
 	var Db, _ = config.MYSQLConnection()
 	json.Unmarshal(reqBody, &newClinicalCase)
 	switch {
-	case (*newClinicalCase.TeacherID*1 == 0) || (*newClinicalCase.TeacherID*1 < 0):
+	case (newClinicalCase.TeacherID == nil) || (*newClinicalCase.TeacherID*1 == 0) || (*newClinicalCase.TeacherID*1 < 0):
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "%v is not a valid TeacherID", *newClinicalCase.TeacherID)
+		fmt.Fprintf(w, "TeacherID is empty or not valid")
 		return
 	case (newClinicalCase.Title == nil) || (len(*newClinicalCase.Title) == 0):
 		w.WriteHeader(http.StatusBadRequest)
@@ -51,21 +49,14 @@ func CreateClinicalCase(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprintf(w, "(SQL) %v", err.Error())
 			return
 		}
-		cnt, err := rows.RowsAffected()
-		if err != nil {
-			fmt.Fprintf(w, "(SQL) %v", err.Error())
-			return
-		} else if cnt < 1 {
-			fmt.Fprintf(w, "No rows affected")
-			return
+		cnt, _ := rows.RowsAffected()
+		if cnt == 1 {
+			int64ID, _ := rows.LastInsertId()
+			intID := int(int64ID)
+			newClinicalCase.ID = &intID
+			w.WriteHeader(http.StatusCreated)
+			json.NewEncoder(w).Encode(newClinicalCase)
 		}
-		lastID, err := rows.LastInsertId()
-		if err != nil {
-			fmt.Fprintf(w, "(SQL) %v", err.Error())
-			return
-		}
-		fmt.Fprintf(w, "ID inserted: %v", lastID)
-		w.WriteHeader(http.StatusCreated)
 		return
 	}
 }
@@ -79,6 +70,7 @@ func GetAllClinicalCases(w http.ResponseWriter, r *http.Request) {
 	defer Db.Close()
 	if err != nil {
 		if err != sql.ErrNoRows {
+			fmt.Fprintf(w, "(SQL) %v", err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
 		}
 		return
@@ -102,11 +94,16 @@ func GetAllClinicalCases(w http.ResponseWriter, r *http.Request) {
 // GetClinicalCase bla bla...
 func GetClinicalCase(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	vars := mux.Vars(r)
-	clinicalCaseID, err := strconv.Atoi(vars["id"])
+	keys, ok := r.URL.Query()["id"]
+	if !ok || len(keys[0]) < 1 {
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, "Url Param 'id' is missing or is invalid")
+		return
+	}
+	clinicalCaseID, err := strconv.Atoi(keys[0])
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "(USER) %v is not a valid ID", vars["id"])
+		fmt.Fprintf(w, "Url Param 'id' is missing or is invalid")
 		return
 	}
 	var ID, TeacherID int
@@ -156,9 +153,13 @@ func UpdateClinicalCase(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, "Media is empty or not valid")
 		return
+	case (updatedClinicalCase.TeacherID) == nil || (*updatedClinicalCase.TeacherID*1 == 0) || (*updatedClinicalCase.TeacherID*1 < 0):
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, "TeacherID is empty or not valid")
+		return
 	default:
 		var Db, _ = config.MYSQLConnection()
-		row, err := Db.Exec("UPDATE Clinical_Cases SET Title=?, Description=?, Media=? WHERE ID=?", updatedClinicalCase.Title, updatedClinicalCase.Description, updatedClinicalCase.Media, updatedClinicalCase.ID)
+		row, err := Db.Exec("UPDATE Clinical_Cases SET Title=?, Description=?, Media=?, TeacherID=? WHERE ID=?", updatedClinicalCase.Title, updatedClinicalCase.Description, updatedClinicalCase.Media, updatedClinicalCase.TeacherID, updatedClinicalCase.ID)
 		defer Db.Close()
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -172,12 +173,10 @@ func UpdateClinicalCase(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		if count == 1 {
-			fmt.Fprintf(w, "One row updated")
+			json.NewEncoder(w).Encode(updatedClinicalCase)
 		} else {
 			fmt.Fprintf(w, "No rows updated")
 		}
-
-		w.Header().Set("Content-Type", "application/json")
 		return
 	}
 }
@@ -219,7 +218,6 @@ func DeleteClinicalCase(w http.ResponseWriter, r *http.Request) {
 	} else {
 		fmt.Fprintf(w, "No rows deleted")
 	}
-	w.Header().Set("Content-Type", "application/json")
 	return
 }
 
