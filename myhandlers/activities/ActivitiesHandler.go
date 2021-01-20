@@ -46,19 +46,19 @@ func CreateActivity(w http.ResponseWriter, r *http.Request) {
 		return
 	case (*newActivity.CourseID*1 == 0) || (*newActivity.CourseID*1 < 0):
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "%v is not a valid CourseID", *newActivity.CourseID)
+		fmt.Fprintf(w, "CourseID is empty or not valid")
 		return
 	case (*newActivity.ClinicalCaseID*1 == 0) || (*newActivity.ClinicalCaseID*1 < 0):
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "%v is not a valid ClinicalCasesID", *newActivity.CourseID)
+		fmt.Fprintf(w, "ClinicalCaseID is empty or not valid")
 		return
 	case (*newActivity.HCNID*1 == 0) || (*newActivity.HCNID*1 < 0):
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "%v is not a valid HCNID", *newActivity.CourseID)
+		fmt.Fprintf(w, "HCNID is empty or not valid")
 		return
 	case (*newActivity.Difficulty*1 == 0) || (*newActivity.Difficulty*1 < 0):
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "%v is not a valid Difficulty", *newActivity.CourseID)
+		fmt.Fprintf(w, "Difficulty is empty or not valid")
 		return
 	default:
 		rows, err := Db.Exec("INSERT INTO Activities(Title,Description,Type,CreationDate,LimitDate,CourseID,ClinicalCaseID,HCNID,Difficulty) VALUES (?,?,?,NOW(),?,?,?,?,?)", newActivity.Title, newActivity.Description, newActivity.Type, newActivity.LimitDate, newActivity.CourseID, newActivity.ClinicalCaseID, newActivity.HCNID, newActivity.Difficulty)
@@ -67,21 +67,14 @@ func CreateActivity(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprintf(w, "(SQL) %v", err.Error())
 			return
 		}
-		cnt, err := rows.RowsAffected()
-		if err != nil {
-			fmt.Fprintf(w, "(SQL) %v", err.Error())
-			return
-		} else if cnt < 1 {
-			fmt.Fprintf(w, "No rows affected")
-			return
+		cnt, _ := rows.RowsAffected()
+		if cnt == 1 {
+			int64ID, _ := rows.LastInsertId()
+			intID := int(int64ID)
+			newActivity.ID = &intID
+			w.WriteHeader(http.StatusCreated)
+			json.NewEncoder(w).Encode(newActivity)
 		}
-		lastID, err := rows.LastInsertId()
-		if err != nil {
-			fmt.Fprintf(w, "(SQL) %v", err.Error())
-			return
-		}
-		fmt.Fprintf(w, "ID inserted: %v", lastID)
-		w.WriteHeader(http.StatusCreated)
 		return
 	}
 }
@@ -119,11 +112,16 @@ func GetAllActivities(w http.ResponseWriter, r *http.Request) {
 // GetActivity bla bla...
 func GetActivity(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	vars := mux.Vars(r)
-	activityID, err := strconv.Atoi(vars["id"])
+	keys, ok := r.URL.Query()["id"]
+	if !ok || len(keys[0]) < 1 {
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, "Url Param 'id' is missing or is invalid")
+		return
+	}
+	activityID, err := strconv.Atoi(keys[0])
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "(USER) %v is not a valid ID", vars["id"])
+		fmt.Fprintf(w, "Url Param 'id' is missing or is invalid")
 		return
 	}
 	var ID, CourseID, ClinicalCaseID, HCNID, Difficulty int
@@ -158,6 +156,10 @@ func UpdateActivity(w http.ResponseWriter, r *http.Request) {
 	var updatedActivity mymodels.Activity
 	json.Unmarshal(reqBody, &updatedActivity)
 	switch {
+	case (updatedAnnouncupdatedActivityement.ID == nil) || (*updatedAnnouncement.ID*1 == 0) || (*updatedAnnouncement.ID*1 < 0):
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, "ID is empty or not valid")
+		return
 	case (updatedActivity.Title == nil) || (len(*updatedActivity.Title) == 0):
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, "Title is empty or not valid")
@@ -202,12 +204,10 @@ func UpdateActivity(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		if count == 1 {
-			fmt.Fprintf(w, "One row updated")
+			json.NewEncoder(w).Encode(updatedActivity)
 		} else {
 			fmt.Fprintf(w, "No rows updated")
 		}
-
-		w.Header().Set("Content-Type", "application/json")
 		return
 	}
 }

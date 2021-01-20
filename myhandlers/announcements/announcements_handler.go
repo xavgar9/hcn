@@ -67,6 +67,7 @@ func GetAllAnnouncements(w http.ResponseWriter, r *http.Request) {
 	defer Db.Close()
 	if err != nil {
 		if err != sql.ErrNoRows {
+			fmt.Fprintf(w, "(SQL) %v", err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
 		}
 		return

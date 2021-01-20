@@ -97,7 +97,7 @@ func MainRouters(router *mux.Router) {
 
 	// Activities URLs
 	router.HandleFunc("/Activities/GetAllActivities", activities.GetAllActivities).Methods("GET")
-	router.HandleFunc("/Activities/GetActivity/{id}", activities.GetActivity).Methods("GET")
+	router.HandleFunc("/Activities/GetActivity", activities.GetActivity).Methods("GET")
 	router.HandleFunc("/Activities/UpdateActivity", activities.UpdateActivity).Methods("POST")
 	router.HandleFunc("/Activities/CreateActivity", activities.CreateActivity).Methods("POST")
 	router.HandleFunc("/Activities/DeleteActivity", activities.DeleteActivity).Methods("DELETE")
