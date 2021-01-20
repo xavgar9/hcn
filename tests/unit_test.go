@@ -181,7 +181,7 @@ func TestUpdateHCN(t *testing.T) {
 func TestDeleteHCN(t *testing.T) {
 	runTestWithBody(t, testhelpers.CasesDeleteHCN())
 }
-*/
+
 
 // Clinical Case test
 func TestGetAllClinicalCases(t *testing.T) {
@@ -202,4 +202,40 @@ func TestUpdateClinicalCase(t *testing.T) {
 
 func TestDeleteClinicalCase(t *testing.T) {
 	runTestWithBody(t, testhelpers.CasesDeleteClinicalCase())
+}
+
+*/
+
+// Activities test
+func TestGetAllActivities(t *testing.T) {
+	runTest(t, testhelpers.CasesGetAllActivities())
+}
+
+func TestCasesGetActivity(t *testing.T) {
+	runTest(t, testhelpers.CasesGetActivity())
+}
+
+func TestCreateActivitye(t *testing.T) {
+	runTestWithBody(t, testhelpers.CasesCreateActivity())
+}
+
+func TestUpdateUpdateActivity(t *testing.T) {
+	runTestWithBody(t, testhelpers.CasesUpdateActivity())
+}
+
+func TestDeleteActivity(t *testing.T) {
+	runTestWithBody(t, testhelpers.CasesDeleteActivity())
+}
+
+// Students_Courses test
+func TestGetAllStudentsCourse(t *testing.T) {
+	runTest(t, testhelpers.CasesGetAllStudentsCourses())
+}
+
+func TestAddStudent(t *testing.T) {
+	runTestWithBody(t, testhelpers.CasesAddStudent())
+}
+
+func TestRemoveStudent(t *testing.T) {
+	runTestWithBody(t, testhelpers.CasesRemoveStudent())
 }

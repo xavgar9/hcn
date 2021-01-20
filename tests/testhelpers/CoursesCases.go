@@ -179,3 +179,126 @@ func CasesDeleteCourse() mymodels.AllTest {
 		},
 	}
 }
+
+// CasesAddStudent bla bla...
+func CasesAddStudent() mymodels.AllTest {
+	return mymodels.AllTest{
+		{
+			Method:       "DELETE",
+			URL:          "/Students/AddStudent",
+			Function:     students.AddStudent,
+			Body:         `{"CourseID":1,"StudentID":5}`,
+			ExpectedBody: `Student added`,
+			StatusCode:   http.StatusOK,
+		},
+		{
+			Method:       "DELETE",
+			URL:          "/Students/AddStudent",
+			Function:     students.AddStudent,
+			Body:         `{"CourseID":1,"StudentID":6}`,
+			ExpectedBody: `Student added`,
+			StatusCode:   http.StatusOK,
+		},
+		{
+			Method:       "DELETE",
+			URL:          "/Students/AddStudent",
+			Function:     students.AddStudent,
+			Body:         `{"CourseID":1,"StudentID":5}`,
+			ExpectedBody: `XXX`,
+			StatusCode:   http.StatusConflict,
+		},
+		{
+		{
+			Method:       "DELETE",
+			URL:          "/Students/AddStudent",
+			Function:     students.AddStudent,
+			Body:         `{"StudentID":6}`,
+			ExpectedBody: `ID is empty or not valid`,
+			StatusCode:   http.StatusBadRequest,
+		},
+		{
+			Method:       "DELETE",
+			URL:          "/Students/AddStudent",
+			Function:     students.AddStudent,
+			Body:         `{"StudentID":6}`,
+			ExpectedBody: `ID is empty or not valid`,
+			StatusCode:   http.StatusBadRequest,
+		},
+		{
+			Method:       "DELETE",
+			URL:          "/Students/AddStudent",
+			Function:     students.AddStudent,
+			Body:         `{"CourseID":Arroz,"StudentID":2}`,
+			ExpectedBody: `ID is empty or not valid`,
+			StatusCode:   http.StatusBadRequest,
+		},
+	}
+}
+
+// CasesAllStudentsCourse bla bla...
+func CasesAllStudentsCourse() mymodels.AllTest {
+	return mymodels.AllTest{
+		{
+			Method:       "DELETE",
+			URL:          "/Students/AllStudentsCourse",
+			Function:     students.AllStudentsCourse,
+			Body:         `{"CourseID":1}`,
+			ExpectedBody: `[{"ID":1,"Name":"Daniel Gómez Sermeño","Email":"goma@email.com"},{"ID":2,"Name":"Xavier Garzón López","Email":"xavgar9@email.com"},{"ID":3,"Name":"Juan F. Gil","Email":"transfer10@email.com"},{"ID":4,"Name":"Edgar Silva","Email":"ednosil@email.com"}]`,
+			StatusCode:   http.StatusOK,
+		},
+		{
+			Method:       "DELETE",
+			URL:          "/Students/AllStudentsCourse",
+			Function:     students.AllStudentsCourse,
+			Body:         `{"CourseID":2}`,
+			ExpectedBody: `[{"ID":5,"Name":"Juanita María Parra Villamíl","Email":"juanitamariap@email.com"},{"ID":6,"Name":"Sebastián Rodríguez Osorio Silva","Email":"sebasrosorio98@email.com"},{"ID":7,"Name":"Andrés Felipe Garcés","Email":"andylukast@email.com"}]`,
+			StatusCode:   http.StatusOK,
+		},
+		{
+			Method:       "DELETE",
+			URL:          "/Students/AllStudentsCourse",
+			Function:     students.AllStudentsCourse,
+			Body:         ``,
+			ExpectedBody: `ID is empty or not valid`,
+			StatusCode:   http.StatusBadRequest,
+		},
+	}
+}
+
+// CasesRemoveStudent bla bla...
+func CasesRemoveStudent() mymodels.AllTest {
+	return mymodels.AllTest{
+		{
+			Method:       "DELETE",
+			URL:          "/Courses/RemoveStudent",
+			Function:     courses.RemoveStudent,
+			Body:         `{"ID":11}`,
+			ExpectedBody: `One row deleted`,
+			StatusCode:   http.StatusOK,
+		},
+		{
+			Method:       "DELETE",
+			URL:          "/Courses/RemoveStudent",
+			Function:     courses.RemoveStudent,
+			Body:         `{"ID":11}`,
+			ExpectedBody: `No rows deleted`,
+			StatusCode:   http.StatusOK,
+		},
+		{
+			Method:       "DELETE",
+			URL:          "/Courses/RemoveStudent",
+			Function:     courses.RemoveStudent,
+			Body:         `{"ID":12}`,
+			ExpectedBody: `One row deleted`,
+			StatusCode:   http.StatusOK,
+		},
+		{
+			Method:       "DELETE",
+			URL:          "/Courses/RemoveStudent",
+			Function:     courses.RemoveStudent,
+			Body:         ``,
+			ExpectedBody: `ID is empty or not valid`,
+			StatusCode:   http.StatusBadRequest,
+		},
+	}
+}

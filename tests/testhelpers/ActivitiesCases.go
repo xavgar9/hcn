@@ -168,8 +168,8 @@ func CasesUpdateActivity() mymodels.AllTest {
 	}
 }
 
-// CasesCreateAnnouncement bla bla...
-func CasesCreateAnnouncement() mymodels.AllTest {
+// CasesCreateActivity bla bla...
+func CasesCreateActivity() mymodels.AllTest {
 	return mymodels.AllTest{
 		{
 			Method:       "POST",

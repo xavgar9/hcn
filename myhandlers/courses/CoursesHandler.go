@@ -211,10 +211,6 @@ func DeleteCourse(w http.ResponseWriter, r *http.Request) {
 // AddStudent adds an Student into a course...
 func AddStudent(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	if !helpers.VerifyRequest(r) {
-		w.WriteHeader(http.StatusForbidden)
-		return
-	}
 	var newStudentTuition mymodels.StudentTuition
 	reqBody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -237,24 +233,16 @@ func AddStudent(w http.ResponseWriter, r *http.Request) {
 		rows, err := Db.Exec("INSERT INTO Students_Courses(CourseID,StudentID) VALUES (?,?)", newStudentTuition.CourseID, newStudentTuition.StudentID)
 		defer Db.Close()
 		if err != nil {
+			w.WriteHeader(http.StatusConflict)
 			fmt.Fprintf(w, "(SQL) %v", err.Error())
 			return
 		}
-		cnt, err := rows.RowsAffected()
-		if err != nil {
-			fmt.Fprintf(w, "(SQL) %v", err.Error())
-			return
-		} else if cnt < 1 {
-			fmt.Fprintf(w, "No rows affected")
-			return
+		cnt, _ := rows.RowsAffected()
+		if cnt == 0 {			
+			fmt.FPrintf(w, "Student added")
+		} else if cnt == 1 {
+			fmt.FPrintf(w, "Student  not added")
 		}
-		lastID, err := rows.LastInsertId()
-		if err != nil {
-			fmt.Fprintf(w, "(SQL) %v", err.Error())
-			return
-		}
-		fmt.Fprintf(w, "ID inserted: %v", lastID)
-		w.WriteHeader(http.StatusCreated)
 		return
 	}
 }
@@ -262,16 +250,16 @@ func AddStudent(w http.ResponseWriter, r *http.Request) {
 // GetAllStudentsCourse get all HCN in a course...
 func GetAllStudentsCourse(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	if !helpers.VerifyRequest(r) {
-		w.WriteHeader(http.StatusForbidden)
+	keys, ok := r.URL.Query()["id"]
+	if !ok || len(keys[0]) < 1 {
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, "Url Param 'id' is missing or is invalid")
 		return
 	}
-
-	vars := mux.Vars(r)
-	courseID, err := strconv.Atoi(vars["id"])
+	courseID, err := strconv.Atoi(keys[0])
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "(USER) %v is not a valid ID", vars["id"])
+		fmt.Fprintf(w, "Url Param 'id' is missing or is invalid")
 		return
 	}
 
@@ -308,17 +296,17 @@ func RemoveStudent(w http.ResponseWriter, r *http.Request) {
 	reqBody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "(USER) %v", err.Error())
+		fmt.Fprintf(w, "ID is empty or not valid")
 		return
 	}
 	var removedStudent mymodels.StudentTuition
 	json.Unmarshal(reqBody, &removedStudent)
-	if (removedStudent.StudentID) == nil || (*removedStudent.StudentID*1 == 0) || (*removedStudent.StudentID*1 < 0) {
+	if (removedStudent.StudentID) == nil || (*removedStudent.StudentID*1 <= 0):
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, "StudentID is empty or not valid")
 		return
 	}
-	if (removedStudent.CourseID) == nil || (*removedStudent.CourseID*1 == 0) || (*removedStudent.CourseID*1 < 0) {
+	if (removedStudent.CourseID) == nil || (*removedStudent.CourseID*1 <= 0):
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, "CourseID is empty or not valid")
 		return
@@ -343,6 +331,5 @@ func RemoveStudent(w http.ResponseWriter, r *http.Request) {
 	} else {
 		fmt.Fprintf(w, "No rows deleted")
 	}
-	w.Header().Set("Content-Type", "application/json")
 	return
 }
