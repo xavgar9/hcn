@@ -26,7 +26,7 @@ func CreateClinicalCase(w http.ResponseWriter, r *http.Request) {
 	var Db, _ = config.MYSQLConnection()
 	json.Unmarshal(reqBody, &newClinicalCase)
 	switch {
-	case (newClinicalCase.TeacherID == nil) || (*newClinicalCase.TeacherID*1 == 0) || (*newClinicalCase.TeacherID*1 < 0):
+	case (newClinicalCase.TeacherID == nil) || (*newClinicalCase.TeacherID*1 <= 0):
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, "TeacherID is empty or not valid")
 		return
@@ -137,7 +137,7 @@ func UpdateClinicalCase(w http.ResponseWriter, r *http.Request) {
 	var updatedClinicalCase mymodels.ClinicalCase
 	json.Unmarshal(reqBody, &updatedClinicalCase)
 	switch {
-	case (updatedClinicalCase.ID) == nil || (*updatedClinicalCase.ID*1 == 0) || (*updatedClinicalCase.ID*1 < 0):
+	case (updatedClinicalCase.ID) == nil || (*updatedClinicalCase.ID*1 <= 0):
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, "ID is empty or not valid")
 		return
@@ -153,7 +153,7 @@ func UpdateClinicalCase(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, "Media is empty or not valid")
 		return
-	case (updatedClinicalCase.TeacherID) == nil || (*updatedClinicalCase.TeacherID*1 == 0) || (*updatedClinicalCase.TeacherID*1 < 0):
+	case (updatedClinicalCase.TeacherID) == nil || (*updatedClinicalCase.TeacherID*1 <= 0):
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, "TeacherID is empty or not valid")
 		return
@@ -193,7 +193,7 @@ func DeleteClinicalCase(w http.ResponseWriter, r *http.Request) {
 	var deletedClinicalCase mymodels.ClinicalCase
 	json.Unmarshal(reqBody, &deletedClinicalCase)
 
-	if (deletedClinicalCase.ID) == nil || (*deletedClinicalCase.ID*1 == 0) || (*deletedClinicalCase.ID*1 < 0) {
+	if (deletedClinicalCase.ID) == nil || (*deletedClinicalCase.ID*1 <= 0) {
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, "ID is empty or not valid")
 		return
@@ -283,12 +283,12 @@ func RemoveHCN(w http.ResponseWriter, r *http.Request) {
 	}
 	var removeHCNVinculation mymodels.HCNVinculation
 	json.Unmarshal(reqBody, &removeHCNVinculation)
-	if (removeHCNVinculation.ClinicalCaseID) == nil || (*removeHCNVinculation.ClinicalCaseID*1 == 0) || (*removeHCNVinculation.ClinicalCaseID*1 < 0) {
+	if (removeHCNVinculation.ClinicalCaseID) == nil || (*removeHCNVinculation.ClinicalCaseID*1 <= 0) {
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, "ClinicalCaseID is empty or not valid")
 		return
 	}
-	if (removeHCNVinculation.HCNID) == nil || (*removeHCNVinculation.HCNID*1 == 0) || (*removeHCNVinculation.HCNID*1 < 0) {
+	if (removeHCNVinculation.HCNID) == nil || (*removeHCNVinculation.HCNID*1 <= 0) {
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, "HCNID is empty or not valid")
 		return
@@ -313,6 +313,5 @@ func RemoveHCN(w http.ResponseWriter, r *http.Request) {
 	} else {
 		fmt.Fprintf(w, "No rows deleted")
 	}
-	w.Header().Set("Content-Type", "application/json")
 	return
 }

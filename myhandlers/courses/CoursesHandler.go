@@ -23,16 +23,11 @@ func CreateCourse(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var Db, _ = config.MYSQLConnection()
-	err = json.Unmarshal(reqBody, &newCourse)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "%v", err)
-		return
-	}
+	json.Unmarshal(reqBody, &newCourse)
 	switch {
-	case (newCourse.TeacherID == nil) || (*newCourse.TeacherID*1 == 0) || (*newCourse.TeacherID*1 < 0):
+	case (newCourse.TeacherID == nil) || (*newCourse.TeacherID*1 <= 0):
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "Teacher is empty or not valid")
+		fmt.Fprintf(w, "TeacherID is empty or not valid")
 		return
 	case (newCourse.Name == nil) || (len(*newCourse.Name) == 0):
 		w.WriteHeader(http.StatusBadRequest)

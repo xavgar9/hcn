@@ -28,17 +28,17 @@ func AddHCN(w http.ResponseWriter, r *http.Request) {
 	var Db, _ = config.MYSQLConnection()
 	json.Unmarshal(reqBody, &newCourseHCN)
 	switch {
-	case (*newCourseHCN.CourseID*1 == 0) || (*newCourseHCN.CourseID*1 < 0):
+	case (newCourseHCN.CourseID == nil) || (*newCourseHCN.CourseID*1 <= 0):
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, "CourseID is empty or not valid")
 		return
-	case (*newCourseHCN.HCNID*1 == 0) || (*newCourseHCN.HCNID*1 < 0):
+	case (newCourseHCN.HCNID == nil) || (*newCourseHCN.HCNID*1 <= 0):
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, "HCNID is empty or not valid")
 		return
-	case (*newCourseHCN.Displayable*1 == 0) || (*newCourseHCN.Displayable*1 < 0):
+	case (newCourseHCN.Displayable == nil) || (*newCourseHCN.Displayable*1 <= 0):
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "%v is not a valid display status", *newCourseHCN.Displayable)
+		fmt.Fprintf(w, "Displayable value is not valid")
 		return
 	default:
 		rows, err := Db.Exec("INSERT INTO Courses_HCN(CourseID,HCNID,Displayable) VALUES (?,?,?)", newCourseHCN.CourseID, newCourseHCN.HCNID, newCourseHCN.Displayable)
@@ -78,13 +78,12 @@ func GetAllHCN(w http.ResponseWriter, r *http.Request) {
 	courseID, err := strconv.Atoi(vars["id"])
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "(USER) %v is not a valid ID", vars["id"])
+		fmt.Fprintf(w, "ID is empty or not valid")
 		return
 	}
 
 	var allCourseHCN mymodels.AllCourseHCN
 	var Db, _ = config.MYSQLConnection()
-	//rows, err := Db.Query("SELECT ID, TeacherID FROM HCN WHERE ID IN (SELECT HCNID FROM Courses_HCN WHERE CourseID = ?)", courseID)
 	rows, err := Db.Query("SELECT ID, CourseID, HCNID, Displayable FROM Courses_HCN WHERE CourseID = ?", courseID)
 	defer Db.Close()
 	if err != nil {
@@ -122,11 +121,11 @@ func RemoveHCN(w http.ResponseWriter, r *http.Request) {
 	json.Unmarshal(reqBody, &removedCourseHCN)
 
 	switch {
-	case (removedCourseHCN.HCNID) == nil || (*removedCourseHCN.HCNID*1 == 0) || (*removedCourseHCN.HCNID*1 < 0):
+	case (removedCourseHCN.HCNID) == nil || (*removedCourseHCN.HCNID*1 <= 0):
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, "HCNID is empty or not valid")
 		return
-	case (removedCourseHCN.CourseID) == nil || (*removedCourseHCN.CourseID*1 == 0) || (*removedCourseHCN.CourseID*1 < 0):
+	case (removedCourseHCN.CourseID) == nil || (*removedCourseHCN.CourseID*1 <= 0):
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, "CourseID is empty or not valid")
 		return
@@ -150,7 +149,6 @@ func RemoveHCN(w http.ResponseWriter, r *http.Request) {
 		} else {
 			fmt.Fprintf(w, "No rows deleted")
 		}
-		w.Header().Set("Content-Type", "application/json")
 		return
 	}
 }
@@ -167,9 +165,9 @@ func VisibilityHCN(w http.ResponseWriter, r *http.Request) {
 	var updatedCourseHCN mymodels.CourseHCN
 	json.Unmarshal(reqBody, &updatedCourseHCN)
 	switch {
-	case (*updatedCourseHCN.Displayable*1 > 1):
+	case (updatedCourseHCN.Displayable == nil) || (*updatedCourseHCN.Displayable*1 > 1):
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "%v is not a valid display status", *updatedCourseHCN.Displayable)
+		fmt.Fprintf(w, "Displayable value is not valid")
 		return
 	default:
 		var Db, _ = config.MYSQLConnection()
@@ -191,8 +189,6 @@ func VisibilityHCN(w http.ResponseWriter, r *http.Request) {
 		} else {
 			fmt.Fprintf(w, "No rows updated")
 		}
-
-		w.Header().Set("Content-Type", "application/json")
 		return
 	}
 }

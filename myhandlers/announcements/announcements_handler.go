@@ -134,7 +134,7 @@ func UpdateAnnouncement(w http.ResponseWriter, r *http.Request) {
 	var updatedAnnouncement mymodels.Announcement
 	json.Unmarshal(reqBody, &updatedAnnouncement)
 	switch {
-	case (updatedAnnouncement.ID == nil) || (*updatedAnnouncement.ID*1 == 0) || (*updatedAnnouncement.ID*1 < 0):
+	case (updatedAnnouncement.ID == nil) || (*updatedAnnouncement.ID*1 <= 0):
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, "ID is empty or not valid")
 		return
@@ -186,7 +186,7 @@ func DeleteAnnouncement(w http.ResponseWriter, r *http.Request) {
 	var deletedAnnouncement mymodels.Announcement
 	json.Unmarshal(reqBody, &deletedAnnouncement)
 
-	if (deletedAnnouncement.ID) == nil || (*deletedAnnouncement.ID*1 == 0) || (*deletedAnnouncement.ID*1 < 0) {
+	if (deletedAnnouncement.ID) == nil || (*deletedAnnouncement.ID*1 <= 0) {
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, "ID is empty or not valid")
 		return

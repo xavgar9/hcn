@@ -26,7 +26,7 @@ func CreateTeacher(w http.ResponseWriter, r *http.Request) {
 	var Db, _ = config.MYSQLConnection()
 	json.Unmarshal(reqBody, &newTeacher)
 	switch {
-	case (newTeacher.ID == nil) || (*newTeacher.ID*1 == 0) || (*newTeacher.ID*1 < 0):
+	case (newTeacher.ID == nil) || (*newTeacher.ID*1 <= 0):
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, "ID is empty or not valid")
 		return
@@ -130,7 +130,7 @@ func UpdateTeacher(w http.ResponseWriter, r *http.Request) {
 	var updatedTeacher mymodels.Teacher
 	json.Unmarshal(reqBody, &updatedTeacher)
 	switch {
-	case (updatedTeacher.ID == nil) || (*updatedTeacher.ID*1 == 0) || (*updatedTeacher.ID*1 < 0):
+	case (updatedTeacher.ID == nil) || (*updatedTeacher.ID*1 <= 0):
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, "ID is empty or not valid")
 		return
@@ -177,7 +177,7 @@ func DeleteTeacher(w http.ResponseWriter, r *http.Request) {
 	var deletedTeacher mymodels.Teacher
 	json.Unmarshal(reqBody, &deletedTeacher)
 
-	if (deletedTeacher.ID) == nil || (*deletedTeacher.ID*1 == 0) || (*deletedTeacher.ID*1 < 0) {
+	if (deletedTeacher.ID) == nil || (*deletedTeacher.ID*1 <= 0) {
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, "ID is empty or not valid")
 		return

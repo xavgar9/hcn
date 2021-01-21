@@ -222,7 +222,7 @@ func DeleteActivity(w http.ResponseWriter, r *http.Request) {
 	var deletedActivity mymodels.Activity
 	json.Unmarshal(reqBody, &deletedActivity)
 
-	if (deletedActivity.ID) == nil || (*deletedActivity.ID*1 == 0) || (*deletedActivity.ID*1 < 0) {
+	if (deletedActivity.ID) == nil || (*deletedActivity.ID*1 <= 0) {
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, "ID is empty or not valid")
 		return

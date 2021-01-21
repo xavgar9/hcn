@@ -78,13 +78,12 @@ func GetAllClinicalCases(w http.ResponseWriter, r *http.Request) {
 	courseID, err := strconv.Atoi(vars["id"])
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "(USER) %v is not a valid ID", vars["id"])
+		fmt.Fprintf(w, "ID is empty or not valid")
 		return
 	}
 
 	var allCourseClinicalCase mymodels.AllCourseClinicalCase
 	var Db, _ = config.MYSQLConnection()
-	//rows, err := Db.Query("SELECT ID, TeacherID FROM HCN WHERE ID IN (SELECT HCNID FROM Courses_HCN WHERE CourseID = ?)", courseID)
 	rows, err := Db.Query("SELECT ID, CourseID, ClinicalCaseID, Displayable FROM Courses_CCases WHERE CourseID = ?", courseID)
 	defer Db.Close()
 	if err != nil {
@@ -122,11 +121,11 @@ func RemoveClinicalCase(w http.ResponseWriter, r *http.Request) {
 	json.Unmarshal(reqBody, &removedCourseClinicalCase)
 
 	switch {
-	case (removedCourseClinicalCase.ClinicalCaseID) == nil || (*removedCourseClinicalCase.ClinicalCaseID*1 == 0) || (*removedCourseClinicalCase.ClinicalCaseID*1 < 0):
+	case (removedCourseClinicalCase.ClinicalCaseID) == nil || (*removedCourseClinicalCase.ClinicalCaseID*1 <= 0):
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, "ClinicalCaseID is empty or not valid")
 		return
-	case (removedCourseClinicalCase.CourseID) == nil || (*removedCourseClinicalCase.CourseID*1 == 0) || (*removedCourseClinicalCase.CourseID*1 < 0):
+	case (removedCourseClinicalCase.CourseID) == nil || (*removedCourseClinicalCase.CourseID*1 <= 0):
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, "CourseID is empty or not valid")
 		return
@@ -150,7 +149,6 @@ func RemoveClinicalCase(w http.ResponseWriter, r *http.Request) {
 		} else {
 			fmt.Fprintf(w, "No rows deleted")
 		}
-		w.Header().Set("Content-Type", "application/json")
 		return
 	}
 }
@@ -192,7 +190,6 @@ func VisibilityClinicalCase(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprintf(w, "No rows updated")
 		}
 
-		w.Header().Set("Content-Type", "application/json")
 		return
 	}
 }
