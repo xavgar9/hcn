@@ -93,13 +93,13 @@ func GetCourse(w http.ResponseWriter, r *http.Request) {
 	keys, ok := r.URL.Query()["id"]
 	if !ok || len(keys[0]) < 1 {
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "Url Param 'id' is missing or is invalid")
+		fmt.Fprintf(w, "ID is empty or not valid")
 		return
 	}
 	courseID, err := strconv.Atoi(keys[0])
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "Url Param 'id' is missing or is invalid")
+		fmt.Fprintf(w, "ID is empty or not valid")
 		return
 	}
 	var ID, TeacherID int

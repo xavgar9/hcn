@@ -28,7 +28,7 @@ func CasesGetCourse() mymodels.AllTest {
 			URL:          "/Courses/GetCourse?idddd=1",
 			Function:     courses.GetCourse,
 			Body:         "",
-			ExpectedBody: `Url Param 'id' is missing or is invalid`,
+			ExpectedBody: `ID is empty or not valid`,
 			StatusCode:   http.StatusBadRequest,
 		},
 		{
@@ -36,7 +36,7 @@ func CasesGetCourse() mymodels.AllTest {
 			URL:          "/Courses/GetCourse?id=",
 			Function:     courses.GetCourse,
 			Body:         "",
-			ExpectedBody: `Url Param 'id' is missing or is invalid`,
+			ExpectedBody: `ID is empty or not valid`,
 			StatusCode:   http.StatusBadRequest,
 		},
 		{

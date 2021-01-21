@@ -36,7 +36,7 @@ func CasesGetActivity() mymodels.AllTest {
 			URL:          "/Activities/GetActivity?iddd=1",
 			Function:     activities.GetActivity,
 			Body:         "",
-			ExpectedBody: `Url Param 'id' is missing or is invalid`,
+			ExpectedBody: `ID is empty or not valid`,
 			StatusCode:   http.StatusBadRequest,
 		},
 		{
@@ -44,7 +44,7 @@ func CasesGetActivity() mymodels.AllTest {
 			URL:          "/Activities/GetActivity?id=",
 			Function:     activities.GetActivity,
 			Body:         "",
-			ExpectedBody: `Url Param 'id' is missing or is invalid`,
+			ExpectedBody: `ID is empty or not valid`,
 			StatusCode:   http.StatusBadRequest,
 		},
 		{

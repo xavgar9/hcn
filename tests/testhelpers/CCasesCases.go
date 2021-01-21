@@ -28,7 +28,7 @@ func CasesGetClinicalCase() mymodels.AllTest {
 			URL:          "/ClinicalCases/GetClinicalCase?idddd=1",
 			Function:     ccases.GetClinicalCase,
 			Body:         "",
-			ExpectedBody: `Url Param 'id' is missing or is invalid`,
+			ExpectedBody: `ID is empty or not valid`,
 			StatusCode:   http.StatusBadRequest,
 		},
 		{
@@ -36,7 +36,7 @@ func CasesGetClinicalCase() mymodels.AllTest {
 			URL:          "/ClinicalCases/GetClinicalCase?id=",
 			Function:     ccases.GetClinicalCase,
 			Body:         "",
-			ExpectedBody: `Url Param 'id' is missing or is invalid`,
+			ExpectedBody: `ID is empty or not valid`,
 			StatusCode:   http.StatusBadRequest,
 		},
 		{

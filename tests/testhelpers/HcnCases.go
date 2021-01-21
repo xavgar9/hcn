@@ -28,7 +28,7 @@ func CasesGetHCN() mymodels.AllTest {
 			URL:          "/HCN/GetHCN?idddd=1",
 			Function:     hcn.GetHCN,
 			Body:         "",
-			ExpectedBody: `Url Param 'id' is missing or is invalid`,
+			ExpectedBody: `ID is empty or not valid`,
 			StatusCode:   http.StatusBadRequest,
 		},
 		{
@@ -36,7 +36,7 @@ func CasesGetHCN() mymodels.AllTest {
 			URL:          "/Courses/GetHCN?id=",
 			Function:     hcn.GetHCN,
 			Body:         "",
-			ExpectedBody: `Url Param 'id' is missing or is invalid`,
+			ExpectedBody: `ID is empty or not valid`,
 			StatusCode:   http.StatusBadRequest,
 		},
 		{

@@ -28,7 +28,7 @@ func CasesGetTeacher() mymodels.AllTest {
 			URL:          "/Teachers/GetTeacher?idddd=1",
 			Function:     teachers.GetTeacher,
 			Body:         "",
-			ExpectedBody: `Url Param 'id' is missing or is invalid`,
+			ExpectedBody: `ID is empty or not valid`,
 			StatusCode:   http.StatusBadRequest,
 		},
 		{
@@ -36,7 +36,7 @@ func CasesGetTeacher() mymodels.AllTest {
 			URL:          "/Teachers/GetTeacher?id=",
 			Function:     teachers.GetTeacher,
 			Body:         "",
-			ExpectedBody: `Url Param 'id' is missing or is invalid`,
+			ExpectedBody: `ID is empty or not valid`,
 			StatusCode:   http.StatusBadRequest,
 		},
 		{

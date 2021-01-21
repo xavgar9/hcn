@@ -28,7 +28,7 @@ func CasesGetFeedback() mymodels.AllTest {
 			URL:          "/Feedbacks/GetFeedback?idddd=1",
 			Function:     feedbacks.GetFeedback,
 			Body:         "",
-			ExpectedBody: `Url Param 'id' is missing or is invalid`,
+			ExpectedBody: `ID is empty or not valid`,
 			StatusCode:   http.StatusBadRequest,
 		},
 		{
@@ -36,7 +36,7 @@ func CasesGetFeedback() mymodels.AllTest {
 			URL:          "/Courses/GetFeedback?id=",
 			Function:     feedbacks.GetFeedback,
 			Body:         "",
-			ExpectedBody: `Url Param 'id' is missing or is invalid`,
+			ExpectedBody: `ID is empty or not valid`,
 			StatusCode:   http.StatusBadRequest,
 		},
 		{

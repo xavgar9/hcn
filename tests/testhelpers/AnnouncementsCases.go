@@ -36,7 +36,7 @@ func CasesGetAnnouncement() mymodels.AllTest {
 			URL:          "/Announcements/GetAnnouncement?iddd=1",
 			Function:     announcements.GetAnnouncement,
 			Body:         "",
-			ExpectedBody: `Url Param 'id' is missing or is invalid`,
+			ExpectedBody: `ID is empty or not valid`,
 			StatusCode:   http.StatusBadRequest,
 		},
 		{
@@ -44,7 +44,7 @@ func CasesGetAnnouncement() mymodels.AllTest {
 			URL:          "/Announcements/GetAnnouncement?id=",
 			Function:     announcements.GetAnnouncement,
 			Body:         "",
-			ExpectedBody: `Url Param 'id' is missing or is invalid`,
+			ExpectedBody: `ID is empty or not valid`,
 			StatusCode:   http.StatusBadRequest,
 		},
 		{
