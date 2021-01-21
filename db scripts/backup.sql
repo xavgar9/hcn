@@ -6,6 +6,7 @@ DELETE FROM Courses_HCN;
 DELETE FROM Announcements;
 ALTER TABLE Announcements AUTO_INCREMENT = 1;
 DELETE FROM Students_Courses;
+ALTER TABLE Students_Courses AUTO_INCREMENT = 1;
 DELETE FROM Students;
 DELETE FROM Activities;
 ALTER TABLE Activities AUTO_INCREMENT = 1;

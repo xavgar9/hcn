@@ -5,13 +5,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"hcn/config"
-	"hcn/helpers"
 	"hcn/mymodels"
 	"io/ioutil"
 	"net/http"
 	"strconv"
-
-	"github.com/gorilla/mux"
 )
 
 // CreateCourse bla bla...
@@ -223,7 +220,7 @@ func AddStudent(w http.ResponseWriter, r *http.Request) {
 	switch {
 	case (newStudentTuition.CourseID == nil) || (*newStudentTuition.CourseID*1 <= 0):
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "CoursesID is empty or not valid")
+		fmt.Fprintf(w, "CourseID is empty or not valid")
 		return
 	case (newStudentTuition.StudentID == nil) || (*newStudentTuition.StudentID*1 <= 0):
 		w.WriteHeader(http.StatusBadRequest)
@@ -238,10 +235,10 @@ func AddStudent(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		cnt, _ := rows.RowsAffected()
-		if cnt == 0 {			
-			fmt.FPrintf(w, "Student added")
+		if cnt == 0 {
+			fmt.Fprintf(w, "Student not added")
 		} else if cnt == 1 {
-			fmt.FPrintf(w, "Student  not added")
+			fmt.Fprintf(w, "Student added")
 		}
 		return
 	}
@@ -253,13 +250,13 @@ func GetAllStudentsCourse(w http.ResponseWriter, r *http.Request) {
 	keys, ok := r.URL.Query()["id"]
 	if !ok || len(keys[0]) < 1 {
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "Url Param 'id' is missing or is invalid")
+		fmt.Fprintf(w, "ID is empty or not valid")
 		return
 	}
 	courseID, err := strconv.Atoi(keys[0])
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "Url Param 'id' is missing or is invalid")
+		fmt.Fprintf(w, "ID is empty or not valid")
 		return
 	}
 
@@ -301,35 +298,35 @@ func RemoveStudent(w http.ResponseWriter, r *http.Request) {
 	}
 	var removedStudent mymodels.StudentTuition
 	json.Unmarshal(reqBody, &removedStudent)
-	if (removedStudent.StudentID) == nil || (*removedStudent.StudentID*1 <= 0):
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "StudentID is empty or not valid")
-		return
-	}
-	if (removedStudent.CourseID) == nil || (*removedStudent.CourseID*1 <= 0):
+	switch {
+	case (removedStudent.CourseID) == nil || (*removedStudent.CourseID*1 <= 0):
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, "CourseID is empty or not valid")
 		return
-	}
+	case (removedStudent.StudentID) == nil || (*removedStudent.StudentID*1 <= 0):
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, "StudentID is empty or not valid")
+		return
+	default:
+		var Db, _ = config.MYSQLConnection()
+		row, err := Db.Exec("DELETE FROM Students_Courses WHERE CourseID=? AND StudentID=?", removedStudent.CourseID, removedStudent.StudentID)
+		defer Db.Close()
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			fmt.Fprintf(w, "(SQL) %v", err.Error())
+			return
+		}
 
-	var Db, _ = config.MYSQLConnection()
-	row, err := Db.Exec("DELETE FROM Students_Courses WHERE CourseID=? AND StudentID=?", removedStudent.CourseID, removedStudent.StudentID)
-	defer Db.Close()
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(w, "(SQL) %v", err.Error())
+		count, err := row.RowsAffected()
+		if err != nil {
+			fmt.Fprintf(w, "(SQL) %v", err.Error())
+			return
+		}
+		if count == 1 {
+			fmt.Fprintf(w, "One row deleted")
+		} else {
+			fmt.Fprintf(w, "No rows deleted")
+		}
 		return
 	}
-
-	count, err := row.RowsAffected()
-	if err != nil {
-		fmt.Fprintf(w, "(SQL) %v", err.Error())
-		return
-	}
-	if count == 1 {
-		fmt.Fprintf(w, "One row deleted")
-	} else {
-		fmt.Fprintf(w, "No rows deleted")
-	}
-	return
 }

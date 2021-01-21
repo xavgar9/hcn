@@ -13,7 +13,7 @@ import (
 
 // runTest basic test for running endpoints test.
 func runTest(t *testing.T, allTest mymodels.AllTest) {
-	for _, test := range allTest {
+	for i, test := range allTest {
 		req, err := http.NewRequest(test.Method, test.URL, nil)
 		if err != nil {
 			t.Fatal(err)
@@ -22,13 +22,13 @@ func runTest(t *testing.T, allTest mymodels.AllTest) {
 		handler := http.HandlerFunc(test.Function)
 		handler.ServeHTTP(rr, req)
 		if status := rr.Code; status != test.StatusCode {
-			t.Errorf("Handler returned wrong status code: got %v want %v",
-				status, test.StatusCode)
+			t.Errorf("Test #%v: Handler returned wrong status code: got %v want %v",
+				i, status, test.StatusCode)
 		}
 		responseBody := strings.TrimSuffix(rr.Body.String(), "\n") //deleting \n last char
 		if responseBody != test.ExpectedBody {
-			t.Errorf("Handler returned unexpected body: got \n%v want \n%v",
-				responseBody, test.ExpectedBody)
+			t.Errorf("Test #%v: Handler returned unexpected body: got \n%v want \n%v",
+				i, responseBody, test.ExpectedBody)
 		}
 	}
 }
@@ -55,7 +55,6 @@ func runTestWithBody(t *testing.T, allTest mymodels.AllTest) {
 	}
 }
 
-/*
 // Teachers test
 func TestGetAllTeachers(t *testing.T) {
 	runTest(t, testhelpers.CasesGetAllTeachers())
@@ -182,7 +181,6 @@ func TestDeleteHCN(t *testing.T) {
 	runTestWithBody(t, testhelpers.CasesDeleteHCN())
 }
 
-
 // Clinical Case test
 func TestGetAllClinicalCases(t *testing.T) {
 	runTest(t, testhelpers.CasesGetAllClinicalCases())
@@ -204,18 +202,16 @@ func TestDeleteClinicalCase(t *testing.T) {
 	runTestWithBody(t, testhelpers.CasesDeleteClinicalCase())
 }
 
-*/
-
 // Activities test
 func TestGetAllActivities(t *testing.T) {
 	runTest(t, testhelpers.CasesGetAllActivities())
 }
 
-func TestCasesGetActivity(t *testing.T) {
+func TestGetActivity(t *testing.T) {
 	runTest(t, testhelpers.CasesGetActivity())
 }
 
-func TestCreateActivitye(t *testing.T) {
+func TestCreateActivity(t *testing.T) {
 	runTestWithBody(t, testhelpers.CasesCreateActivity())
 }
 
@@ -229,7 +225,7 @@ func TestDeleteActivity(t *testing.T) {
 
 // Students_Courses test
 func TestGetAllStudentsCourse(t *testing.T) {
-	runTest(t, testhelpers.CasesGetAllStudentsCourses())
+	runTest(t, testhelpers.CasesGetAllStudentsCourse())
 }
 
 func TestAddStudent(t *testing.T) {

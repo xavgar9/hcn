@@ -10,8 +10,6 @@ import (
 	"net/http"
 
 	"strconv"
-
-	"github.com/gorilla/mux"
 )
 
 // CreateActivity bla bla...
@@ -44,19 +42,19 @@ func CreateActivity(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, "LimitDate is empty or not valid")
 		return
-	case (*newActivity.CourseID*1 == 0) || (*newActivity.CourseID*1 < 0):
+	case (newActivity.CourseID == nil) || (*newActivity.CourseID*1 <= 0):
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, "CourseID is empty or not valid")
 		return
-	case (*newActivity.ClinicalCaseID*1 == 0) || (*newActivity.ClinicalCaseID*1 < 0):
+	case (newActivity.ClinicalCaseID == nil) || (*newActivity.ClinicalCaseID*1 <= 0):
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, "ClinicalCaseID is empty or not valid")
 		return
-	case (*newActivity.HCNID*1 == 0) || (*newActivity.HCNID*1 < 0):
+	case (newActivity.HCNID == nil) || (*newActivity.HCNID*1 <= 0):
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, "HCNID is empty or not valid")
 		return
-	case (*newActivity.Difficulty*1 == 0) || (*newActivity.Difficulty*1 < 0):
+	case (newActivity.Difficulty == nil) || (*newActivity.Difficulty*1 <= 0):
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, "Difficulty is empty or not valid")
 		return
@@ -156,7 +154,7 @@ func UpdateActivity(w http.ResponseWriter, r *http.Request) {
 	var updatedActivity mymodels.Activity
 	json.Unmarshal(reqBody, &updatedActivity)
 	switch {
-	case (updatedAnnouncupdatedActivityement.ID == nil) || (*updatedAnnouncement.ID*1 == 0) || (*updatedAnnouncement.ID*1 < 0):
+	case (updatedActivity.ID == nil) || (*updatedActivity.ID*1 <= 0):
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, "ID is empty or not valid")
 		return
@@ -176,17 +174,17 @@ func UpdateActivity(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, "LimitDate is empty or not valid")
 		return
-	case (*updatedActivity.ClinicalCaseID*1 == 0) || (*updatedActivity.ClinicalCaseID*1 < 0):
+	case (updatedActivity.ClinicalCaseID == nil) || (*updatedActivity.ClinicalCaseID*1 <= 0):
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "%v is not a valid ClinicalCasesID", *updatedActivity.CourseID)
+		fmt.Fprintf(w, "ClinicalCaseID is empty or not valid")
 		return
-	case (*updatedActivity.HCNID*1 == 0) || (*updatedActivity.HCNID*1 < 0):
+	case (updatedActivity.HCNID == nil) || (*updatedActivity.HCNID*1 <= 0):
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "%v is not a valid HCNID", *updatedActivity.CourseID)
+		fmt.Fprintf(w, "HCNID is empty or not valid")
 		return
-	case (*updatedActivity.Difficulty*1 == 0) || (*updatedActivity.Difficulty*1 < 0):
+	case (updatedActivity.Difficulty == nil) || (*updatedActivity.Difficulty*1 <= 0):
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "%v is not a valid Difficulty", *updatedActivity.CourseID)
+		fmt.Fprintf(w, "Difficulty is empty or not valid")
 		return
 	default:
 		var Db, _ = config.MYSQLConnection()
