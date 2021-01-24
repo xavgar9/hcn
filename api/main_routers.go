@@ -75,12 +75,12 @@ func MainRouters(router *mux.Router) {
 	router.HandleFunc("/Courses/DeleteCourse", courses.DeleteCourse).Methods("DELETE")
 
 	router.HandleFunc("/Courses/AddHCN", courses.AddHCN).Methods("POST")
-	router.HandleFunc("/Courses/GetAllHCN/{id}", courses.GetAllHCN).Methods("GET")
+	router.HandleFunc("/Courses/GetAllHCN", courses.GetAllHCNCourse).Methods("GET")
 	router.HandleFunc("/Courses/RemoveHCN", courses.RemoveHCN).Methods("DELETE")
 	router.HandleFunc("/Courses/VisibilityHCN", courses.VisibilityHCN).Methods("POST")
 
 	router.HandleFunc("/Courses/AddClinicalCase", courses.AddClinicalCase).Methods("POST")
-	router.HandleFunc("/Courses/GetAllClinicalCases/{id}", courses.GetAllClinicalCases).Methods("GET")
+	router.HandleFunc("/Courses/GetAllClinicalCases", courses.GetAllClinicalCases).Methods("GET")
 	router.HandleFunc("/Courses/RemoveClinicalCase", courses.RemoveClinicalCase).Methods("DELETE")
 	router.HandleFunc("/Courses/VisibilityClinicalCase", courses.VisibilityClinicalCase).Methods("POST")
 
@@ -116,8 +116,8 @@ func MainRouters(router *mux.Router) {
 	router.HandleFunc("/ClinicalCases/CreateClinicalCase", ccases.CreateClinicalCase).Methods("POST")
 	router.HandleFunc("/ClinicalCases/DeleteClinicalCase", ccases.DeleteClinicalCase).Methods("DELETE")
 
-	router.HandleFunc("/ClinicalCases/AddHCN", ccases.AddHCN).Methods("POST")
-	router.HandleFunc("/ClinicalCases/RemoveHCN", ccases.RemoveHCN).Methods("DELETE")
+	router.HandleFunc("/ClinicalCases/LinkHCN", ccases.LinkHCN).Methods("POST")
+	router.HandleFunc("/ClinicalCases/UnlinkHCN", ccases.UnlinkHCN).Methods("DELETE")
 
 	// HCN URLs
 	router.HandleFunc("/HCN/GetAllHCN", hcn.GetAllHCN).Methods("GET")

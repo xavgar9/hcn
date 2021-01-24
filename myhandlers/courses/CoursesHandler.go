@@ -141,7 +141,7 @@ func UpdateCourse(w http.ResponseWriter, r *http.Request) {
 		row, err := Db.Exec("UPDATE Courses SET Name=? WHERE ID=?", updatedCourse.Name, updatedCourse.ID)
 		defer Db.Close()
 		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
+			w.WriteHeader(http.StatusConflict)
 			fmt.Fprintf(w, "(SQL) %v", err.Error())
 			return
 		}

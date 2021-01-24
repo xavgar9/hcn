@@ -5,13 +5,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"hcn/config"
-	"hcn/helpers"
 	"hcn/mymodels"
 	"io/ioutil"
 	"net/http"
 	"strconv"
-
-	"github.com/gorilla/mux"
 )
 
 // AddClinicalCase adds a relationship between a course and a HCN...
@@ -28,40 +25,35 @@ func AddClinicalCase(w http.ResponseWriter, r *http.Request) {
 	var Db, _ = config.MYSQLConnection()
 	json.Unmarshal(reqBody, &newCourseClinicalCase)
 	switch {
-	case (*newCourseClinicalCase.CourseID*1 == 0) || (*newCourseClinicalCase.CourseID*1 < 0):
+	case (newCourseClinicalCase.CourseID == nil) || (*newCourseClinicalCase.CourseID*1 <= 0):
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, "CourseID is empty or not valid")
 		return
-	case (*newCourseClinicalCase.ClinicalCaseID*1 == 0) || (*newCourseClinicalCase.ClinicalCaseID*1 < 0):
+	case (newCourseClinicalCase.ClinicalCaseID == nil) || (*newCourseClinicalCase.ClinicalCaseID*1 <= 0):
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, "ClinicalCaseID is empty or not valid")
 		return
-	case (*newCourseClinicalCase.Displayable*1 == 0) || (*newCourseClinicalCase.Displayable*1 < 0):
+	case (newCourseClinicalCase.Displayable == nil):
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "%v is not a valid display status", *newCourseClinicalCase.Displayable)
+		fmt.Fprintf(w, "Displayable is empty or not valid")
 		return
 	default:
-		rows, err := Db.Exec("INSERT INTO Courses_HCN(CourseID,ClinicalCaseID,Displayable) VALUES (?,?,?)", newCourseClinicalCase.CourseID, newCourseClinicalCase.ClinicalCaseID, newCourseClinicalCase.Displayable)
-		defer Db.Close()
-		if err != nil {
-			fmt.Fprintf(w, "(SQL) %v", err.Error())
+		if *newCourseClinicalCase.Displayable == 0 || *newCourseClinicalCase.Displayable == 1 {
+			rows, err := Db.Exec("INSERT INTO Courses_CCases(CourseID,ClinicalCaseID,Displayable) VALUES (?,?,?)", newCourseClinicalCase.CourseID, newCourseClinicalCase.ClinicalCaseID, newCourseClinicalCase.Displayable)
+			defer Db.Close()
+			if err != nil {
+				w.WriteHeader(http.StatusConflict)
+				fmt.Fprintf(w, "(SQL) %v", err.Error())
+				return
+			}
+			cnt, _ := rows.RowsAffected()
+			if cnt == 1 {
+				fmt.Fprintf(w, "Clinical Case added to course")
+			}
 			return
 		}
-		cnt, err := rows.RowsAffected()
-		if err != nil {
-			fmt.Fprintf(w, "(SQL) %v", err.Error())
-			return
-		} else if cnt < 1 {
-			fmt.Fprintf(w, "No rows affected")
-			return
-		}
-		lastID, err := rows.LastInsertId()
-		if err != nil {
-			fmt.Fprintf(w, "(SQL) %v", err.Error())
-			return
-		}
-		fmt.Fprintf(w, "ID inserted: %v", lastID)
-		w.WriteHeader(http.StatusCreated)
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, "Displayable is empty or not valid")
 		return
 	}
 }
@@ -69,13 +61,13 @@ func AddClinicalCase(w http.ResponseWriter, r *http.Request) {
 // GetAllClinicalCases bla bla...
 func GetAllClinicalCases(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	if !helpers.VerifyRequest(r) {
-		w.WriteHeader(http.StatusForbidden)
+	keys, ok := r.URL.Query()["id"]
+	if !ok || len(keys[0]) < 1 {
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, "ID is empty or not valid")
 		return
 	}
-
-	vars := mux.Vars(r)
-	courseID, err := strconv.Atoi(vars["id"])
+	courseID, err := strconv.Atoi(keys[0])
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, "ID is empty or not valid")
@@ -121,13 +113,13 @@ func RemoveClinicalCase(w http.ResponseWriter, r *http.Request) {
 	json.Unmarshal(reqBody, &removedCourseClinicalCase)
 
 	switch {
-	case (removedCourseClinicalCase.ClinicalCaseID) == nil || (*removedCourseClinicalCase.ClinicalCaseID*1 <= 0):
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "ClinicalCaseID is empty or not valid")
-		return
 	case (removedCourseClinicalCase.CourseID) == nil || (*removedCourseClinicalCase.CourseID*1 <= 0):
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, "CourseID is empty or not valid")
+		return
+	case (removedCourseClinicalCase.ClinicalCaseID) == nil || (*removedCourseClinicalCase.ClinicalCaseID*1 <= 0):
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, "ClinicalCaseID is empty or not valid")
 		return
 	default:
 		var Db, _ = config.MYSQLConnection()
@@ -165,16 +157,28 @@ func VisibilityClinicalCase(w http.ResponseWriter, r *http.Request) {
 	var updatedCourseClinicalCase mymodels.CourseClinicalCase
 	json.Unmarshal(reqBody, &updatedCourseClinicalCase)
 	switch {
-	case (*updatedCourseClinicalCase.Displayable*1 > 1):
+	case (updatedCourseClinicalCase.ID == nil) || (*updatedCourseClinicalCase.ID*1 == 0) || (*updatedCourseClinicalCase.ID*1 < 0):
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "%v is not a valid display status", *updatedCourseClinicalCase.Displayable)
+		fmt.Fprintf(w, "ID is empty or not valid")
+		return
+	case (updatedCourseClinicalCase.CourseID == nil) || (*updatedCourseClinicalCase.CourseID*1 <= 0):
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, "CourseID is empty or not valid")
+		return
+	case (updatedCourseClinicalCase.ClinicalCaseID == nil) || (*updatedCourseClinicalCase.ClinicalCaseID*1 <= 0):
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, "ClinicalCaseID is empty or not valid")
+		return
+	case (updatedCourseClinicalCase.Displayable == nil) || (*updatedCourseClinicalCase.Displayable*1 > 1):
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, "Displayable is empty or not valid")
 		return
 	default:
 		var Db, _ = config.MYSQLConnection()
 		row, err := Db.Exec("UPDATE Courses_CCases SET Displayable=? WHERE CourseID=? AND ClinicalCaseID=?", updatedCourseClinicalCase.Displayable, updatedCourseClinicalCase.CourseID, updatedCourseClinicalCase.ClinicalCaseID)
 		defer Db.Close()
 		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
+			w.WriteHeader(http.StatusConflict)
 			fmt.Fprintf(w, "(SQL) %v", err.Error())
 			return
 		}
@@ -185,11 +189,10 @@ func VisibilityClinicalCase(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		if count == 1 {
-			fmt.Fprintf(w, "One row updated")
+			json.NewEncoder(w).Encode(updatedCourseClinicalCase)
 		} else {
 			fmt.Fprintf(w, "No rows updated")
 		}
-
 		return
 	}
 }

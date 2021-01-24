@@ -238,10 +238,44 @@ func TestRemoveStudent(t *testing.T) {
 
 // CCases_HCN test
 
+func TestLinkHCN(t *testing.T) {
+	runTestWithBody(t, testhelpers.CasesLinkHCN())
+}
+
+func TestUnlinkHCN(t *testing.T) {
+	runTestWithBody(t, testhelpers.CasesUnlinkHCN())
+}
+
+// Courses_HCN test
+
 func TestAddHCN(t *testing.T) {
 	runTestWithBody(t, testhelpers.CasesAddHCN())
 }
 
+func TestGetAllHCNCourse(t *testing.T) {
+	runTestWithBody(t, testhelpers.CasesGetAllHCNCourse())
+}
+
 func TestRemoveHCN(t *testing.T) {
 	runTestWithBody(t, testhelpers.CasesRemoveHCN())
+}
+
+func TestVisibilityHCN(t *testing.T) {
+	runTestWithBody(t, testhelpers.CasesVisibilityHCN())
+}
+
+func TestAddClinicalCase(t *testing.T) {
+	runTestWithBody(t, testhelpers.CasesAddClinicalCase())
+}
+
+func TestGetAllClinicalCasesCourse(t *testing.T) {
+	runTestWithBody(t, testhelpers.CasesGetAllClinicalCasesCourse())
+}
+
+func TestRemoveClinicalCase(t *testing.T) {
+	runTestWithBody(t, testhelpers.CasesRemoveClinicalCase())
+}
+
+func TestVisibilityClinicalCase(t *testing.T) {
+	runTestWithBody(t, testhelpers.CasesVisibilityClinicalCase())
 }

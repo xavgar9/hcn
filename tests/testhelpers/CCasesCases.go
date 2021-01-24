@@ -220,53 +220,53 @@ func CasesDeleteClinicalCase() mymodels.AllTest {
 	}
 }
 
-// CasesAddHCN vinculates vinculates one HCN with one Clinical Case
-func CasesAddHCN() mymodels.AllTest {
+// CasesLinkHCN vinculates vinculates one HCN with one Clinical Case
+func CasesLinkHCN() mymodels.AllTest {
 	return mymodels.AllTest{
 		{
 			Method:       "POST",
-			URL:          "/ClinicalCases/AddHCN",
-			Function:     ccases.AddHCN,
+			URL:          "/ClinicalCases/LinkHCN",
+			Function:     ccases.LinkHCN,
 			Body:         `{"ClinicalCaseID":2,"HCNID":2}`,
 			ExpectedBody: `HCN added`,
 			StatusCode:   http.StatusOK,
 		},
 		{
 			Method:       "POST",
-			URL:          "/ClinicalCases/AddHCN",
-			Function:     ccases.AddHCN,
+			URL:          "/ClinicalCases/LinkHCN",
+			Function:     ccases.LinkHCN,
 			Body:         `{"ClinicalCaseID":3,"HCNID":3}`,
 			ExpectedBody: `HCN added`,
 			StatusCode:   http.StatusOK,
 		},
 		{
 			Method:       "POST",
-			URL:          "/ClinicalCases/AddHCN",
-			Function:     ccases.AddHCN,
+			URL:          "/ClinicalCases/LinkHCN",
+			Function:     ccases.LinkHCN,
 			Body:         `{"ClinicalCaseID":1,"HCNID":1}`,
 			ExpectedBody: `(SQL) Error 1062: Duplicate entry '1-1' for key 'uq_CCases_HCN'`,
 			StatusCode:   http.StatusConflict,
 		},
 		{
 			Method:       "POST",
-			URL:          "/ClinicalCases/AddHCN",
-			Function:     ccases.AddHCN,
+			URL:          "/ClinicalCases/LinkHCN",
+			Function:     ccases.LinkHCN,
 			Body:         `{"HCNID":4}`,
 			ExpectedBody: `ClinicalCaseID is empty or not valid`,
 			StatusCode:   http.StatusBadRequest,
 		},
 		{
 			Method:       "POST",
-			URL:          "/ClinicalCases/AddHCN",
-			Function:     ccases.AddHCN,
+			URL:          "/ClinicalCases/LinkHCN",
+			Function:     ccases.LinkHCN,
 			Body:         `{"ClinicalCaseID":2}`,
 			ExpectedBody: `HCNID is empty or not valid`,
 			StatusCode:   http.StatusBadRequest,
 		},
 		{
 			Method:       "POST",
-			URL:          "/ClinicalCases/AddHCN",
-			Function:     ccases.AddHCN,
+			URL:          "/ClinicalCases/LinkHCN",
+			Function:     ccases.LinkHCN,
 			Body:         `{"ClinicalCaseID":3,"HCNID":5}`,
 			ExpectedBody: `HCN added`,
 			StatusCode:   http.StatusOK,
@@ -274,45 +274,45 @@ func CasesAddHCN() mymodels.AllTest {
 	}
 }
 
-// CasesRemoveHCN bla bla...
-func CasesRemoveHCN() mymodels.AllTest {
+// CasesUnlinkHCN bla bla...
+func CasesUnlinkHCN() mymodels.AllTest {
 	return mymodels.AllTest{
 		{
 			Method:       "DELETE",
-			URL:          "/Courses/RemoveHCN",
-			Function:     ccases.RemoveHCN,
+			URL:          "/Courses/UnlinkHCN",
+			Function:     ccases.UnlinkHCN,
 			Body:         `{"ClinicalCaseID":2,"HCNID":2}`,
 			ExpectedBody: `One row deleted`,
 			StatusCode:   http.StatusOK,
 		},
 		{
 			Method:       "DELETE",
-			URL:          "/Courses/RemoveHCN",
-			Function:     ccases.RemoveHCN,
+			URL:          "/Courses/UnlinkHCN",
+			Function:     ccases.UnlinkHCN,
 			Body:         `{"ClinicalCaseID":2,"HCNID":2}`,
 			ExpectedBody: `No rows deleted`,
 			StatusCode:   http.StatusOK,
 		},
 		{
 			Method:       "DELETE",
-			URL:          "/Courses/RemoveHCN",
-			Function:     ccases.RemoveHCN,
+			URL:          "/Courses/UnlinkHCN",
+			Function:     ccases.UnlinkHCN,
 			Body:         `{"ClinicalCaseID":3,"HCNID":3}`,
 			ExpectedBody: `One row deleted`,
 			StatusCode:   http.StatusOK,
 		},
 		{
 			Method:       "DELETE",
-			URL:          "/Courses/RemoveHCN",
-			Function:     ccases.RemoveHCN,
+			URL:          "/Courses/UnlinkHCN",
+			Function:     ccases.UnlinkHCN,
 			Body:         `{"ClinicalCaseID":2}`,
 			ExpectedBody: `HCNID is empty or not valid`,
 			StatusCode:   http.StatusBadRequest,
 		},
 		{
 			Method:       "DELETE",
-			URL:          "/Courses/RemoveHCN",
-			Function:     ccases.RemoveHCN,
+			URL:          "/Courses/UnlinkHCN",
+			Function:     ccases.UnlinkHCN,
 			Body:         `{"HCNID":4}`,
 			ExpectedBody: `ClinicalCaseID is empty or not valid`,
 			StatusCode:   http.StatusBadRequest,

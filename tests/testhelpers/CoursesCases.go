@@ -309,3 +309,419 @@ func CasesRemoveStudent() mymodels.AllTest {
 		},
 	}
 }
+
+// CasesAddHCN bla bla...
+func CasesAddHCN() mymodels.AllTest {
+	return mymodels.AllTest{
+		{
+			Method:       "POST",
+			URL:          "/Courses/AddHCN",
+			Function:     courses.AddHCN,
+			Body:         `{"CourseID":1,"HCNID":4,"Displayable":1}`,
+			ExpectedBody: `HCN added to course`,
+			StatusCode:   http.StatusOK,
+		},
+		{
+			Method:       "POST",
+			URL:          "/Courses/AddHCN",
+			Function:     courses.AddHCN,
+			Body:         `{"CourseID":2,"HCNID":5,"Displayable":0}`,
+			ExpectedBody: `HCN added to course`,
+			StatusCode:   http.StatusOK,
+		},
+		{
+			Method:       "POST",
+			URL:          "/Courses/AddHCN",
+			Function:     courses.AddHCN,
+			Body:         `{"CourseID":1,"HCNID":1,"Displayable":0}`,
+			ExpectedBody: `(SQL) Error 1062: Duplicate entry '1-1' for key 'uq_Courses_HCN'`,
+			StatusCode:   http.StatusConflict,
+		},
+		{
+			Method:       "POST",
+			URL:          "/Courses/AddHCN",
+			Function:     courses.AddHCN,
+			Body:         `{"HCNID":4,"Displayable":1}`,
+			ExpectedBody: `CourseID is empty or not valid`,
+			StatusCode:   http.StatusBadRequest,
+		},
+		{
+			Method:       "POST",
+			URL:          "/Courses/AddHCN",
+			Function:     courses.AddHCN,
+			Body:         `{"CourseID":2,"Displayable":0}`,
+			ExpectedBody: `HCNID is empty or not valid`,
+			StatusCode:   http.StatusBadRequest,
+		},
+		{
+			Method:       "POST",
+			URL:          "/Courses/AddHCN",
+			Function:     courses.AddHCN,
+			Body:         `{"CourseID":2,"HCNID":5}`,
+			ExpectedBody: `Displayable is empty or not valid`,
+			StatusCode:   http.StatusBadRequest,
+		},
+		{
+			Method:       "POST",
+			URL:          "/Courses/AddHCN",
+			Function:     courses.AddHCN,
+			Body:         `{"CourseID":2,"HCNID":5,"Displayable":-1}`,
+			ExpectedBody: `Displayable is empty or not valid`,
+			StatusCode:   http.StatusBadRequest,
+		},
+		{
+			Method:       "POST",
+			URL:          "/Courses/AddHCN",
+			Function:     courses.AddHCN,
+			Body:         `{"CourseID":2,"HCNID":5,"Displayable":2}`,
+			ExpectedBody: `Displayable is empty or not valid`,
+			StatusCode:   http.StatusBadRequest,
+		},
+		{
+			Method:       "POST",
+			URL:          "/Courses/AddHCN",
+			Function:     courses.AddHCN,
+			Body:         `{"CourseID":"Arroz","StudentID":5,"Displayable":0}`,
+			ExpectedBody: `CourseID is empty or not valid`,
+			StatusCode:   http.StatusBadRequest,
+		},
+	}
+}
+
+// CasesGetAllHCNCourse bla bla...
+func CasesGetAllHCNCourse() mymodels.AllTest {
+	return mymodels.AllTest{
+		{
+			Method:       "DELETE",
+			URL:          "/Courses/GetAllHCNCourse?iddddd=1",
+			Function:     courses.GetAllHCNCourse,
+			Body:         ``,
+			ExpectedBody: `ID is empty or not valid`,
+			StatusCode:   http.StatusBadRequest,
+		},
+		{
+			Method:       "DELETE",
+			URL:          "/Courses/GetAllHCNCourse?id=1",
+			Function:     courses.GetAllHCNCourse,
+			Body:         ``,
+			ExpectedBody: `[{"ID":1,"CourseID":1,"HCNID":1,"Displayable":1},{"ID":2,"CourseID":1,"HCNID":2,"Displayable":0},{"ID":4,"CourseID":1,"HCNID":4,"Displayable":1}]`,
+			StatusCode:   http.StatusOK,
+		},
+		{
+			Method:       "DELETE",
+			URL:          "/Courses/GetAllHCNCourse?id=2",
+			Function:     courses.GetAllHCNCourse,
+			Body:         ``,
+			ExpectedBody: `[{"ID":3,"CourseID":2,"HCNID":3,"Displayable":1},{"ID":5,"CourseID":2,"HCNID":5,"Displayable":0}]`,
+			StatusCode:   http.StatusOK,
+		},
+		{
+			Method:       "DELETE",
+			URL:          "/Courses/GetAllHCNCourse",
+			Function:     courses.GetAllHCNCourse,
+			Body:         ``,
+			ExpectedBody: `ID is empty or not valid`,
+			StatusCode:   http.StatusBadRequest,
+		},
+	}
+}
+
+// CasesRemoveHCN bla bla...
+func CasesRemoveHCN() mymodels.AllTest {
+	return mymodels.AllTest{
+		{
+			Method:       "DELETE",
+			URL:          "/Courses/RemoveHCN",
+			Function:     courses.RemoveHCN,
+			Body:         `{"CourseID":1, "HCNID":4}`,
+			ExpectedBody: `One row deleted`,
+			StatusCode:   http.StatusOK,
+		},
+		{
+			Method:       "DELETE",
+			URL:          "/Courses/RemoveHCN",
+			Function:     courses.RemoveHCN,
+			Body:         `{"CourseID":1, "HCNID":4}`,
+			ExpectedBody: `No rows deleted`,
+			StatusCode:   http.StatusOK,
+		},
+		{
+			Method:       "DELETE",
+			URL:          "/Courses/RemoveHCN",
+			Function:     courses.RemoveHCN,
+			Body:         `{"CourseID":2, "HCNID":5}`,
+			ExpectedBody: `One row deleted`,
+			StatusCode:   http.StatusOK,
+		},
+		{
+			Method:       "DELETE",
+			URL:          "/Courses/RemoveHCN",
+			Function:     courses.RemoveHCN,
+			Body:         ``,
+			ExpectedBody: `CourseID is empty or not valid`,
+			StatusCode:   http.StatusBadRequest,
+		},
+	}
+}
+
+// CasesVisibilityHCN bla bla...
+func CasesVisibilityHCN() mymodels.AllTest {
+	return mymodels.AllTest{
+		{
+			Method:       "POST",
+			URL:          "/Courses/VisibilityHCN",
+			Function:     courses.VisibilityHCN,
+			Body:         `{"ID":1,"CourseID":1,"HCNID":1,"Displayable":0}`,
+			ExpectedBody: `{"ID":1,"CourseID":1,"HCNID":1,"Displayable":0}`,
+			StatusCode:   http.StatusOK,
+		},
+		{
+			Method:       "POST",
+			URL:          "/Courses/VisibilityHCN",
+			Function:     courses.VisibilityHCN,
+			Body:         `{"ID":1,"CourseID":1,"HCNID":1,"Displayable":1}`,
+			ExpectedBody: `{"ID":1,"CourseID":1,"HCNID":1,"Displayable":1}`,
+			StatusCode:   http.StatusOK,
+		},
+		{
+			Method:       "POST",
+			URL:          "/Courses/VisibilityHCN",
+			Function:     courses.VisibilityHCN,
+			Body:         `{"CourseID",1 "HCNID":4,"Displayable":1}`,
+			ExpectedBody: `ID is empty or not valid`,
+			StatusCode:   http.StatusBadRequest,
+		},
+		{
+			Method:       "POST",
+			URL:          "/Courses/VisibilityHCN",
+			Function:     courses.VisibilityHCN,
+			Body:         `{"ID":1,"HCNID":4,"Displayable":1}`,
+			ExpectedBody: `CourseID is empty or not valid`,
+			StatusCode:   http.StatusBadRequest,
+		},
+		{
+			Method:       "POST",
+			URL:          "/Courses/VisibilityHCN",
+			Function:     courses.VisibilityHCN,
+			Body:         `{"ID":1,"CourseID":2,"Displayable":0}`,
+			ExpectedBody: `HCNID is empty or not valid`,
+			StatusCode:   http.StatusBadRequest,
+		},
+		{
+			Method:       "POST",
+			URL:          "/Courses/VisibilityHCN",
+			Function:     courses.VisibilityHCN,
+			Body:         `{"ID":1,"CourseID":2,"HCNID":5}`,
+			ExpectedBody: `Displayable is empty or not valid`,
+			StatusCode:   http.StatusBadRequest,
+		},
+	}
+}
+
+// CasesAddClinicalCase bla bla...
+func CasesAddClinicalCase() mymodels.AllTest {
+	return mymodels.AllTest{
+		{
+			Method:       "POST",
+			URL:          "/Courses/AddClinicalCase",
+			Function:     courses.AddClinicalCase,
+			Body:         `{"CourseID":1,"ClinicalCaseID":2,"Displayable":1}`,
+			ExpectedBody: `Clinical Case added to course`,
+			StatusCode:   http.StatusOK,
+		},
+		{
+			Method:       "POST",
+			URL:          "/Courses/AddClinicalCase",
+			Function:     courses.AddClinicalCase,
+			Body:         `{"CourseID":2,"ClinicalCaseID":3,"Displayable":0}`,
+			ExpectedBody: `Clinical Case added to course`,
+			StatusCode:   http.StatusOK,
+		},
+		{
+			Method:       "POST",
+			URL:          "/Courses/AddClinicalCase",
+			Function:     courses.AddClinicalCase,
+			Body:         `{"CourseID":1,"ClinicalCaseID":1,"Displayable":0}`,
+			ExpectedBody: `(SQL) Error 1062: Duplicate entry '1-1' for key 'uq_Courses_CCases'`,
+			StatusCode:   http.StatusConflict,
+		},
+		{
+			Method:       "POST",
+			URL:          "/Courses/AddClinicalCase",
+			Function:     courses.AddClinicalCase,
+			Body:         `{"ClinicalCaseID":4,"Displayable":1}`,
+			ExpectedBody: `CourseID is empty or not valid`,
+			StatusCode:   http.StatusBadRequest,
+		},
+		{
+			Method:       "POST",
+			URL:          "/Courses/AddClinicalCase",
+			Function:     courses.AddClinicalCase,
+			Body:         `{"CourseID":2,"Displayable":0}`,
+			ExpectedBody: `ClinicalCaseID is empty or not valid`,
+			StatusCode:   http.StatusBadRequest,
+		},
+		{
+			Method:       "POST",
+			URL:          "/Courses/AddClinicalCase",
+			Function:     courses.AddClinicalCase,
+			Body:         `{"CourseID":2,"ClinicalCaseID":5}`,
+			ExpectedBody: `Displayable is empty or not valid`,
+			StatusCode:   http.StatusBadRequest,
+		},
+		{
+			Method:       "POST",
+			URL:          "/Courses/AddClinicalCase",
+			Function:     courses.AddClinicalCase,
+			Body:         `{"CourseID":2,"ClinicalCaseID":5,"Displayable":-1}`,
+			ExpectedBody: `Displayable is empty or not valid`,
+			StatusCode:   http.StatusBadRequest,
+		},
+		{
+			Method:       "POST",
+			URL:          "/Courses/AddClinicalCase",
+			Function:     courses.AddClinicalCase,
+			Body:         `{"CourseID":2,"ClinicalCaseID":5,"Displayable":2}`,
+			ExpectedBody: `Displayable is empty or not valid`,
+			StatusCode:   http.StatusBadRequest,
+		},
+		{
+			Method:       "POST",
+			URL:          "/Courses/AddClinicalCase",
+			Function:     courses.AddClinicalCase,
+			Body:         `{"CourseID":"Arroz","StudentID":5,"Displayable":0}`,
+			ExpectedBody: `CourseID is empty or not valid`,
+			StatusCode:   http.StatusBadRequest,
+		},
+	}
+}
+
+// CasesGetAllClinicalCasesCourse bla bla...
+func CasesGetAllClinicalCasesCourse() mymodels.AllTest {
+	return mymodels.AllTest{
+		{
+			Method:       "DELETE",
+			URL:          "/Courses/GetAllClinicalCases?iddddd=1",
+			Function:     courses.GetAllClinicalCases,
+			Body:         ``,
+			ExpectedBody: `ID is empty or not valid`,
+			StatusCode:   http.StatusBadRequest,
+		},
+		{
+			Method:       "DELETE",
+			URL:          "/Courses/GetAllClinicalCases?id=1",
+			Function:     courses.GetAllClinicalCases,
+			Body:         ``,
+			ExpectedBody: `[{"ID":1,"CourseID":1,"ClinicalCaseID":1,"Displayable":1},{"ID":4,"CourseID":1,"ClinicalCaseID":2,"Displayable":1}]`,
+			StatusCode:   http.StatusOK,
+		},
+		{
+			Method:       "DELETE",
+			URL:          "/Courses/GetAllClinicalCases?id=2",
+			Function:     courses.GetAllClinicalCases,
+			Body:         ``,
+			ExpectedBody: `[{"ID":2,"CourseID":2,"ClinicalCaseID":2,"Displayable":1},{"ID":5,"CourseID":2,"ClinicalCaseID":3,"Displayable":0}]`,
+			StatusCode:   http.StatusOK,
+		},
+		{
+			Method:       "DELETE",
+			URL:          "/Courses/GetAllClinicalCases",
+			Function:     courses.GetAllClinicalCases,
+			Body:         ``,
+			ExpectedBody: `ID is empty or not valid`,
+			StatusCode:   http.StatusBadRequest,
+		},
+	}
+}
+
+// CasesRemoveClinicalCase bla bla...
+func CasesRemoveClinicalCase() mymodels.AllTest {
+	return mymodels.AllTest{
+		{
+			Method:       "DELETE",
+			URL:          "/Courses/RemoveClinicalCase",
+			Function:     courses.RemoveClinicalCase,
+			Body:         `{"CourseID":1, "ClinicalCaseID":2}`,
+			ExpectedBody: `One row deleted`,
+			StatusCode:   http.StatusOK,
+		},
+		{
+			Method:       "DELETE",
+			URL:          "/Courses/RemoveClinicalCase",
+			Function:     courses.RemoveClinicalCase,
+			Body:         `{"CourseID":1, "ClinicalCaseID":2}`,
+			ExpectedBody: `No rows deleted`,
+			StatusCode:   http.StatusOK,
+		},
+		{
+			Method:       "DELETE",
+			URL:          "/Courses/RemoveClinicalCase",
+			Function:     courses.RemoveClinicalCase,
+			Body:         `{"CourseID":2, "ClinicalCaseID":3}`,
+			ExpectedBody: `One row deleted`,
+			StatusCode:   http.StatusOK,
+		},
+		{
+			Method:       "DELETE",
+			URL:          "/Courses/RemoveClinicalCase",
+			Function:     courses.RemoveClinicalCase,
+			Body:         ``,
+			ExpectedBody: `CourseID is empty or not valid`,
+			StatusCode:   http.StatusBadRequest,
+		},
+	}
+}
+
+// CasesVisibilityClinicalCase bla bla...
+func CasesVisibilityClinicalCase() mymodels.AllTest {
+	return mymodels.AllTest{
+		{
+			Method:       "POST",
+			URL:          "/Courses/VisibilityClinicalCase",
+			Function:     courses.VisibilityClinicalCase,
+			Body:         `{"ID":1,"CourseID":1,"ClinicalCaseID":1,"Displayable":0}`,
+			ExpectedBody: `{"ID":1,"CourseID":1,"ClinicalCaseID":1,"Displayable":0}`,
+			StatusCode:   http.StatusOK,
+		},
+		{
+			Method:       "POST",
+			URL:          "/Courses/VisibilityClinicalCase",
+			Function:     courses.VisibilityClinicalCase,
+			Body:         `{"ID":1,"CourseID":1,"ClinicalCaseID":1,"Displayable":1}`,
+			ExpectedBody: `{"ID":1,"CourseID":1,"ClinicalCaseID":1,"Displayable":1}`,
+			StatusCode:   http.StatusOK,
+		},
+		{
+			Method:       "POST",
+			URL:          "/Courses/VisibilityClinicalCase",
+			Function:     courses.VisibilityClinicalCase,
+			Body:         `{"CourseID",1 "ClinicalCaseID":4,"Displayable":1}`,
+			ExpectedBody: `ID is empty or not valid`,
+			StatusCode:   http.StatusBadRequest,
+		},
+		{
+			Method:       "POST",
+			URL:          "/Courses/VisibilityClinicalCase",
+			Function:     courses.VisibilityClinicalCase,
+			Body:         `{"ID":1,"ClinicalCaseID":4,"Displayable":1}`,
+			ExpectedBody: `CourseID is empty or not valid`,
+			StatusCode:   http.StatusBadRequest,
+		},
+		{
+			Method:       "POST",
+			URL:          "/Courses/VisibilityClinicalCase",
+			Function:     courses.VisibilityClinicalCase,
+			Body:         `{"ID":1,"CourseID":2,"Displayable":0}`,
+			ExpectedBody: `ClinicalCaseID is empty or not valid`,
+			StatusCode:   http.StatusBadRequest,
+		},
+		{
+			Method:       "POST",
+			URL:          "/Courses/VisibilityClinicalCase",
+			Function:     courses.VisibilityClinicalCase,
+			Body:         `{"ID":1,"CourseID":2,"ClinicalCaseID":5}`,
+			ExpectedBody: `Displayable is empty or not valid`,
+			StatusCode:   http.StatusBadRequest,
+		},
+	}
+}

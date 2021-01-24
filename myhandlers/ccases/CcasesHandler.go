@@ -220,8 +220,8 @@ func DeleteClinicalCase(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-// AddHCN adds an HCN into a Clinical Case...
-func AddHCN(w http.ResponseWriter, r *http.Request) {
+// LinkHCN adds an HCN into a Clinical Case...
+func LinkHCN(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var newHCNVinculation mymodels.HCNVinculation
 	reqBody, err := ioutil.ReadAll(r.Body)
@@ -259,8 +259,8 @@ func AddHCN(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// RemoveHCN from a Clnical Case...
-func RemoveHCN(w http.ResponseWriter, r *http.Request) {
+// UnlinkHCN from a Clnical Case...
+func UnlinkHCN(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	reqBody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
