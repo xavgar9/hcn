@@ -235,3 +235,13 @@ func TestAddStudent(t *testing.T) {
 func TestRemoveStudent(t *testing.T) {
 	runTestWithBody(t, testhelpers.CasesRemoveStudent())
 }
+
+// CCases_HCN test
+
+func TestAddHCN(t *testing.T) {
+	runTestWithBody(t, testhelpers.CasesAddHCN())
+}
+
+func TestRemoveHCN(t *testing.T) {
+	runTestWithBody(t, testhelpers.CasesRemoveHCN())
+}

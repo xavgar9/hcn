@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"hcn/config"
-	"hcn/helpers"
 	"hcn/mymodels"
 	"io/ioutil"
 	"net/http"
@@ -224,10 +223,6 @@ func DeleteClinicalCase(w http.ResponseWriter, r *http.Request) {
 // AddHCN adds an HCN into a Clinical Case...
 func AddHCN(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	if !helpers.VerifyRequest(r) {
-		w.WriteHeader(http.StatusForbidden)
-		return
-	}
 	var newHCNVinculation mymodels.HCNVinculation
 	reqBody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -250,24 +245,16 @@ func AddHCN(w http.ResponseWriter, r *http.Request) {
 		rows, err := Db.Exec("INSERT INTO CCases_HCN(ClinicalCaseID,HCNID) VALUES (?,?)", newHCNVinculation.ClinicalCaseID, newHCNVinculation.HCNID)
 		defer Db.Close()
 		if err != nil {
+			w.WriteHeader(http.StatusConflict)
 			fmt.Fprintf(w, "(SQL) %v", err.Error())
 			return
 		}
-		cnt, err := rows.RowsAffected()
-		if err != nil {
-			fmt.Fprintf(w, "(SQL) %v", err.Error())
-			return
-		} else if cnt < 1 {
-			fmt.Fprintf(w, "No rows affected")
-			return
+		cnt, _ := rows.RowsAffected()
+		if cnt == 0 {
+			fmt.Fprintf(w, "HCN not added")
+		} else if cnt == 1 {
+			fmt.Fprintf(w, "HCN added")
 		}
-		lastID, err := rows.LastInsertId()
-		if err != nil {
-			fmt.Fprintf(w, "(SQL) %v", err.Error())
-			return
-		}
-		fmt.Fprintf(w, "ID inserted: %v", lastID)
-		w.WriteHeader(http.StatusCreated)
 		return
 	}
 }

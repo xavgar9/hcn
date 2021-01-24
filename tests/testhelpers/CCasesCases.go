@@ -95,7 +95,7 @@ func CasesUpdateClinicalCase() mymodels.AllTest {
 		},
 		{
 			Method:       "POST",
-			URL:          "/Students/UpdateClinicalCase",
+			URL:          "/ClinicalCases/UpdateClinicalCase",
 			Function:     ccases.UpdateClinicalCase,
 			Body:         `{"ID":110,"Title":"El joven parchado","Description":"Benjamón era un joven con IMC PARCHADO.","Media":"../activitiesresources/img1.png","TeacherID":1}`,
 			ExpectedBody: `No rows updated`,
@@ -103,7 +103,7 @@ func CasesUpdateClinicalCase() mymodels.AllTest {
 		},
 		{
 			Method:       "POST",
-			URL:          "/Students/UpdateClinicalCase",
+			URL:          "/ClinicalCases/UpdateClinicalCase",
 			Function:     ccases.UpdateClinicalCase,
 			Body:         `{"Title":"El joven parchado","Description":"Benjamón era un joven con IMC PARCHADO.","Media":"../activitiesresources/img1.png","TeacherID":1}`,
 			ExpectedBody: `ID is empty or not valid`,
@@ -111,7 +111,7 @@ func CasesUpdateClinicalCase() mymodels.AllTest {
 		},
 		{
 			Method:       "POST",
-			URL:          "/Students/UpdateClinicalCase",
+			URL:          "/ClinicalCases/UpdateClinicalCase",
 			Function:     ccases.UpdateClinicalCase,
 			Body:         `{"ID":1,"Description":"Benjamón era un joven con IMC PARCHADO.","Media":"../activitiesresources/img1.png","TeacherID":1}`,
 			ExpectedBody: `Title is empty or not valid`,
@@ -119,7 +119,7 @@ func CasesUpdateClinicalCase() mymodels.AllTest {
 		},
 		{
 			Method:       "POST",
-			URL:          "/Students/UpdateClinicalCase",
+			URL:          "/ClinicalCases/UpdateClinicalCase",
 			Function:     ccases.UpdateClinicalCase,
 			Body:         `{"ID":1,"Title":"El joven parchado","Media":"../activitiesresources/img1.png","TeacherID":1}`,
 			ExpectedBody: `Description is empty or not valid`,
@@ -127,7 +127,7 @@ func CasesUpdateClinicalCase() mymodels.AllTest {
 		},
 		{
 			Method:       "POST",
-			URL:          "/Students/UpdateClinicalCase",
+			URL:          "/ClinicalCases/UpdateClinicalCase",
 			Function:     ccases.UpdateClinicalCase,
 			Body:         `{"ID":1,"Title":"El joven parchado","Description":"Benjamón era un joven con IMC PARCHADO.","TeacherID":1}`,
 			ExpectedBody: `Media is empty or not valid`,
@@ -135,7 +135,7 @@ func CasesUpdateClinicalCase() mymodels.AllTest {
 		},
 		{
 			Method:       "POST",
-			URL:          "/Students/UpdateClinicalCase",
+			URL:          "/ClinicalCases/UpdateClinicalCase",
 			Function:     ccases.UpdateClinicalCase,
 			Body:         `{"ID":1,"Title":"El joven parchado","Description":"Benjamón era un joven con IMC PARCHADO.","Media":"../activitiesresources/img1.png"}`,
 			ExpectedBody: `TeacherID is empty or not valid`,
@@ -157,7 +157,7 @@ func CasesCreateClinicalCase() mymodels.AllTest {
 		},
 		{
 			Method:       "POST",
-			URL:          "/Students/CreateClinicalCase",
+			URL:          "/ClinicalCases/CreateClinicalCase",
 			Function:     ccases.CreateClinicalCase,
 			Body:         `{"Description":"Benjamón era un joven con IMC PARCHADO.","Media":"../activitiesresources/img1.png","TeacherID":1}`,
 			ExpectedBody: `Title is empty or not valid`,
@@ -165,7 +165,7 @@ func CasesCreateClinicalCase() mymodels.AllTest {
 		},
 		{
 			Method:       "POST",
-			URL:          "/Students/CreateClinicalCase",
+			URL:          "/ClinicalCases/CreateClinicalCase",
 			Function:     ccases.CreateClinicalCase,
 			Body:         `{"Title":"El joven parchado","Media":"../activitiesresources/img1.png","TeacherID":1}`,
 			ExpectedBody: `Description is empty or not valid`,
@@ -173,7 +173,7 @@ func CasesCreateClinicalCase() mymodels.AllTest {
 		},
 		{
 			Method:       "POST",
-			URL:          "/Students/CreateClinicalCase",
+			URL:          "/ClinicalCases/CreateClinicalCase",
 			Function:     ccases.CreateClinicalCase,
 			Body:         `{"Title":"El joven parchado","Description":"Benjamón era un joven con IMC PARCHADO.","TeacherID":1}`,
 			ExpectedBody: `Media is empty or not valid`,
@@ -181,7 +181,7 @@ func CasesCreateClinicalCase() mymodels.AllTest {
 		},
 		{
 			Method:       "POST",
-			URL:          "/Students/CreateClinicalCase",
+			URL:          "/ClinicalCases/CreateClinicalCase",
 			Function:     ccases.CreateClinicalCase,
 			Body:         `{"Title":"El joven parchado","Description":"Benjamón era un joven con IMC PARCHADO.","Media":"../activitiesresources/img1.png"}`,
 			ExpectedBody: `TeacherID is empty or not valid`,
@@ -215,6 +215,106 @@ func CasesDeleteClinicalCase() mymodels.AllTest {
 			Function:     ccases.DeleteClinicalCase,
 			Body:         `{"ID":Arroz}`,
 			ExpectedBody: `ID is empty or not valid`,
+			StatusCode:   http.StatusBadRequest,
+		},
+	}
+}
+
+// CasesAddHCN vinculates vinculates one HCN with one Clinical Case
+func CasesAddHCN() mymodels.AllTest {
+	return mymodels.AllTest{
+		{
+			Method:       "POST",
+			URL:          "/ClinicalCases/AddHCN",
+			Function:     ccases.AddHCN,
+			Body:         `{"ClinicalCaseID":2,"HCNID":2}`,
+			ExpectedBody: `HCN added`,
+			StatusCode:   http.StatusOK,
+		},
+		{
+			Method:       "POST",
+			URL:          "/ClinicalCases/AddHCN",
+			Function:     ccases.AddHCN,
+			Body:         `{"ClinicalCaseID":3,"HCNID":3}`,
+			ExpectedBody: `HCN added`,
+			StatusCode:   http.StatusOK,
+		},
+		{
+			Method:       "POST",
+			URL:          "/ClinicalCases/AddHCN",
+			Function:     ccases.AddHCN,
+			Body:         `{"ClinicalCaseID":1,"HCNID":1}`,
+			ExpectedBody: `(SQL) Error 1062: Duplicate entry '1-1' for key 'uq_CCases_HCN'`,
+			StatusCode:   http.StatusConflict,
+		},
+		{
+			Method:       "POST",
+			URL:          "/ClinicalCases/AddHCN",
+			Function:     ccases.AddHCN,
+			Body:         `{"HCNID":4}`,
+			ExpectedBody: `ClinicalCaseID is empty or not valid`,
+			StatusCode:   http.StatusBadRequest,
+		},
+		{
+			Method:       "POST",
+			URL:          "/ClinicalCases/AddHCN",
+			Function:     ccases.AddHCN,
+			Body:         `{"ClinicalCaseID":2}`,
+			ExpectedBody: `HCNID is empty or not valid`,
+			StatusCode:   http.StatusBadRequest,
+		},
+		{
+			Method:       "POST",
+			URL:          "/ClinicalCases/AddHCN",
+			Function:     ccases.AddHCN,
+			Body:         `{"ClinicalCaseID":3,"HCNID":5}`,
+			ExpectedBody: `HCN added`,
+			StatusCode:   http.StatusOK,
+		},
+	}
+}
+
+// CasesRemoveHCN bla bla...
+func CasesRemoveHCN() mymodels.AllTest {
+	return mymodels.AllTest{
+		{
+			Method:       "DELETE",
+			URL:          "/Courses/RemoveHCN",
+			Function:     ccases.RemoveHCN,
+			Body:         `{"ClinicalCaseID":2,"HCNID":2}`,
+			ExpectedBody: `One row deleted`,
+			StatusCode:   http.StatusOK,
+		},
+		{
+			Method:       "DELETE",
+			URL:          "/Courses/RemoveHCN",
+			Function:     ccases.RemoveHCN,
+			Body:         `{"ClinicalCaseID":2,"HCNID":2}`,
+			ExpectedBody: `No rows deleted`,
+			StatusCode:   http.StatusOK,
+		},
+		{
+			Method:       "DELETE",
+			URL:          "/Courses/RemoveHCN",
+			Function:     ccases.RemoveHCN,
+			Body:         `{"ClinicalCaseID":3,"HCNID":3}`,
+			ExpectedBody: `One row deleted`,
+			StatusCode:   http.StatusOK,
+		},
+		{
+			Method:       "DELETE",
+			URL:          "/Courses/RemoveHCN",
+			Function:     ccases.RemoveHCN,
+			Body:         `{"ClinicalCaseID":2}`,
+			ExpectedBody: `HCNID is empty or not valid`,
+			StatusCode:   http.StatusBadRequest,
+		},
+		{
+			Method:       "DELETE",
+			URL:          "/Courses/RemoveHCN",
+			Function:     ccases.RemoveHCN,
+			Body:         `{"HCNID":4}`,
+			ExpectedBody: `ClinicalCaseID is empty or not valid`,
 			StatusCode:   http.StatusBadRequest,
 		},
 	}

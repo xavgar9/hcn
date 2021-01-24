@@ -255,8 +255,6 @@ INSERT INTO Courses_HCN(ID,CourseID,HCNID,Displayable) VALUES (3,2,3,1);
 
 -- CCases_HCN
 INSERT INTO CCases_HCN(ID,ClinicalCaseID,HCNID) VALUES (1,1,1);
-INSERT INTO CCases_HCN(ID,ClinicalCaseID,HCNID) VALUES (2,2,2);
-INSERT INTO CCases_HCN(ID,ClinicalCaseID,HCNID) VALUES (3,3,3);
 
 -- Courses_CCases
 INSERT INTO Courses_CCases(ID,ClinicalCaseID,CourseID,Displayable) VALUES (1,1,1,1);

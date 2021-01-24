@@ -136,7 +136,7 @@ func CasesCreateCourse() mymodels.AllTest {
 			URL:          "/Courses/CreateCourse",
 			Function:     courses.CreateCourse,
 			Body:         `{"Name":"Desapoyo moral","CreationDate":"2021-01-12 15:12:21"}`,
-			ExpectedBody: `Teacher is empty or not valid`,
+			ExpectedBody: `TeacherID is empty or not valid`,
 			StatusCode:   http.StatusBadRequest,
 		},
 		{
@@ -144,7 +144,7 @@ func CasesCreateCourse() mymodels.AllTest {
 			URL:          "/Courses/CreateCourse",
 			Function:     courses.CreateCourse,
 			Body:         `{"TeacherID":"Pipe","Name":"Desapoyo moral","CreationDate":"2021-01-12 15:22:15"}`,
-			ExpectedBody: `json: cannot unmarshal string into Go struct field Course.TeacherID of type int`,
+			ExpectedBody: `TeacherID is empty or not valid`,
 			StatusCode:   http.StatusBadRequest,
 		},
 	}
