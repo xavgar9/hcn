@@ -9,9 +9,14 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strconv"
+
+	"github.com/tidwall/gjson"
+	//"github.com/m7shapan/njson"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-// CreateHCN bla bla...
+// CreateHCN MySQL bla bla...
 func CreateHCN(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var newHCN mymodels.HCN
@@ -48,7 +53,7 @@ func CreateHCN(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// GetAllHCN bla bla...
+// GetAllHCN MySQL bla bla...
 func GetAllHCN(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var hcns mymodels.AllHCN
@@ -77,7 +82,7 @@ func GetAllHCN(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-// GetHCN bla bla...
+// GetHCN MySQL bla bla...
 func GetHCN(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	keys, ok := r.URL.Query()["id"]
@@ -110,7 +115,7 @@ func GetHCN(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-// UpdateHCN bla bla...
+// UpdateHCN MySQL bla bla...
 func UpdateHCN(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	reqBody, err := ioutil.ReadAll(r.Body)
@@ -154,7 +159,7 @@ func UpdateHCN(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// DeleteHCN bla bla...
+// DeleteHCN MySQL bla bla...
 func DeleteHCN(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	reqBody, err := ioutil.ReadAll(r.Body)
@@ -192,4 +197,89 @@ func DeleteHCN(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "No rows deleted")
 	}
 	return
+}
+
+// -------------------------------------------
+// Mongo Handlers
+// -------------------------------------------
+
+// CreateHCNMongo Mongo bla bla...
+func CreateHCNMongo(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	var newHCNmongo mymodels.HCNmongo
+	var newGeneralData mymodels.GeneralDatamongo
+
+	reqBody, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, "(USER) %v", err.Error())
+		return
+	}
+	generalData := gjson.Get(string(reqBody), "GeneralData")
+	consultationReason := gjson.Get(string(reqBody), "ConsultationReason")
+
+	json.Unmarshal([]byte(generalData.Raw), &newGeneralData)
+
+	newHCNmongo.GeneralDatamongo = newGeneralData
+	reason := consultationReason.String()
+	newHCNmongo.ConsultationReason = &reason
+
+	client, ctx := config.MongoConnection()
+	collection := client.Database("HCNProject").Collection("HCN")
+	result, _ := collection.InsertOne(ctx, newHCNmongo)
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(result)
+}
+
+// GetAllHCNMongo bla bla...
+func GetAllHCNMongo(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("content-type", "application/json")
+	var allHCNs mymodels.AllHCNmongo
+	client, ctx := config.MongoConnection()
+	collection := client.Database("HCNProject").Collection("HCN")
+
+	cursor, err := collection.Find(ctx, bson.M{})
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(w, "(SQL) %v", err.Error())
+		//w.Write([]byte(`{ "error": "` + err.Error() + `" }`))
+		return
+	}
+	defer cursor.Close(ctx)
+	for cursor.Next(ctx) {
+		var newHCN mymodels.HCNmongo
+		cursor.Decode(&newHCN)
+		allHCNs = append(allHCNs, newHCN)
+	}
+	if err := cursor.Err(); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(`{ "error": "` + err.Error() + `" }`))
+		return
+	}
+	json.NewEncoder(w).Encode(allHCNs)
+}
+
+// GetHCNMongo bla bla...
+func GetHCNMongo(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	keys, ok := r.URL.Query()["id"]
+	if !ok || len(keys[0]) < 1 {
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, "ID is empty or not valid")
+		return
+	}
+	hcnID, _ := primitive.ObjectIDFromHex(keys[0])
+
+	//var person Person
+	var newHCN mymodels.HCNmongo
+	client, ctx := config.MongoConnection()
+	collection := client.Database("HCNProject").Collection("HCN")
+
+	err := collection.FindOne(ctx, mymodels.HCNmongo{ID: hcnID}).Decode(&newHCN)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(`{ "message": "` + err.Error() + `" }`))
+		return
+	}
+	json.NewEncoder(w).Encode(newHCN)
 }
