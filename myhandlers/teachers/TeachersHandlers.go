@@ -59,15 +59,22 @@ func CreateTeacher(w http.ResponseWriter, r *http.Request) {
 func GetAllTeachers(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var teachers mymodels.AllTeachers
-	var Db, _ = config.MYSQLConnection()
+	var Db, err = config.MYSQLConnection()
+	if err != nil {
+		if err != sql.ErrNoRows {
+			w.WriteHeader(http.StatusInternalServerError)
+			fmt.Fprint(w, err)
+		}
+		return
+	}
 	rows, err := Db.Query("SELECT ID, Name, Email FROM Teachers")
-	defer Db.Close()
 	if err != nil {
 		if err != sql.ErrNoRows {
 			w.WriteHeader(http.StatusInternalServerError)
 		}
 		return
 	}
+	defer Db.Close()
 	for rows.Next() {
 		var teacherID int
 		var Name, Email string

@@ -129,7 +129,8 @@ func MainRouters(router *mux.Router) {
 	// HCN Mongo URLs
 	router.HandleFunc("/HCN/GetAllHCNMongo", hcn.GetAllHCNMongo).Methods("GET")
 	router.HandleFunc("/HCN/GetHCNMongo", hcn.GetHCNMongo).Methods("GET")
-	//router.HandleFunc("/HCN/UpdateHCN", hcn.UpdateHCN).Methods("POST")
+	router.HandleFunc("/HCN/UpdateHCNMongo", hcn.UpdateHCNMongo).Methods("POST")
 	router.HandleFunc("/HCN/CreateHCNMongo", hcn.CreateHCNMongo).Methods("POST")
 	//router.HandleFunc("/HCN/DeleteHCN", hcn.DeleteHCN).Methods("DELETE")
+	router.HandleFunc("/HCN/DeleteAllHCNMongo", hcn.DeleteAllHCNMongo).Methods("DELETE")
 }
