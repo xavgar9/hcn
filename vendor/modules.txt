@@ -1,21 +1,6 @@
-# github.com/aws/aws-sdk-go v1.34.28
-github.com/aws/aws-sdk-go/aws
-github.com/aws/aws-sdk-go/aws/awserr
-github.com/aws/aws-sdk-go/aws/awsutil
-github.com/aws/aws-sdk-go/aws/client/metadata
-github.com/aws/aws-sdk-go/aws/credentials
-github.com/aws/aws-sdk-go/aws/endpoints
-github.com/aws/aws-sdk-go/aws/request
-github.com/aws/aws-sdk-go/aws/signer/v4
-github.com/aws/aws-sdk-go/internal/context
-github.com/aws/aws-sdk-go/internal/ini
-github.com/aws/aws-sdk-go/internal/sdkio
-github.com/aws/aws-sdk-go/internal/sdkmath
-github.com/aws/aws-sdk-go/internal/shareddefaults
-github.com/aws/aws-sdk-go/internal/strings
-github.com/aws/aws-sdk-go/internal/sync/singleflight
-github.com/aws/aws-sdk-go/private/protocol
-github.com/aws/aws-sdk-go/private/protocol/rest
+# github.com/DataDog/zstd v1.4.5
+## explicit
+github.com/DataDog/zstd
 # github.com/dustin/go-humanize v1.0.0
 github.com/dustin/go-humanize
 # github.com/felixge/httpsnoop v1.0.1
@@ -24,9 +9,13 @@ github.com/felixge/httpsnoop
 ## explicit
 github.com/go-sql-driver/mysql
 # github.com/go-stack/stack v1.8.0
+## explicit
 github.com/go-stack/stack
 # github.com/golang/snappy v0.0.1
+## explicit
 github.com/golang/snappy
+# github.com/google/go-cmp v0.5.2
+## explicit
 # github.com/gorilla/csrf v1.7.0
 ## explicit
 github.com/gorilla/csrf
@@ -46,16 +35,10 @@ github.com/itrepablik/lumberjack
 # github.com/itrepablik/sakto v1.0.5
 ## explicit
 github.com/itrepablik/sakto
-# github.com/jmespath/go-jmespath v0.4.0
-github.com/jmespath/go-jmespath
-# github.com/klauspost/compress v1.9.5
-github.com/klauspost/compress/fse
-github.com/klauspost/compress/huff0
-github.com/klauspost/compress/snappy
-github.com/klauspost/compress/zstd
-github.com/klauspost/compress/zstd/internal/xxhash
 # github.com/pkg/errors v0.9.1
 github.com/pkg/errors
+# github.com/stretchr/testify v1.7.0
+## explicit
 # github.com/tidwall/gjson v1.6.8
 ## explicit
 github.com/tidwall/gjson
@@ -64,10 +47,12 @@ github.com/tidwall/match
 # github.com/tidwall/pretty v1.0.2
 github.com/tidwall/pretty
 # github.com/xdg/scram v0.0.0-20180814205039-7eeb5667e42c
+## explicit
 github.com/xdg/scram
 # github.com/xdg/stringprep v0.0.0-20180714160509-73f8eece6fdc
+## explicit
 github.com/xdg/stringprep
-# go.mongodb.org/mongo-driver v1.4.6
+# go.mongodb.org/mongo-driver v1.2.1
 ## explicit
 go.mongodb.org/mongo-driver/bson
 go.mongodb.org/mongo-driver/bson/bsoncodec
@@ -95,7 +80,6 @@ go.mongodb.org/mongo-driver/x/mongo/driver/description
 go.mongodb.org/mongo-driver/x/mongo/driver/dns
 go.mongodb.org/mongo-driver/x/mongo/driver/mongocrypt
 go.mongodb.org/mongo-driver/x/mongo/driver/mongocrypt/options
-go.mongodb.org/mongo-driver/x/mongo/driver/ocsp
 go.mongodb.org/mongo-driver/x/mongo/driver/operation
 go.mongodb.org/mongo-driver/x/mongo/driver/session
 go.mongodb.org/mongo-driver/x/mongo/driver/topology
@@ -115,11 +99,13 @@ go.uber.org/zap/zapcore
 # golang.org/x/crypto v0.0.0-20200429183012-4b2356b1ed79
 golang.org/x/crypto/bcrypt
 golang.org/x/crypto/blowfish
-golang.org/x/crypto/ocsp
 golang.org/x/crypto/pbkdf2
 # golang.org/x/sync v0.0.0-20190911185100-cd5d95a43a6e
-golang.org/x/sync/errgroup
+## explicit
 golang.org/x/sync/semaphore
 # golang.org/x/text v0.3.3
+## explicit
 golang.org/x/text/transform
 golang.org/x/text/unicode/norm
+# gopkg.in/yaml.v2 v2.2.8
+## explicit

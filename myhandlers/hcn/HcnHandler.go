@@ -202,7 +202,7 @@ func DeleteHCN(w http.ResponseWriter, r *http.Request) {
 // Mongo Handlers
 // -------------------------------------------
 
-// CreateHCNMongo Mongo bla bla...
+// CreateHCNMongo Mongo bla bla... OK
 func CreateHCNMongo(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	reqBody, err := ioutil.ReadAll(r.Body)
@@ -243,12 +243,15 @@ func CreateHCNMongo(w http.ResponseWriter, r *http.Request) {
 	// Insert data in mongo db
 	client, ctx := config.MongoConnection()
 	collection := client.Database("HCNProject").Collection("HCN")
-	result, _ := collection.InsertOne(ctx, newHCNmongo)
+	insertResult, err := collection.InsertOne(ctx, newHCNmongo)
+	if err != nil {
+		w.Write([]byte(`{ "error": "` + err.Error() + `" }`))
+	}
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(result)
+	json.NewEncoder(w).Encode(insertResult)
 }
 
-// GetAllHCNMongo bla bla...
+// GetAllHCNMongo bla bla... OK
 func GetAllHCNMongo(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("content-type", "application/json")
 	var allHCNs mymodels.AllHCNmongo
@@ -276,7 +279,7 @@ func GetAllHCNMongo(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(allHCNs)
 }
 
-// GetHCNMongo bla bla...
+// GetHCNMongo bla bla... OK
 func GetHCNMongo(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	keys, ok := r.URL.Query()["id"]
@@ -287,22 +290,19 @@ func GetHCNMongo(w http.ResponseWriter, r *http.Request) {
 	}
 	hcnID, _ := primitive.ObjectIDFromHex(keys[0])
 
-	//var person Person
 	var newHCN mymodels.HCNmongo
+
 	client, ctx := config.MongoConnection()
 	collection := client.Database("HCNProject").Collection("HCN")
-
-	err := collection.FindOne(ctx, mymodels.HCNmongo{ID: hcnID}).Decode(&newHCN)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(`{ "message": "` + err.Error() + `" }`))
-		return
-	}
+	collection.FindOne(ctx, bson.M{"_id": hcnID}).Decode(&newHCN)
 	json.NewEncoder(w).Encode(newHCN)
 }
 
 // UpdateHCNMongo Mongo bla bla...
 func UpdateHCNMongo(w http.ResponseWriter, r *http.Request) {
+	// It is neccesary that all the fields inside a field are filled, otherwise
+	// the unfilled fields inside a field will be erased.
+
 	w.Header().Set("Content-Type", "application/json")
 	reqBody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -317,45 +317,43 @@ func UpdateHCNMongo(w http.ResponseWriter, r *http.Request) {
 	var newAnthropometry mymodels.Anthropometry
 	var newBiochemistry []mymodels.Biochemistry
 
-	generalData := gjson.Get(string(reqBody), "GeneralData")
-	consultationReason := gjson.Get(string(reqBody), "ConsultationReason")
-	anthropometry := gjson.Get(string(reqBody), "Anthropometry")
-	patientData := gjson.Get(string(reqBody), "PatientData")
-	biochemistry := gjson.Get(string(reqBody), "Biochemistry")
+	// All json assessment data
+	json.Unmarshal(reqBody, &newHCN)
 
 	// General nutritional assessment data
+	generalData := gjson.Get(string(reqBody), "GeneralData")
 	json.Unmarshal([]byte(generalData.Raw), &newGeneralData)
-	newHCN.GeneralData = newGeneralData
-	// General patient data
+
+	// Patitent data
+	patientData := gjson.Get(string(reqBody), "PatientData")
 	json.Unmarshal([]byte(patientData.Raw), &newPatientData)
-	newHCN.PatientData = newPatientData
-	// Consultation Reason
-	reason := consultationReason.String()
-	newHCN.ConsultationReason = &reason
-	// Anthropometry
-	json.Unmarshal([]byte(anthropometry.Raw), &newAnthropometry)
-	newHCN.Anthropometry = newAnthropometry
-	// Biochemistry
+
+	// Anthropometry data
+	Anthropometry := gjson.Get(string(reqBody), "Anthropometry")
+	json.Unmarshal([]byte(Anthropometry.Raw), &newAnthropometry)
+
+	// Biochemistry data
+	biochemistry := gjson.Get(string(reqBody), "Biochemistry")
 	json.Unmarshal([]byte(biochemistry.Raw), &newBiochemistry)
-	newHCN.Biochemistry = newBiochemistry
 
-	// Update data in mongo db
-	/*
-		client, ctx := config.MongoConnection()
-		collection := client.Database("HCNProject").Collection("HCN")
-		filter := bson.M{"_id": "602078f08d054d95b0d74048"}
-		update := bson.M{
-			"$set": {
-				"GeneralData": {
-					"ValorationDate": "Malo",
-				},
-			},
-		}
+	client, ctx := config.MongoConnection()
+	collection := client.Database("HCNProject").Collection("HCN")
 
-		result, _ := collection.UpdateOne(ctx, filter, update)
-		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(result)
-	*/
+	id, _ := primitive.ObjectIDFromHex(*newHCN.ID)
+	result, err := collection.UpdateOne(
+		ctx,
+		bson.M{"_id": id},
+		bson.D{
+			{"$set", bson.D{
+				{"GeneralData", newGeneralData},
+				{"PatientData", newPatientData},
+				{"Anthropometry", newAnthropometry},
+				{"Biochemistry", newBiochemistry}}},
+		},
+	)
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(result)
 }
 
 // DeleteAllHCNMongo bla bla...
@@ -376,7 +374,8 @@ func DeleteAllHCNMongo(w http.ResponseWriter, r *http.Request) {
 	for cursor.Next(ctx) {
 		var newHCN mymodels.HCNmongo
 		cursor.Decode(&newHCN)
-		_, err := collection.DeleteOne(ctx, bson.M{"_id": newHCN.ID})
+		id, _ := primitive.ObjectIDFromHex(*newHCN.ID)
+		_, err := collection.DeleteOne(ctx, bson.M{"_id": id})
 		if err != nil {
 			return
 		}

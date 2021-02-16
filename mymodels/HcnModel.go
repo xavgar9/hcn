@@ -1,9 +1,5 @@
 package mymodels
 
-import (
-	"go.mongodb.org/mongo-driver/bson/primitive"
-)
-
 // --------------------------------------------------------------------------------------
 // MySQL Models
 // --------------------------------------------------------------------------------------
@@ -30,14 +26,14 @@ type AllHCN []HCN
 
 // HCNmongo contains all sections of the nutritional assessment
 type HCNmongo struct {
-	ID                 primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"`
-	GeneralData        GeneralData        `json:"GeneralData,omitempty" bson:"GeneralData,omitempty"`
-	PatientData        PatientData        `json:"PatientData,omitempty" bson:"PatientData,omitempty"`
-	ConsultationReason *string            `json:"ConsultationReason,omitempty" bson:"ConsultationReason,omitempty"`
-	Anthropometry      Anthropometry      `json:"Anthropometry,omitempty" bson:"Anthropometry,omitempty"`
-	Biochemistry       []Biochemistry     `json:"Biochemistry,omitempty" bson:"Biochemistry,omitempty"`
-	Interpretation     *string            `json:"Interpretation,omitempty" bson:"Interpretation,omitempty"`
-	Feedback           *string            `json:"Feedback,omitempty" bson:"Feedback,omitempty"`
+	ID                 *string        `json:"_id,omitempty" bson:"_id,omitempty"`
+	GeneralData        GeneralData    `json:"GeneralData,omitempty" bson:"GeneralData,omitempty"`
+	PatientData        PatientData    `json:"PatientData,omitempty" bson:"PatientData,omitempty"`
+	ConsultationReason *string        `json:"ConsultationReason,omitempty" bson:"ConsultationReason,omitempty"`
+	Anthropometry      Anthropometry  `json:"Anthropometry,omitempty" bson:"Anthropometry,omitempty"`
+	Biochemistry       []Biochemistry `json:"Biochemistry,omitempty" bson:"Biochemistry,omitempty"`
+	Interpretation     *string        `json:"Interpretation,omitempty" bson:"Interpretation,omitempty"`
+	Feedback           *string        `json:"Feedback,omitempty" bson:"Feedback,omitempty"`
 }
 
 // GeneralData contains all the general data of the nutriotional assessement

@@ -29,7 +29,6 @@ type serverConfig struct {
 	poolMonitor               *event.PoolMonitor
 	connectionPoolMaxIdleTime time.Duration
 	registry                  *bsoncodec.Registry
-	monitoringDisabled        bool
 }
 
 func newServerConfig(opts ...ServerOption) (*serverConfig, error) {
@@ -52,13 +51,6 @@ func newServerConfig(opts ...ServerOption) (*serverConfig, error) {
 
 // ServerOption configures a server.
 type ServerOption func(*serverConfig) error
-
-func withMonitoringDisabled(fn func(bool) bool) ServerOption {
-	return func(cfg *serverConfig) error {
-		cfg.monitoringDisabled = fn(cfg.monitoringDisabled)
-		return nil
-	}
-}
 
 // WithConnectionOptions configures the server's connections.
 func WithConnectionOptions(fn func(...ConnectionOption) []ConnectionOption) ServerOption {

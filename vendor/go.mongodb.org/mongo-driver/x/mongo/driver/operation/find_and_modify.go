@@ -14,7 +14,6 @@ import (
 	"fmt"
 
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/bsontype"
 	"go.mongodb.org/mongo-driver/event"
 	"go.mongodb.org/mongo-driver/mongo/writeconcern"
 	"go.mongodb.org/mongo-driver/x/bsonx/bsoncore"
@@ -46,7 +45,6 @@ type FindAndModify struct {
 	writeConcern             *writeconcern.WriteConcern
 	retry                    *driver.RetryMode
 	crypt                    *driver.Crypt
-	hint                     bsoncore.Value
 
 	result FindAndModifyResult
 }
@@ -107,7 +105,7 @@ func NewFindAndModify(query bsoncore.Document) *FindAndModify {
 // Result returns the result of executing this operation.
 func (fam *FindAndModify) Result() FindAndModifyResult { return fam.result }
 
-func (fam *FindAndModify) processResponse(response bsoncore.Document, srvr driver.Server, desc description.Server, _ int) error {
+func (fam *FindAndModify) processResponse(response bsoncore.Document, srvr driver.Server, desc description.Server) error {
 	var err error
 
 	fam.result, err = buildFindAndModifyResult(response, srvr)
@@ -189,16 +187,6 @@ func (fam *FindAndModify) command(dst []byte, desc description.SelectedServer) (
 	if fam.upsert != nil {
 
 		dst = bsoncore.AppendBooleanElement(dst, "upsert", *fam.upsert)
-	}
-	if fam.hint.Type != bsontype.Type(0) {
-
-		if desc.WireVersion == nil || !desc.WireVersion.Includes(8) {
-			return nil, errors.New("the 'hint' command parameter requires a minimum server wire version of 8")
-		}
-		if !fam.writeConcern.Acknowledged() {
-			return nil, errUnacknowledgedHint
-		}
-		dst = bsoncore.AppendValueElement(dst, "hint", fam.hint)
 	}
 
 	return dst, nil
@@ -414,15 +402,5 @@ func (fam *FindAndModify) Crypt(crypt *driver.Crypt) *FindAndModify {
 	}
 
 	fam.crypt = crypt
-	return fam
-}
-
-// Hint specifies the index to use.
-func (fam *FindAndModify) Hint(hint bsoncore.Value) *FindAndModify {
-	if fam == nil {
-		fam = new(FindAndModify)
-	}
-
-	fam.hint = hint
 	return fam
 }

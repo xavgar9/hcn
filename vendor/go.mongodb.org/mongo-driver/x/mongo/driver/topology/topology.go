@@ -64,14 +64,12 @@ type Topology struct {
 
 	done chan struct{}
 
-	pollingRequired   bool
 	pollingDone       chan struct{}
 	pollingwg         sync.WaitGroup
 	rescanSRVInterval time.Duration
 	pollHeartbeatTime atomic.Value // holds a bool
 
-	updateCallback updateTopologyCallback
-	fsm            *fsm
+	fsm *fsm
 
 	// This should really be encapsulated into it's own type. This will likely
 	// require a redesign so we can share a minimum of data between the
@@ -123,24 +121,14 @@ func New(opts ...Option) (*Topology, error) {
 		dnsResolver:       dns.DefaultResolver,
 	}
 	t.desc.Store(description.Topology{})
-	t.updateCallback = func(desc description.Server) description.Server {
-		return t.apply(context.TODO(), desc)
-	}
 
-	// A replica set name sets the initial topology type to ReplicaSetNoPrimary unless a direct connection is also
-	// specified, in which case the initial type is Single.
 	if cfg.replicaSetName != "" {
 		t.fsm.SetName = cfg.replicaSetName
 		t.fsm.Kind = description.ReplicaSetNoPrimary
 	}
 
-	// A direct connection unconditionally sets the topology type to Single.
 	if cfg.mode == SingleMode {
 		t.fsm.Kind = description.Single
-	}
-
-	if t.cfg.uri != "" {
-		t.pollingRequired = strings.HasPrefix(t.cfg.uri, "mongodb+srv://")
 	}
 
 	return t, nil
@@ -166,7 +154,7 @@ func (t *Topology) Connect() error {
 	}
 	t.serversLock.Unlock()
 
-	if t.pollingRequired {
+	if srvPollingRequired(t.cfg.cs.Original) {
 		go t.pollSRVRecords()
 		t.pollingwg.Add(1)
 	}
@@ -204,7 +192,7 @@ func (t *Topology) Disconnect(ctx context.Context) error {
 	t.subscriptionsClosed = true
 	t.subLock.Unlock()
 
-	if t.pollingRequired {
+	if srvPollingRequired(t.cfg.cs.Original) {
 		t.pollingDone <- struct{}{}
 		t.pollingwg.Wait()
 	}
@@ -213,6 +201,10 @@ func (t *Topology) Disconnect(ctx context.Context) error {
 
 	atomic.StoreInt32(&t.connectionstate, disconnected)
 	return nil
+}
+
+func srvPollingRequired(connstr string) bool {
+	return strings.HasPrefix(connstr, "mongodb+srv://")
 }
 
 // Description returns a description of the topology.
@@ -290,6 +282,16 @@ func (t *Topology) RequestImmediateCheck() {
 	t.serversLock.Unlock()
 }
 
+// SupportsSessions returns true if the topology supports sessions.
+func (t *Topology) SupportsSessions() bool {
+	return t.Description().SessionTimeoutMinutes != 0 && t.Description().Kind != description.Single
+}
+
+// SupportsRetryWrites returns true if the topology supports retryable writes, which it does if it supports sessions.
+func (t *Topology) SupportsRetryWrites() bool {
+	return t.SupportsSessions()
+}
+
 // SelectServer selects a server with given a selector. SelectServer complies with the
 // server selection spec, and will time out after severSelectionTimeout or when the
 // parent context is done.
@@ -315,7 +317,7 @@ func (t *Topology) SelectServer(ctx context.Context, ss description.ServerSelect
 		if !doneOnce {
 			// for the first pass, select a server from the current description.
 			// this improves selection speed for up-to-date topology descriptions.
-			suitable, selectErr = t.selectServerFromDescription(t.Description(), selectionState)
+			suitable, selectErr = t.selectServerFromDescription(ctx, t.Description(), selectionState)
 			doneOnce = true
 		} else {
 			// if the first pass didn't select a server, the previous description did not contain a suitable server, so
@@ -440,7 +442,7 @@ func (t *Topology) selectServerFromSubscription(ctx context.Context, subscriptio
 		case current = <-subscriptionCh:
 		}
 
-		suitable, err := t.selectServerFromDescription(current, selectionState)
+		suitable, err := t.selectServerFromDescription(ctx, current, selectionState)
 		if err != nil {
 			return nil, err
 		}
@@ -453,11 +455,16 @@ func (t *Topology) selectServerFromSubscription(ctx context.Context, subscriptio
 }
 
 // selectServerFromDescription process the given topology description and returns a slice of suitable servers.
-func (t *Topology) selectServerFromDescription(desc description.Topology,
+func (t *Topology) selectServerFromDescription(ctx context.Context, desc description.Topology,
 	selectionState serverSelectionState) ([]description.Server, error) {
 
-	// Unlike selectServerFromSubscription, this code path does not check ctx.Done or selectionState.timeoutChan because
-	// selecting a server from a description is not a blocking operation.
+	select {
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	case <-selectionState.timeoutChan:
+		return nil, wrapServerSelectionError(ErrServerSelectionTimeout, t)
+	default:
+	}
 
 	var allowed []description.Server
 	for _, s := range desc.Servers {
@@ -491,7 +498,7 @@ func (t *Topology) pollSRVRecords() {
 	}()
 
 	// remove the scheme
-	uri := t.cfg.uri[14:]
+	uri := t.cfg.cs.Original[14:]
 	hosts := uri
 	if idx := strings.IndexAny(uri, "/?@"); idx != -1 {
 		hosts = uri[:idx]
@@ -589,28 +596,21 @@ func (t *Topology) processSRVResults(parsedHosts []string) bool {
 
 }
 
-// apply updates the Topology and its underlying FSM based on the provided server description and returns the server
-// description that should be stored.
-func (t *Topology) apply(ctx context.Context, desc description.Server) description.Server {
+func (t *Topology) apply(ctx context.Context, desc description.Server) {
+	var err error
+
 	t.serversLock.Lock()
 	defer t.serversLock.Unlock()
 
-	ind, ok := t.fsm.findServer(desc.Addr)
-	if t.serversClosed || !ok {
-		return desc
+	if _, ok := t.servers[desc.Addr]; t.serversClosed || !ok {
+		return
 	}
 
 	prev := t.fsm.Topology
-	oldDesc := t.fsm.Servers[ind]
-	if description.CompareTopologyVersion(oldDesc.TopologyVersion, desc.TopologyVersion) > 0 {
-		return oldDesc
-	}
 
-	var current description.Topology
-	var err error
-	current, desc, err = t.fsm.apply(desc)
+	current, err := t.fsm.apply(desc)
 	if err != nil {
-		return desc
+		return
 	}
 
 	diff := description.DiffTopology(prev, current)
@@ -643,7 +643,6 @@ func (t *Topology) apply(ctx context.Context, desc description.Server) descripti
 	}
 	t.subLock.Unlock()
 
-	return desc
 }
 
 func (t *Topology) addServer(addr address.Address) error {
@@ -651,7 +650,10 @@ func (t *Topology) addServer(addr address.Address) error {
 		return nil
 	}
 
-	svr, err := ConnectServer(addr, t.updateCallback, t.cfg.serverOpts...)
+	topoFunc := func(desc description.Server) {
+		t.apply(context.TODO(), desc)
+	}
+	svr, err := ConnectServer(addr, topoFunc, t.cfg.serverOpts...)
 	if err != nil {
 		return err
 	}

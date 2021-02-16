@@ -10,6 +10,7 @@ import (
 	"context"
 	"crypto/tls"
 	"errors"
+	"strconv"
 	"strings"
 	"time"
 
@@ -25,7 +26,6 @@ import (
 	"go.mongodb.org/mongo-driver/x/mongo/driver/auth"
 	"go.mongodb.org/mongo-driver/x/mongo/driver/connstring"
 	"go.mongodb.org/mongo-driver/x/mongo/driver/description"
-	"go.mongodb.org/mongo-driver/x/mongo/driver/ocsp"
 	"go.mongodb.org/mongo-driver/x/mongo/driver/operation"
 	"go.mongodb.org/mongo-driver/x/mongo/driver/session"
 	"go.mongodb.org/mongo-driver/x/mongo/driver/topology"
@@ -33,14 +33,11 @@ import (
 )
 
 const defaultLocalThreshold = 15 * time.Millisecond
+const batchSize = 10000
 
-var (
-	// keyVaultCollOpts specifies options used to communicate with the key vault collection
-	keyVaultCollOpts = options.Collection().SetReadConcern(readconcern.Majority()).
-				SetWriteConcern(writeconcern.New(writeconcern.WMajority()))
-
-	endSessionsBatchSize = 10000
-)
+// keyVaultCollOpts specifies options used to communicate with the key vault collection
+var keyVaultCollOpts = options.Collection().SetReadConcern(readconcern.Majority()).
+	SetWriteConcern(writeconcern.New(writeconcern.WMajority()))
 
 // Client is a handle representing a pool of connections to a MongoDB deployment. It is safe for concurrent use by
 // multiple goroutines.
@@ -275,8 +272,7 @@ func (c *Client) StartSession(opts ...*options.SessionOptions) (Session, error) 
 		return nil, replaceErrors(err)
 	}
 
-	// Writes are not retryable on standalones, so let operation determine whether to retry
-	sess.RetryWrite = false
+	sess.RetryWrite = c.retryWrites
 	sess.RetryRead = c.retryReads
 
 	return &sessionImpl{
@@ -291,27 +287,31 @@ func (c *Client) endSessions(ctx context.Context) {
 		return
 	}
 
-	sessionIDs := c.sessionPool.IDSlice()
-	op := operation.NewEndSessions(nil).ClusterClock(c.clock).Deployment(c.deployment).
+	ids := c.sessionPool.IDSlice()
+	idx, idArray := bsoncore.AppendArrayStart(nil)
+	for i, id := range ids {
+		idDoc, _ := id.MarshalBSON()
+		idArray = bsoncore.AppendDocumentElement(idArray, strconv.Itoa(i), idDoc)
+	}
+	idArray, _ = bsoncore.AppendArrayEnd(idArray, idx)
+
+	op := operation.NewEndSessions(idArray).ClusterClock(c.clock).Deployment(c.deployment).
 		ServerSelector(description.ReadPrefSelector(readpref.PrimaryPreferred())).CommandMonitor(c.monitor).
 		Database("admin").Crypt(c.crypt)
 
-	totalNumIDs := len(sessionIDs)
-	var currentBatch []bsoncore.Document
+	idx, idArray = bsoncore.AppendArrayStart(nil)
+	totalNumIDs := len(ids)
 	for i := 0; i < totalNumIDs; i++ {
-		currentBatch = append(currentBatch, sessionIDs[i])
-
-		// If we are at the end of a batch or the end of the overall IDs array, execute the operation.
-		if ((i+1)%endSessionsBatchSize) == 0 || i == totalNumIDs-1 {
-			// Ignore all errors when ending sessions.
-			_, marshalVal, err := bson.MarshalValue(currentBatch)
-			if err == nil {
-				_ = op.SessionIDs(marshalVal).Execute(ctx)
-			}
-
-			currentBatch = currentBatch[:0]
+		idDoc, _ := ids[i].MarshalBSON()
+		idArray = bsoncore.AppendDocumentElement(idArray, strconv.Itoa(i), idDoc)
+		if ((i+1)%batchSize) == 0 || i == totalNumIDs-1 {
+			idArray, _ = bsoncore.AppendArrayEnd(idArray, idx)
+			_ = op.SessionIDs(idArray).Execute(ctx)
+			idArray = idArray[:0]
+			idx = 0
 		}
 	}
+
 }
 
 func (c *Client) configure(opts *options.ClientOptions) error {
@@ -325,22 +325,10 @@ func (c *Client) configure(opts *options.ClientOptions) error {
 
 	// TODO(GODRIVER-814): Add tests for topology, server, and connection related options.
 
-	// ClusterClock
-	c.clock = new(session.ClusterClock)
-
-	// Pass down URI so topology can determine whether or not SRV polling is required
-	topologyOpts = append(topologyOpts, topology.WithURI(func(uri string) string {
-		return opts.GetURI()
-	}))
-
 	// AppName
 	var appName string
 	if opts.AppName != nil {
 		appName = *opts.AppName
-
-		serverOpts = append(serverOpts, topology.WithServerAppName(func(string) string {
-			return appName
-		}))
 	}
 	// Compressors & ZlibLevel
 	var comps []string
@@ -372,7 +360,7 @@ func (c *Client) configure(opts *options.ClientOptions) error {
 	}
 	// Handshaker
 	var handshaker = func(driver.Handshaker) driver.Handshaker {
-		return operation.NewIsMaster().AppName(appName).Compressors(comps).ClusterClock(c.clock)
+		return operation.NewIsMaster().AppName(appName).Compressors(comps)
 	}
 	// Auth & Database & Password & Username
 	if opts.Auth != nil {
@@ -403,7 +391,6 @@ func (c *Client) configure(opts *options.ClientOptions) error {
 			AppName:       appName,
 			Authenticator: authenticator,
 			Compressors:   comps,
-			ClusterClock:  c.clock,
 		}
 		if mechanism == "" {
 			// Required for SASL mechanism negotiation during handshake
@@ -558,20 +545,8 @@ func (c *Client) configure(opts *options.ClientOptions) error {
 		}
 	}
 
-	// OCSP cache
-	ocspCache := ocsp.NewCache()
-	connOpts = append(
-		connOpts,
-		topology.WithOCSPCache(func(ocsp.Cache) ocsp.Cache { return ocspCache }),
-	)
-
-	// Disable communication with external OCSP responders.
-	if opts.DisableOCSPEndpointCheck != nil {
-		connOpts = append(
-			connOpts,
-			topology.WithDisableOCSPEndpointCheck(func(bool) bool { return *opts.DisableOCSPEndpointCheck }),
-		)
-	}
+	// ClusterClock
+	c.clock = new(session.ClusterClock)
 
 	serverOpts = append(
 		serverOpts,
@@ -584,9 +559,7 @@ func (c *Client) configure(opts *options.ClientOptions) error {
 
 	// Deployment
 	if opts.Deployment != nil {
-		// topology options: WithSeedlist and WithURI
-		// server options: WithClock and WithConnectionOptions
-		if len(serverOpts) > 2 || len(topologyOpts) > 2 {
+		if len(serverOpts) > 2 || len(topologyOpts) > 1 {
 			return errors.New("cannot specify topology or server options with a deployment")
 		}
 		c.deployment = opts.Deployment
@@ -626,7 +599,7 @@ func (c *Client) configureKeyVault(opts *options.AutoEncryptionOptions) error {
 
 func (c *Client) configureMongocryptd(opts *options.AutoEncryptionOptions) error {
 	var err error
-	c.mongocryptd, err = newMcryptClient(opts)
+	c.mongocryptd, err = newMcryptClient(opts.ExtraOptions)
 	return err
 }
 
@@ -720,14 +693,9 @@ func (c *Client) ListDatabases(ctx context.Context, filter interface{}, opts ...
 	op := operation.NewListDatabases(filterDoc).
 		Session(sess).ReadPreference(c.readPreference).CommandMonitor(c.monitor).
 		ServerSelector(selector).ClusterClock(c.clock).Database("admin").Deployment(c.deployment).Crypt(c.crypt)
-
 	if ldo.NameOnly != nil {
 		op = op.NameOnly(*ldo.NameOnly)
 	}
-	if ldo.AuthorizedDatabases != nil {
-		op = op.AuthorizedDatabases(*ldo.AuthorizedDatabases)
-	}
-
 	retry := driver.RetryNone
 	if c.retryReads {
 		retry = driver.RetryOncePerCommand
@@ -777,7 +745,7 @@ func (c *Client) ListDatabaseNames(ctx context.Context, filter interface{}, opts
 //
 // Any error returned by the fn callback will be returned without any modifications.
 func WithSession(ctx context.Context, sess Session, fn func(SessionContext) error) error {
-	return fn(NewSessionContext(ctx, sess))
+	return fn(contextWithSession(ctx, sess))
 }
 
 // UseSession creates a new Session and uses it to create a new SessionContext, which is used to call the fn callback.
@@ -800,7 +768,13 @@ func (c *Client) UseSessionWithOptions(ctx context.Context, opts *options.Sessio
 	}
 
 	defer defaultSess.EndSession(ctx)
-	return fn(NewSessionContext(ctx, defaultSess))
+
+	sessCtx := sessionContext{
+		Context: context.WithValue(ctx, sessionKey{}, defaultSess),
+		Session: defaultSess,
+	}
+
+	return fn(sessCtx)
 }
 
 // Watch returns a change stream for all changes on the deployment. See
@@ -828,7 +802,6 @@ func (c *Client) Watch(ctx context.Context, pipeline interface{},
 		client:         c,
 		registry:       c.registry,
 		streamType:     ClientStream,
-		crypt:          c.crypt,
 	}
 
 	return newChangeStream(ctx, csConfig, pipeline, opts...)
