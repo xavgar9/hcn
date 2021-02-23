@@ -5,7 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"hcn/config"
+	"hcn/helpers"
 	"hcn/mymodels"
+
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -211,50 +213,101 @@ func CreateHCNMongo(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "(USER) %v", err.Error())
 		return
 	}
+
 	// Prepare the data for insert
-	var newHCNmongo mymodels.HCNmongo
-	var newGeneralData mymodels.GeneralData
-	var newPatientData mymodels.PatientData
-	var newAnthropometry mymodels.Anthropometry
-	var newBiochemistry []mymodels.Biochemistry
+	reqEmpty := true
+	var newGeneralData *mymodels.GeneralData
+	var newReason *string
+	var newPatientData *mymodels.PatientData
+	var newAnthropometry *mymodels.Anthropometry
+	var newBiochemistry *[]mymodels.Biochemistry
 
-	generalData := gjson.Get(string(reqBody), "GeneralData")
-	consultationReason := gjson.Get(string(reqBody), "ConsultationReason")
-	anthropometry := gjson.Get(string(reqBody), "Anthropometry")
-	patientData := gjson.Get(string(reqBody), "PatientData")
-	biochemistry := gjson.Get(string(reqBody), "Biochemistry")
-
-	// General nutritional assessment data
-	json.Unmarshal([]byte(generalData.Raw), &newGeneralData)
-	newHCNmongo.GeneralData = newGeneralData
-	// General patient data
-	json.Unmarshal([]byte(patientData.Raw), &newPatientData)
-	newHCNmongo.PatientData = newPatientData
-	// Consultation Reason
-	reason := consultationReason.String()
-	newHCNmongo.ConsultationReason = &reason
-	// Anthropometry
-	json.Unmarshal([]byte(anthropometry.Raw), &newAnthropometry)
-	newHCNmongo.Anthropometry = newAnthropometry
-	// Biochemistry
-	json.Unmarshal([]byte(biochemistry.Raw), &newBiochemistry)
-	newHCNmongo.Biochemistry = newBiochemistry
-
-	// Insert data in mongo db
-	client, ctx := config.MongoConnection()
-	collection := client.Database("HCNProject").Collection("HCN")
-	insertResult, err := collection.InsertOne(ctx, newHCNmongo)
-	if err != nil {
-		w.Write([]byte(`{ "error": "` + err.Error() + `" }`))
+	if gjson.Get(string(reqBody), "GeneralData").Exists() {
+		generalData := gjson.Get(string(reqBody), "GeneralData")
+		json.Unmarshal([]byte(generalData.Raw), &newGeneralData)
+		reqEmpty = false
 	}
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(insertResult)
+
+	if gjson.Get(string(reqBody), "ConsultationReason").Exists() {
+		consultationReason := gjson.Get(string(reqBody), "ConsultationReason")
+		json.Unmarshal([]byte(consultationReason.Raw), &newReason)
+		reqEmpty = false
+	}
+
+	if gjson.Get(string(reqBody), "Anthropometry").Exists() {
+		anthropometry := gjson.Get(string(reqBody), "Anthropometry")
+		json.Unmarshal([]byte(anthropometry.Raw), &newAnthropometry)
+		reqEmpty = false
+	}
+
+	if gjson.Get(string(reqBody), "Biochemistry").Exists() {
+		biochemistry := gjson.Get(string(reqBody), "Biochemistry")
+		json.Unmarshal([]byte(biochemistry.Raw), &newBiochemistry)
+		reqEmpty = false
+	}
+
+	// This strange way of initialize the struct if looking for
+	// no storing empty fields in mongo
+	newHCNmongo := mymodels.HCNmongo{
+		GeneralData:        *&newGeneralData,
+		ConsultationReason: *&newReason,
+		PatientData:        *&newPatientData,
+		Anthropometry:      *&newAnthropometry,
+		Biochemistry:       *&newBiochemistry,
+	}
+
+	if !reqEmpty {
+		// Insert data in mongo db
+		client, ctx := config.MongoConnection()
+		collection := client.Database("HCNProject").Collection("HCN")
+		_, err = collection.InsertOne(ctx, newHCNmongo)
+		if err != nil {
+			w.Write([]byte(`{ "error": "` + err.Error() + `" }`))
+		}
+		/*
+			rows, err := Db.Exec("INSERT INTO HCN(TeacherID) VALUES (?)", newHCN.TeacherID)
+			defer Db.Close()
+			if err != nil {
+				fmt.Fprintf(w, "(SQL) %v", err.Error())
+				return
+			}
+			cnt, _ := rows.RowsAffected()
+			if cnt == 1 {
+				int64ID, _ := rows.LastInsertId()
+				intID := int(int64ID)
+				newHCN.ID = &intID
+				w.WriteHeader(http.StatusCreated)
+				json.NewEncoder(w).Encode(newHCN)
+			}
+			return
+
+			HAY QUE ADAPTAR MONGO CON SQL EN EL MISMO ENPOINT
+			VERIFICAR LOS OTROS CAMBIOS EN LOS DEMÁS ENDOINTS
+				Al crear una actividad hay que asignar una HCN
+				También hay que asignarle un estudiante que la resuelve
+				Hay que guardar la original
+				Hay que dejar que el profesor la pueda resolver
+		*/
+
+		w.WriteHeader(http.StatusCreated)
+
+		// Use next line for testing
+		json.NewEncoder(w).Encode(newHCNmongo)
+		// Use next line for production
+		//json.NewEncoder(w).Encode(newHCNmongo)
+	}
+
 }
 
 // GetAllHCNMongo bla bla... OK
 func GetAllHCNMongo(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("content-type", "application/json")
-	var allHCNs mymodels.AllHCNmongo
+
+	// Use next line for testing
+	var allHCNsNoID mymodels.AllHCNmongoNoID
+
+	// Use next line for production
+	//var allHCNs mymodels.AllHCNmongo
 	client, ctx := config.MongoConnection()
 	collection := client.Database("HCNProject").Collection("HCN")
 
@@ -262,21 +315,38 @@ func GetAllHCNMongo(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprintf(w, "(SQL) %v", err.Error())
-		//w.Write([]byte(`{ "error": "` + err.Error() + `" }`))
+		w.Write([]byte(`{ "error": "` + err.Error() + `" }`))
 		return
 	}
 	defer cursor.Close(ctx)
 	for cursor.Next(ctx) {
 		var newHCN mymodels.HCNmongo
 		cursor.Decode(&newHCN)
-		allHCNs = append(allHCNs, newHCN)
+
+		// Use next line for testing
+		allHCNsNoID = append(allHCNsNoID, helpers.CleanHCN(newHCN))
+
+		// Use next line for production
+		//allHCNs = append(allHCNs, newHCN)
 	}
 	if err := cursor.Err(); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(`{ "error": "` + err.Error() + `" }`))
 		return
 	}
-	json.NewEncoder(w).Encode(allHCNs)
+	// Use next line for testing
+	if allHCNsNoID == nil {
+		// Use next line for production
+		//if allHCNs == nil {
+		var emptyTest mymodels.EmptyTest
+		json.NewEncoder(w).Encode(emptyTest)
+	} else {
+		// Use next line for testing
+		json.NewEncoder(w).Encode(allHCNsNoID)
+		// Use next line for production
+		//json.NewEncoder(w).Encode(allHCNs)
+	}
+
 }
 
 // GetHCNMongo bla bla... OK
@@ -295,14 +365,25 @@ func GetHCNMongo(w http.ResponseWriter, r *http.Request) {
 	client, ctx := config.MongoConnection()
 	collection := client.Database("HCNProject").Collection("HCN")
 	collection.FindOne(ctx, bson.M{"_id": hcnID}).Decode(&newHCN)
-	json.NewEncoder(w).Encode(newHCN)
+	if newHCN.ID == nil {
+		json.NewEncoder(w).Encode(nil)
+	} else {
+		// For testing only
+		var newHCNnoID mymodels.HCNmongoNoID
+		newhcn, _ := json.Marshal(newHCN)
+		json.Unmarshal([]byte(newhcn), &newHCNnoID)
+		json.NewEncoder(w).Encode(newHCNnoID)
+
+		//Use this in production
+		//json.NewEncoder(w).Encode(newHCN)
+	}
+
 }
 
-// UpdateHCNMongo Mongo bla bla...
+// UpdateHCNMongo ...
+// It is neccesary that all the fields inside a field are filled, otherwise
+// the unfilled fields inside a field will be erased.
 func UpdateHCNMongo(w http.ResponseWriter, r *http.Request) {
-	// It is neccesary that all the fields inside a field are filled, otherwise
-	// the unfilled fields inside a field will be erased.
-
 	w.Header().Set("Content-Type", "application/json")
 	reqBody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -324,7 +405,7 @@ func UpdateHCNMongo(w http.ResponseWriter, r *http.Request) {
 	generalData := gjson.Get(string(reqBody), "GeneralData")
 	json.Unmarshal([]byte(generalData.Raw), &newGeneralData)
 
-	// Patitent data
+	// Patient data
 	patientData := gjson.Get(string(reqBody), "PatientData")
 	json.Unmarshal([]byte(patientData.Raw), &newPatientData)
 
@@ -387,5 +468,5 @@ func DeleteAllHCNMongo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(cnt)
+	//json.NewEncoder(w).Encode(cnt)
 }

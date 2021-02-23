@@ -55,6 +55,7 @@ func runTestWithBody(t *testing.T, allTest mymodels.AllTest) {
 	}
 }
 
+/*
 // Teachers test
 func TestGetAllTeachers(t *testing.T) {
 	runTest(t, testhelpers.CasesGetAllTeachers())
@@ -278,4 +279,24 @@ func TestRemoveClinicalCase(t *testing.T) {
 
 func TestVisibilityClinicalCase(t *testing.T) {
 	runTestWithBody(t, testhelpers.CasesVisibilityClinicalCase())
+}
+*/
+
+func TestDeleteAllHCNMongo(t *testing.T) {
+	runTest(t, testhelpers.CasesDeleteAllHCNMongo())
+}
+func TestGetAllHCNMongo1(t *testing.T) {
+	runTest(t, testhelpers.CasesGetAllHCNMongo1())
+}
+
+func TestCreateHCNMongo(t *testing.T) {
+	runTestWithBody(t, testhelpers.CasesCreateHCNMongo())
+}
+
+func TestGetAllHCNMongo2(t *testing.T) {
+	runTest(t, testhelpers.CasesGetAllHCNMongo2())
+}
+
+func TestUpdateHCNMongo(t *testing.T) {
+	runTestWithBody(t, testhelpers.CasesUpdateHCNMongo())
 }

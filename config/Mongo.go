@@ -20,20 +20,10 @@ func MongoConnection() (*mongo.Client, context.Context) {
 		log.Fatal(err)
 	}
 
-	// Check the connections
+	// Check the connection
 	err = client.Ping(context.TODO(), nil)
 	if err != nil {
 		log.Fatal(err)
 	}
 	return client, ctx
-	/*
-		ctx, err := context.WithTimeout(context.Background(), 30*time.Second)
-		if err != nil {
-
-		}
-		clientOptions := options.Client().ApplyURI("mongodb://" + dbIP + ":" + dbPORT)
-		var client *mongo.Client
-		client, _ = mongo.Connect(ctx, clientOptions)
-		return client, ctx
-	*/
 }
