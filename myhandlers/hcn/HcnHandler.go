@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"hcn/config"
-	"hcn/helpers"
 	"hcn/mymodels"
 
 	"io/ioutil"
@@ -31,12 +30,16 @@ func CreateHCN(w http.ResponseWriter, r *http.Request) {
 	var Db, _ = config.MYSQLConnection()
 	json.Unmarshal(reqBody, &newHCN)
 	switch {
-	case (newHCN.TeacherID == nil) || (*newHCN.TeacherID*1 == 0) || (*newHCN.TeacherID*1 < 0):
+	case (newHCN.TeacherID == nil) || (*newHCN.TeacherID*1 <= 0):
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, "TeacherID is empty or not valid")
 		return
+	case (newHCN.MongoID == nil) || (len(*newHCN.MongoID) == 0):
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, "MongoID is empty or not valid")
+		return
 	default:
-		rows, err := Db.Exec("INSERT INTO HCN(TeacherID) VALUES (?)", newHCN.TeacherID)
+		rows, err := Db.Exec("INSERT INTO HCN(TeacherID, MongoID) VALUES (?, ?)", newHCN.TeacherID, newHCN.MongoID)
 		defer Db.Close()
 		if err != nil {
 			fmt.Fprintf(w, "(SQL) %v", err.Error())
@@ -59,7 +62,7 @@ func GetAllHCN(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var hcns mymodels.AllHCN
 	var Db, _ = config.MYSQLConnection()
-	rows, err := Db.Query("SELECT ID, TeacherID FROM HCN")
+	rows, err := Db.Query("SELECT ID, TeacherID, MongoID FROM HCN")
 	defer Db.Close()
 	if err != nil {
 		if err != sql.ErrNoRows {
@@ -70,12 +73,13 @@ func GetAllHCN(w http.ResponseWriter, r *http.Request) {
 	}
 	for rows.Next() {
 		var ID, TeacherID int
-		if err := rows.Scan(&ID, &TeacherID); err != nil {
+		var MongoID string
+		if err := rows.Scan(&ID, &TeacherID, &MongoID); err != nil {
 			fmt.Fprintf(w, "(SQL) %v", err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		var hcn = mymodels.HCN{ID: &ID, TeacherID: &TeacherID}
+		var hcn = mymodels.HCN{ID: &ID, TeacherID: &TeacherID, MongoID: &MongoID}
 		hcns = append(hcns, hcn)
 	}
 	json.NewEncoder(w).Encode(hcns)
@@ -99,8 +103,9 @@ func GetHCN(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var ID, TeacherID int
+	var MongoID string
 	var Db, _ = config.MYSQLConnection()
-	err = Db.QueryRow("SELECT ID, TeacherID FROM HCN WHERE ID=?", hcnID).Scan(&ID, &TeacherID)
+	err = Db.QueryRow("SELECT ID, TeacherID, MongoID FROM HCN WHERE ID=?", hcnID).Scan(&ID, &TeacherID, &MongoID)
 	defer Db.Close()
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -110,7 +115,7 @@ func GetHCN(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	var course = mymodels.HCN{ID: &ID, TeacherID: &TeacherID}
+	var course = mymodels.HCN{ID: &ID, TeacherID: &TeacherID, MongoID: &MongoID}
 	json.NewEncoder(w).Encode(course)
 	w.WriteHeader(http.StatusCreated)
 	return
@@ -136,9 +141,13 @@ func UpdateHCN(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, "TeacherID is empty or not valid")
 		return
+	case (updatedHCN.MongoID == nil) || (len(*updatedHCN.MongoID) == 0):
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, "MongoID is empty or not valid")
+		return
 	default:
 		var Db, _ = config.MYSQLConnection()
-		row, err := Db.Exec("UPDATE HCN SET TeacherID=? WHERE ID=?", updatedHCN.TeacherID, updatedHCN.ID)
+		row, err := Db.Exec("UPDATE HCN SET TeacherID=?, MongoID=? WHERE ID=?", updatedHCN.TeacherID, updatedHCN.MongoID, updatedHCN.ID)
 		defer Db.Close()
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -304,10 +313,11 @@ func GetAllHCNMongo(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("content-type", "application/json")
 
 	// Use next line for testing
-	var allHCNsNoID mymodels.AllHCNmongoNoID
+	//var allHCNsNoID mymodels.AllHCNmongoNoID
 
 	// Use next line for production
-	//var allHCNs mymodels.AllHCNmongo
+	var allHCNs mymodels.AllHCNmongo
+
 	client, ctx := config.MongoConnection()
 	collection := client.Database("HCNProject").Collection("HCN")
 
@@ -324,10 +334,10 @@ func GetAllHCNMongo(w http.ResponseWriter, r *http.Request) {
 		cursor.Decode(&newHCN)
 
 		// Use next line for testing
-		allHCNsNoID = append(allHCNsNoID, helpers.CleanHCN(newHCN))
+		// allHCNsNoID = append(allHCNsNoID, helpers.CleanHCN(newHCN))
 
 		// Use next line for production
-		//allHCNs = append(allHCNs, newHCN)
+		allHCNs = append(allHCNs, newHCN)
 	}
 	if err := cursor.Err(); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -335,16 +345,16 @@ func GetAllHCNMongo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Use next line for testing
-	if allHCNsNoID == nil {
-		// Use next line for production
-		//if allHCNs == nil {
+	//if allHCNsNoID == nil {
+	// Use next line for production
+	if allHCNs == nil {
 		var emptyTest mymodels.EmptyTest
 		json.NewEncoder(w).Encode(emptyTest)
 	} else {
 		// Use next line for testing
-		json.NewEncoder(w).Encode(allHCNsNoID)
+		//json.NewEncoder(w).Encode(allHCNsNoID)
 		// Use next line for production
-		//json.NewEncoder(w).Encode(allHCNs)
+		json.NewEncoder(w).Encode(allHCNs)
 	}
 
 }
@@ -469,4 +479,40 @@ func DeleteAllHCNMongo(w http.ResponseWriter, r *http.Request) {
 	}
 	w.WriteHeader(http.StatusOK)
 	//json.NewEncoder(w).Encode(cnt)
+}
+
+////////////////////////////////////////
+// HAY QUE METERLE SQL A TODO MONGO HCN
+////////////////////////////////////////
+
+// DeleteHCNMongo bla bla...
+func DeleteHCNMongo(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("content-type", "application/json")
+	reqBody, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, "(USER) %v", err.Error())
+		return
+	}
+	type deletedID struct {
+		ID *string
+	}
+	var deletedHCN deletedID
+	json.Unmarshal(reqBody, &deletedHCN)
+
+	if (deletedHCN.ID == nil) || (len(*deletedHCN.ID) == 0) {
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, "ID is empty or not valid")
+		return
+	}
+	client, ctx := config.MongoConnection()
+	collection := client.Database("HCNProject").Collection("HCN")
+	id, _ := primitive.ObjectIDFromHex(*deletedHCN.ID)
+	result, err := collection.DeleteOne(ctx, bson.M{"_id": id})
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(result.DeletedCount)
 }

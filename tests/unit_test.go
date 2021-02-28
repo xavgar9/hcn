@@ -55,7 +55,6 @@ func runTestWithBody(t *testing.T, allTest mymodels.AllTest) {
 	}
 }
 
-/*
 // Teachers test
 func TestGetAllTeachers(t *testing.T) {
 	runTest(t, testhelpers.CasesGetAllTeachers())
@@ -141,25 +140,25 @@ func TestDeleteAnnouncement(t *testing.T) {
 }
 
 // Feedbacks test
-func TestGetAllFeedbacks(t *testing.T) {
-	runTest(t, testhelpers.CasesGetAllFeedbacks())
-}
+// func TestGetAllFeedbacks(t *testing.T) {
+// 	runTest(t, testhelpers.CasesGetAllFeedbacks())
+// }
 
-func TestGetFeedback(t *testing.T) {
-	runTest(t, testhelpers.CasesGetFeedback())
-}
+// func TestGetFeedback(t *testing.T) {
+// 	runTest(t, testhelpers.CasesGetFeedback())
+// }
 
-func TestCreateFeedback(t *testing.T) {
-	runTestWithBody(t, testhelpers.CasesCreateFeedback())
-}
+// func TestCreateFeedback(t *testing.T) {
+// 	runTestWithBody(t, testhelpers.CasesCreateFeedback())
+// }
 
-func TestUpdateFeedback(t *testing.T) {
-	runTestWithBody(t, testhelpers.CasesUpdateFeedback())
-}
+// func TestUpdateFeedback(t *testing.T) {
+// 	runTestWithBody(t, testhelpers.CasesUpdateFeedback())
+// }
 
-func TestDeleteFeedback(t *testing.T) {
-	runTestWithBody(t, testhelpers.CasesDeleteFeedback())
-}
+// func TestDeleteFeedback(t *testing.T) {
+// 	runTestWithBody(t, testhelpers.CasesDeleteFeedback())
+// }
 
 // HCN test
 func TestGetAllHCN(t *testing.T) {
@@ -280,7 +279,8 @@ func TestRemoveClinicalCase(t *testing.T) {
 func TestVisibilityClinicalCase(t *testing.T) {
 	runTestWithBody(t, testhelpers.CasesVisibilityClinicalCase())
 }
-*/
+
+/*
 
 func TestDeleteAllHCNMongo(t *testing.T) {
 	runTest(t, testhelpers.CasesDeleteAllHCNMongo())
@@ -300,3 +300,4 @@ func TestGetAllHCNMongo2(t *testing.T) {
 func TestUpdateHCNMongo(t *testing.T) {
 	runTestWithBody(t, testhelpers.CasesUpdateHCNMongo())
 }
+*/

@@ -203,8 +203,8 @@ func CasesAddStudent() mymodels.AllTest {
 			Method:       "POST",
 			URL:          "/Students/AddStudent",
 			Function:     courses.AddStudent,
-			Body:         `{"CourseID":1,"StudentID":5}`,
-			ExpectedBody: `(SQL) Error 1062: Duplicate entry '1-5' for key 'uq_Students_Courses'`,
+			Body:         `{"CourseID":1,"StudentID":4}`,
+			ExpectedBody: `(SQL) Error 1062: Duplicate entry '1-4' for key 'uq_Students_Courses'`,
 			StatusCode:   http.StatusConflict,
 		},
 		{
@@ -279,7 +279,7 @@ func CasesRemoveStudent() mymodels.AllTest {
 			Method:       "DELETE",
 			URL:          "/Courses/RemoveStudent",
 			Function:     courses.RemoveStudent,
-			Body:         `{"CourseID":1, "StudentID":5}`,
+			Body:         `{"CourseID":1, "StudentID":4}`,
 			ExpectedBody: `One row deleted`,
 			StatusCode:   http.StatusOK,
 		},
@@ -288,7 +288,7 @@ func CasesRemoveStudent() mymodels.AllTest {
 			URL:          "/Courses/RemoveStudent",
 			Function:     courses.RemoveStudent,
 			Body:         `{"CourseID":1, "StudentID":5}`,
-			ExpectedBody: `No rows deleted`,
+			ExpectedBody: `One row deleted`,
 			StatusCode:   http.StatusOK,
 		},
 		{
@@ -297,6 +297,14 @@ func CasesRemoveStudent() mymodels.AllTest {
 			Function:     courses.RemoveStudent,
 			Body:         `{"CourseID":1, "StudentID":6}`,
 			ExpectedBody: `One row deleted`,
+			StatusCode:   http.StatusOK,
+		},
+		{
+			Method:       "DELETE",
+			URL:          "/Courses/RemoveStudent",
+			Function:     courses.RemoveStudent,
+			Body:         `{"CourseID":1, "StudentID":7}`,
+			ExpectedBody: `No rows deleted`,
 			StatusCode:   http.StatusOK,
 		},
 		{

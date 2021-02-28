@@ -1,6 +1,4 @@
 -- Prepare the data base for testing
-DELETE FROM Feedbacks;
-ALTER TABLE Feedbacks AUTO_INCREMENT = 1;
 DELETE FROM CCases_HCN;
 DELETE FROM Courses_CCases;
 ALTER TABLE Courses_CCases AUTO_INCREMENT = 1;
@@ -52,11 +50,11 @@ INSERT INTO Announcements(ID,CourseID,Title,Description,CreationDate) VALUES
     (4,1,'Material guía','Busquen en Youtube. "Accidentes de tránsito graves sin censura."', "2021-01-17 13:34:28");
 
 -- HCN
-INSERT INTO HCN(ID,TeacherID) VALUES (1,1);
-INSERT INTO HCN(ID,TeacherID) VALUES (2,1);
-INSERT INTO HCN(ID,TeacherID) VALUES (3,1);
-INSERT INTO HCN(ID,TeacherID) VALUES (4,2);
-INSERT INTO HCN(ID,TeacherID) VALUES (5,3);
+INSERT INTO HCN(ID,TeacherID,MongoID) VALUES (1,1,"602dbcd2437d1bc1295d976e");
+INSERT INTO HCN(ID,TeacherID,MongoID) VALUES (2,1,"5tgdfdghghdfdbc1295d976d");
+INSERT INTO HCN(ID,TeacherID,MongoID) VALUES (3,1,"dfvdbcd2437sfbc1295d54de");
+INSERT INTO HCN(ID,TeacherID,MongoID) VALUES (4,2,"nhddbcd2437d1bc8fvewigd3");
+INSERT INTO HCN(ID,TeacherID,MongoID) VALUES (5,3,"knv949f95dvreij9mvo00dmd");
 
 -- Clinical_Cases
 INSERT INTO Clinical_Cases(ID,Title,Description,Media,TeacherID) VALUES
@@ -71,15 +69,6 @@ INSERT INTO Activities(ID,Title,Description,Type,CreationDate,LimitDate,CourseID
     (1,'Primera tarea, matrices dispersas','Re easy pri, solo busquen en Google.','Calificable','2021-01-08 12:00:00','2021-01-08 20:00:00',1,1,1,3);
 INSERT INTO Activities(ID,Title,Description,Type,CreationDate,LimitDate,CourseID,ClinicalCaseID,HCNID,Difficulty) VALUES
     (2,'Actividad de prueba','Por favor ignoren esta actividad, gracias.','Prueba','2021-01-09 11:43:21','2021-01-19 10:59:59',2,2,2,1);
-
--- Feedbacks
-INSERT INTO Feedbacks(ID,ActivityID,StudentID) VALUES (1,1,1);
-INSERT INTO Feedbacks(ID,ActivityID,StudentID) VALUES (2,1,2);
-INSERT INTO Feedbacks(ID,ActivityID,StudentID) VALUES (3,1,3);
-INSERT INTO Feedbacks(ID,ActivityID,StudentID) VALUES (4,1,4);
-INSERT INTO Feedbacks(ID,ActivityID,StudentID) VALUES (5,1,5);
-INSERT INTO Feedbacks(ID,ActivityID,StudentID) VALUES (6,1,6);
-INSERT INTO Feedbacks(ID,ActivityID,StudentID) VALUES (7,1,7);
 
 -- Courses_HCN
 INSERT INTO Courses_HCN(ID,CourseID,HCNID,Displayable) VALUES (1,1,1,1);

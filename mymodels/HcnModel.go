@@ -6,8 +6,9 @@ package mymodels
 
 // HCN is the assessment in MySQL (Historia Clínica Nutricional)...
 type HCN struct {
-	ID        *int `json:"ID"`
-	TeacherID *int `json:"TeacherID"`
+	ID        *int    `json:"ID"`
+	TeacherID *int    `json:"TeacherID"`
+	MongoID   *string `json:"MongoID"`
 }
 
 // HCNVinculation bla bla...
