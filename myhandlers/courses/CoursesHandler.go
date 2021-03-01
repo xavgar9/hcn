@@ -239,6 +239,27 @@ func AddStudent(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// GetAllStudentsCourseNoHTTP get all HCN in a course...
+func GetAllStudentsCourseNoHTTP(courseID int) (mymodels.AllStudents, error) {
+	var allStudents mymodels.AllStudents
+	var Db, _ = config.MYSQLConnection()
+	rows, err := Db.Query("SELECT ID, Name, Email FROM Students WHERE ID IN (SELECT StudentID FROM Students_Courses WHERE CourseID = ?)", courseID)
+	defer Db.Close()
+	if err != nil {
+		return allStudents, err
+	}
+	for rows.Next() {
+		var ID int
+		var Name, Email string
+		if err := rows.Scan(&ID, &Name, &Email); err != nil {
+			return allStudents, err
+		}
+		var student = mymodels.Student{ID: &ID, Name: &Name, Email: &Email}
+		allStudents = append(allStudents, student)
+	}
+	return allStudents, nil
+}
+
 // GetAllStudentsCourse get all HCN in a course...
 func GetAllStudentsCourse(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")

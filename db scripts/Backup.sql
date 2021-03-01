@@ -11,6 +11,8 @@ ALTER TABLE Students_Courses AUTO_INCREMENT = 1;
 DELETE FROM Students;
 DELETE FROM Activities;
 ALTER TABLE Activities AUTO_INCREMENT = 1;
+DELETE FROM Solved_HCN;
+ALTER TABLE Solved_HCN AUTO_INCREMENT = 1;
 DELETE FROM HCN;
 ALTER TABLE HCN AUTO_INCREMENT = 1;
 DELETE FROM Clinical_Cases;
@@ -20,24 +22,24 @@ ALTER TABLE Courses AUTO_INCREMENT = 1;
 DELETE FROM Teachers;
 
 -- Students
-INSERT INTO Students(ID,Name,Email) VALUES (1,'Daniel Gómez Sermeño','goma@email.com');
-INSERT INTO Students(ID,Name,Email) VALUES (2,'Xavier Garzón López','xavgar9@email.com');
-INSERT INTO Students(ID,Name,Email) VALUES (3,'Juan F. Gil','transfer10@email.com');
-INSERT INTO Students(ID,Name,Email) VALUES (4,'Edgar Silva','ednosil@email.com');
-INSERT INTO Students(ID,Name,Email) VALUES (5,'Juanita María Parra Villamíl','juanitamariap@email.com');
-INSERT INTO Students(ID,Name,Email) VALUES (6,'Sebastián Rodríguez Osorio Silva','sebasrosorio98@email.com');
-INSERT INTO Students(ID,Name,Email) VALUES (7,'Andrés Felipe Garcés','andylukast@email.com');
+INSERT INTO Students(ID,Name,Email) VALUES (10001,'Daniel Gómez Sermeño','goma@email.com');
+INSERT INTO Students(ID,Name,Email) VALUES (10002,'Xavier Garzón López','xavgar9@email.com');
+INSERT INTO Students(ID,Name,Email) VALUES (10003,'Juan F. Gil','transfer10@email.com');
+INSERT INTO Students(ID,Name,Email) VALUES (10004,'Edgar Silva','ednosil@email.com');
+INSERT INTO Students(ID,Name,Email) VALUES (10005,'Juanita María Parra Villamíl','juanitamariap@email.com');
+INSERT INTO Students(ID,Name,Email) VALUES (10006,'Sebastián Rodríguez Osorio Silva','sebasrosorio98@email.com');
+INSERT INTO Students(ID,Name,Email) VALUES (10007,'Andrés Felipe Garcés','andylukast@email.com');
 
 -- Teachers
-INSERT INTO Teachers(ID,Name,Email) VALUES (1,'Benjamín Calderón Silva','matlab@email.com');
-INSERT INTO Teachers(ID,Name,Email) VALUES (2,'Oscar David Hurtado Zapata','oscrdh@email.com');
-INSERT INTO Teachers(ID,Name,Email) VALUES (3,'Christian Camilo Ortiz','camilorto@email.com');
+INSERT INTO Teachers(ID,Name,Email) VALUES (50001,'Benjamín Calderón Silva','matlab@email.com');
+INSERT INTO Teachers(ID,Name,Email) VALUES (50002,'Oscar David Hurtado Zapata','oscrdh@email.com');
+INSERT INTO Teachers(ID,Name,Email) VALUES (50003,'Christian Camilo Ortiz','camilorto@email.com');
 
 -- Courses
-INSERT INTO Courses(TeacherID,Name, CreationDate) VALUES (1,'Introducción a Matlab', '2021-01-01 12:00:00');
-INSERT INTO Courses(TeacherID,Name, CreationDate) VALUES (1,'Matlab avanzado', '2021-01-01 12:20:08');
-INSERT INTO Courses(TeacherID,Name, CreationDate) VALUES (2,'Clases de piano', '2021-01-06 15:21:50');
-INSERT INTO Courses(TeacherID,Name, CreationDate) VALUES (3,'Manejando en Cali', '2021-01-05 11:40:12');
+INSERT INTO Courses(TeacherID,Name, CreationDate) VALUES (50001,'Introducción a Matlab', '2021-01-01 12:00:00');
+INSERT INTO Courses(TeacherID,Name, CreationDate) VALUES (50001,'Matlab avanzado', '2021-01-01 12:20:08');
+INSERT INTO Courses(TeacherID,Name, CreationDate) VALUES (50002,'Clases de piano', '2021-01-06 15:21:50');
+INSERT INTO Courses(TeacherID,Name, CreationDate) VALUES (50003,'Manejando en Cali', '2021-01-05 11:40:12');
 
 -- Announcements
 INSERT INTO Announcements(ID,CourseID,Title,Description,CreationDate) VALUES
@@ -50,19 +52,19 @@ INSERT INTO Announcements(ID,CourseID,Title,Description,CreationDate) VALUES
     (4,1,'Material guía','Busquen en Youtube. "Accidentes de tránsito graves sin censura."', "2021-01-17 13:34:28");
 
 -- HCN
-INSERT INTO HCN(ID,TeacherID,MongoID) VALUES (1,1,"602dbcd2437d1bc1295d976e");
-INSERT INTO HCN(ID,TeacherID,MongoID) VALUES (2,1,"5tgdfdghghdfdbc1295d976d");
-INSERT INTO HCN(ID,TeacherID,MongoID) VALUES (3,1,"dfvdbcd2437sfbc1295d54de");
-INSERT INTO HCN(ID,TeacherID,MongoID) VALUES (4,2,"nhddbcd2437d1bc8fvewigd3");
-INSERT INTO HCN(ID,TeacherID,MongoID) VALUES (5,3,"knv949f95dvreij9mvo00dmd");
+INSERT INTO HCN(ID,TeacherID,MongoID) VALUES (1,50001,"60346574367b678c2e13c072");
+INSERT INTO HCN(ID,TeacherID,MongoID) VALUES (2,50001,"5tgdfdghghdfdbc1295d976d");
+INSERT INTO HCN(ID,TeacherID,MongoID) VALUES (3,50001,"dfvdbcd2437sfbc1295d54de");
+INSERT INTO HCN(ID,TeacherID,MongoID) VALUES (4,50002,"nhddbcd2437d1bc8fvewigd3");
+INSERT INTO HCN(ID,TeacherID,MongoID) VALUES (5,50003,"knv949f95dvreij9mvo00dmd");
 
 -- Clinical_Cases
 INSERT INTO Clinical_Cases(ID,Title,Description,Media,TeacherID) VALUES
-    (1,"El joven parchado","Benjamón era un joven con IMC PARCHADO.","../activitiesresources/img1.png",1);
+    (1,"El joven parchado","Benjamón era un joven con IMC PARCHADO.","../activitiesresources/img1.png",50001);
 INSERT INTO Clinical_Cases(ID,Title,Description,Media,TeacherID) VALUES
-    (2,"El pianista de la selva","Re La Mi Do#","../activitiesresources/img2.png",2);
+    (2,"El pianista de la selva","Re La Mi Do#","../activitiesresources/img2.png",50002);
 INSERT INTO Clinical_Cases(ID,Title,Description,Media,TeacherID) VALUES
-    (3,"Muerte accidental","¿Por qué se fue? ¿Y por qué murió? ¿Por qué el Señor me la quitó? Se ha ido al cielo y para poder ir yo...","../activitiesresources/ElUltimoBeso.mp3",3);
+    (3,"Muerte accidental","¿Por qué se fue? ¿Y por qué murió? ¿Por qué el Señor me la quitó? Se ha ido al cielo y para poder ir yo...","../activitiesresources/ElUltimoBeso.mp3",50003);
 
 -- Activities
 INSERT INTO Activities(ID,Title,Description,Type,CreationDate,LimitDate,CourseID,ClinicalCaseID,HCNID,Difficulty) VALUES
@@ -84,13 +86,13 @@ INSERT INTO Courses_CCases(ID,ClinicalCaseID,CourseID,Displayable) VALUES (2,2,2
 INSERT INTO Courses_CCases(ID,ClinicalCaseID,CourseID,Displayable) VALUES (3,3,3,0);
 
 -- Students_Courses
-INSERT INTO Students_Courses(ID,CourseID,StudentID) VALUES (1,1,1);
-INSERT INTO Students_Courses(ID,CourseID,StudentID) VALUES (2,1,2);
-INSERT INTO Students_Courses(ID,CourseID,StudentID) VALUES (3,1,3);
-INSERT INTO Students_Courses(ID,CourseID,StudentID) VALUES (4,1,4);
-INSERT INTO Students_Courses(ID,CourseID,StudentID) VALUES (5,2,5);
-INSERT INTO Students_Courses(ID,CourseID,StudentID) VALUES (6,2,6);
-INSERT INTO Students_Courses(ID,CourseID,StudentID) VALUES (7,2,7);
-INSERT INTO Students_Courses(ID,CourseID,StudentID) VALUES (8,3,1);
-INSERT INTO Students_Courses(ID,CourseID,StudentID) VALUES (9,3,2);
-INSERT INTO Students_Courses(ID,CourseID,StudentID) VALUES (10,3,7);
+INSERT INTO Students_Courses(ID,CourseID,StudentID) VALUES (1,1,10001);
+INSERT INTO Students_Courses(ID,CourseID,StudentID) VALUES (2,1,10002);
+INSERT INTO Students_Courses(ID,CourseID,StudentID) VALUES (3,1,10003);
+INSERT INTO Students_Courses(ID,CourseID,StudentID) VALUES (4,1,10004);
+INSERT INTO Students_Courses(ID,CourseID,StudentID) VALUES (5,2,10005);
+INSERT INTO Students_Courses(ID,CourseID,StudentID) VALUES (6,2,10006);
+INSERT INTO Students_Courses(ID,CourseID,StudentID) VALUES (7,2,10007);
+INSERT INTO Students_Courses(ID,CourseID,StudentID) VALUES (8,3,10001);
+INSERT INTO Students_Courses(ID,CourseID,StudentID) VALUES (9,3,10002);
+INSERT INTO Students_Courses(ID,CourseID,StudentID) VALUES (10,3,10007);

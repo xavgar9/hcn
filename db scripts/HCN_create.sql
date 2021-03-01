@@ -82,7 +82,7 @@ CREATE TABLE HCN (
 
 -- Table: Solved_HCN
 CREATE TABLE Solved_HCN (
-    ID int NOT NULL,
+    ID int NOT NULL AUTO_INCREMENT,
     OriginalHCN int NOT NULL,
     MongoID varchar(50) NOT NULL,
     Solver int NOT NULL,

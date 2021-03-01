@@ -8,6 +8,7 @@ import (
 	"hcn/myhandlers/courses"
 	"hcn/myhandlers/feedbacks"
 	"hcn/myhandlers/hcn"
+	solvedhcn "hcn/myhandlers/solvedHCN"
 	"hcn/myhandlers/students"
 	"hcn/myhandlers/teachers"
 	"html/template"
@@ -133,4 +134,8 @@ func MainRouters(router *mux.Router) {
 	router.HandleFunc("/HCN/CreateHCNMongo", hcn.CreateHCNMongo).Methods("POST")
 	router.HandleFunc("/HCN/DeleteHCNMongo", hcn.DeleteHCNMongo).Methods("DELETE")
 	router.HandleFunc("/HCN/DeleteAllHCNMongo", hcn.DeleteAllHCNMongo).Methods("DELETE")
+
+	// SolvedHCN URLs
+	router.HandleFunc("/SolvedHCN/CreateSolvedHCN", solvedhcn.CreateSolvedHCN).Methods("POST")
+	router.HandleFunc("/SolvedHCN/GetAllSolvedHCN", solvedhcn.GetAllSolvedHCN).Methods("GET")
 }

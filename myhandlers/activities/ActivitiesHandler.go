@@ -1,6 +1,7 @@
 package activities
 
 import (
+	"bytes"
 	"database/sql"
 	"encoding/json"
 	"fmt"
@@ -23,7 +24,6 @@ func CreateActivity(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var Db, _ = config.MYSQLConnection()
 	json.Unmarshal(reqBody, &newActivity)
 	switch {
 	case (newActivity.Title == nil) || (len(*newActivity.Title) == 0):
@@ -58,20 +58,45 @@ func CreateActivity(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, "Difficulty is empty or not valid")
 		return
+	case (newActivity.TeacherID == nil) || (*newActivity.TeacherID*1 <= 0):
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, "TeacherID is empty or not valid")
+		return
 	default:
-		rows, err := Db.Exec("INSERT INTO Activities(Title,Description,Type,CreationDate,LimitDate,CourseID,ClinicalCaseID,HCNID,Difficulty) VALUES (?,?,?,NOW(),?,?,?,?,?)", newActivity.Title, newActivity.Description, newActivity.Type, newActivity.LimitDate, newActivity.CourseID, newActivity.ClinicalCaseID, newActivity.HCNID, newActivity.Difficulty)
-		defer Db.Close()
-		if err != nil {
-			fmt.Fprintf(w, "(SQL) %v", err.Error())
-			return
+		newSolvedHCN := mymodels.SolvedHCN{
+			CourseID:    newActivity.CourseID,
+			OriginalHCN: newActivity.HCNID,
+			TeacherID:   newActivity.TeacherID,
 		}
-		cnt, _ := rows.RowsAffected()
-		if cnt == 1 {
-			int64ID, _ := rows.LastInsertId()
-			intID := int(int64ID)
-			newActivity.ID = &intID
-			w.WriteHeader(http.StatusCreated)
-			json.NewEncoder(w).Encode(newActivity)
+		endpoint := "http://" + config.ServerIP + ":" + config.ServerPort + "/SolvedHCN/CreateSolvedHCN"
+		jsonValue, _ := json.Marshal(newSolvedHCN)
+		req, _ := http.NewRequest("POST", endpoint, bytes.NewBuffer(jsonValue))
+		req.Header.Set("Content-Type", "application/json")
+		client := &http.Client{}
+		resp, err := client.Do(req)
+		if err != nil {
+			fmt.Fprintf(w, err.Error())
+			break
+		}
+		if resp.Status == "201 Created" {
+			var Db, _ = config.MYSQLConnection()
+			rows, err := Db.Exec("INSERT INTO Activities(Title,Description,Type,CreationDate,LimitDate,CourseID,ClinicalCaseID,HCNID,Difficulty) VALUES (?,?,?,NOW(),?,?,?,?,?)", newActivity.Title, newActivity.Description, newActivity.Type, newActivity.LimitDate, newActivity.CourseID, newActivity.ClinicalCaseID, newActivity.HCNID, newActivity.Difficulty)
+			defer Db.Close()
+			if err != nil {
+				fmt.Fprintf(w, "(SQL) %v", err.Error())
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+			cnt, _ := rows.RowsAffected()
+			if cnt == 1 {
+				int64ID, _ := rows.LastInsertId()
+				intID := int(int64ID)
+				newActivity.ID = &intID
+				w.WriteHeader(http.StatusCreated)
+				json.NewEncoder(w).Encode(newActivity)
+			}
+		} else {
+			fmt.Fprintf(w, "Can't create solvedHCN %v", resp.Body)
 		}
 		return
 	}

@@ -12,6 +12,7 @@ type Activity struct {
 	ClinicalCaseID *int    `json:"ClinicalCaseID"`
 	HCNID          *int    `json:"HCNID"`
 	Difficulty     *int    `json:"Difficulty"`
+	TeacherID      *int    `json:"TeacherID"`
 }
 
 // AllActivities bla bla...

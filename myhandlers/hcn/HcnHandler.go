@@ -3,9 +3,11 @@ package hcn
 import (
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"hcn/config"
 	"hcn/mymodels"
+	"strings"
 
 	"io/ioutil"
 	"net/http"
@@ -85,6 +87,18 @@ func GetAllHCN(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(hcns)
 	w.WriteHeader(http.StatusOK)
 	return
+}
+
+// GetHCNMongoIDNoHTTP MYSQL bla bla...
+func GetHCNMongoIDNoHTTP(hcnID int) (string, error) {
+	var MongoID string
+	var Db, _ = config.MYSQLConnection()
+	err := Db.QueryRow("SELECT MongoID FROM HCN WHERE ID=?", hcnID).Scan(&MongoID)
+	defer Db.Close()
+	if err != nil {
+		return MongoID, err
+	}
+	return MongoID, err
 }
 
 // GetHCN MySQL bla bla...
@@ -269,7 +283,7 @@ func CreateHCNMongo(w http.ResponseWriter, r *http.Request) {
 		// Insert data in mongo db
 		client, ctx := config.MongoConnection()
 		collection := client.Database("HCNProject").Collection("HCN")
-		_, err = collection.InsertOne(ctx, newHCNmongo)
+		result, err := collection.InsertOne(ctx, newHCNmongo)
 		if err != nil {
 			w.Write([]byte(`{ "error": "` + err.Error() + `" }`))
 		}
@@ -289,21 +303,14 @@ func CreateHCNMongo(w http.ResponseWriter, r *http.Request) {
 				json.NewEncoder(w).Encode(newHCN)
 			}
 			return
-
-			HAY QUE ADAPTAR MONGO CON SQL EN EL MISMO ENPOINT
-			VERIFICAR LOS OTROS CAMBIOS EN LOS DEMÁS ENDOINTS
-				Al crear una actividad hay que asignar una HCN
-				También hay que asignarle un estudiante que la resuelve
-				Hay que guardar la original
-				Hay que dejar que el profesor la pueda resolver
 		*/
 
 		w.WriteHeader(http.StatusCreated)
 
 		// Use next line for testing
-		json.NewEncoder(w).Encode(newHCNmongo)
-		// Use next line for production
 		//json.NewEncoder(w).Encode(newHCNmongo)
+		// Use next line for production
+		json.NewEncoder(w).Encode(strings.Split(fmt.Sprintf("%v", result.InsertedID), `"`)[1])
 	}
 
 }
@@ -356,6 +363,22 @@ func GetAllHCNMongo(w http.ResponseWriter, r *http.Request) {
 		// Use next line for production
 		json.NewEncoder(w).Encode(allHCNs)
 	}
+
+}
+
+// GetHCNMongoNoHTTP bla bla... OK
+func GetHCNMongoNoHTTP(hcnid string) (mymodels.HCNmongo, error) {
+	hcnID, _ := primitive.ObjectIDFromHex(hcnid)
+
+	var newHCN mymodels.HCNmongo
+
+	client, ctx := config.MongoConnection()
+	collection := client.Database("HCNProject").Collection("HCN")
+	collection.FindOne(ctx, bson.M{"_id": hcnID}).Decode(&newHCN)
+	if newHCN.ID == nil {
+		return newHCN, errors.New("Mongo HCN doesnt exist")
+	}
+	return newHCN, nil
 
 }
 
