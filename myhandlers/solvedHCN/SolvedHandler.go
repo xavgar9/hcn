@@ -53,7 +53,6 @@ func CreateSolvedHCN(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, err.Error())
 		return
 	}
-	var Db, _ = config.MYSQLConnection()
 	endpoint := "http://" + config.ServerIP + ":" + config.ServerPort + "/HCN/CreateHCNMongo"
 	jsonValue, _ := json.Marshal(hcnMongo)
 	req, _ := http.NewRequest("POST", endpoint, bytes.NewBuffer(jsonValue))
@@ -77,9 +76,9 @@ func CreateSolvedHCN(w http.ResponseWriter, r *http.Request) {
 					return
 				}
 				json.Unmarshal(reqBody, &hcnID)
-
-				rows, err := Db.Exec("INSERT INTO Solved_HCN(OriginalHCN, MongoID, Solver, Reviewed) VALUES (?,?,?,?)", *newSolvedHCN.OriginalHCN, hcnID, *student.ID, 0)
+				var Db, _ = config.MYSQLConnection()
 				defer Db.Close()
+				rows, err := Db.Exec("INSERT INTO Solved_HCN(OriginalHCN, MongoID, Solver, Reviewed) VALUES (?,?,?,?)", *newSolvedHCN.OriginalHCN, hcnID, *student.ID, 0)
 				if err == nil {
 					cnt, _ := rows.RowsAffected()
 					if cnt == 1 {

@@ -80,8 +80,8 @@ func CreateActivity(w http.ResponseWriter, r *http.Request) {
 		}
 		if resp.Status == "201 Created" {
 			var Db, _ = config.MYSQLConnection()
-			rows, err := Db.Exec("INSERT INTO Activities(Title,Description,Type,CreationDate,LimitDate,CourseID,ClinicalCaseID,HCNID,Difficulty) VALUES (?,?,?,NOW(),?,?,?,?,?)", newActivity.Title, newActivity.Description, newActivity.Type, newActivity.LimitDate, newActivity.CourseID, newActivity.ClinicalCaseID, newActivity.HCNID, newActivity.Difficulty)
 			defer Db.Close()
+			rows, err := Db.Exec("INSERT INTO Activities(Title,Description,Type,CreationDate,LimitDate,CourseID,ClinicalCaseID,HCNID,Difficulty) VALUES (?,?,?,NOW(),?,?,?,?,?)", newActivity.Title, newActivity.Description, newActivity.Type, newActivity.LimitDate, newActivity.CourseID, newActivity.ClinicalCaseID, newActivity.HCNID, newActivity.Difficulty)
 			if err != nil {
 				fmt.Fprintf(w, "(SQL) %v", err.Error())
 				w.WriteHeader(http.StatusInternalServerError)

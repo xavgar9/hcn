@@ -52,19 +52,19 @@ INSERT INTO Announcements(ID,CourseID,Title,Description,CreationDate) VALUES
     (4,1,'Material guía','Busquen en Youtube. "Accidentes de tránsito graves sin censura."', "2021-01-17 13:34:28");
 
 -- HCN
-INSERT INTO HCN(ID,TeacherID,MongoID) VALUES (1,50001,"60346574367b678c2e13c072");
-INSERT INTO HCN(ID,TeacherID,MongoID) VALUES (2,50001,"5tgdfdghghdfdbc1295d976d");
-INSERT INTO HCN(ID,TeacherID,MongoID) VALUES (3,50001,"dfvdbcd2437sfbc1295d54de");
-INSERT INTO HCN(ID,TeacherID,MongoID) VALUES (4,50002,"nhddbcd2437d1bc8fvewigd3");
-INSERT INTO HCN(ID,TeacherID,MongoID) VALUES (5,50003,"knv949f95dvreij9mvo00dmd");
+INSERT INTO HCN(ID,TeacherID,MongoID) VALUES (1,50001,"604bd02d2a14a823c0b5725b");
+INSERT INTO HCN(ID,TeacherID,MongoID) VALUES (2,50001,"604bd02d2a14a823c0b5725c");
+INSERT INTO HCN(ID,TeacherID,MongoID) VALUES (3,50001,"604bd02d2a14a823c0b5725d");
+INSERT INTO HCN(ID,TeacherID,MongoID) VALUES (4,50002,"604bd02d2a14a823c0b5725e");
+INSERT INTO HCN(ID,TeacherID,MongoID) VALUES (5,50003,"604bd02d2a14a823c0b5725e");
 
 -- Clinical_Cases
 INSERT INTO Clinical_Cases(ID,Title,Description,Media,TeacherID) VALUES
-    (1,"El joven parchado","Benjamón era un joven con IMC PARCHADO.","../activitiesresources/img1.png",50001);
+    (1,"El joven parchado","Benjamón era un joven con IMC PARCHADO.","Li4vYWN0aXZpdGllc3Jlc291cmNlcy9pbWcxLnBuZw==",50001);
 INSERT INTO Clinical_Cases(ID,Title,Description,Media,TeacherID) VALUES
-    (2,"El pianista de la selva","Re La Mi Do#","../activitiesresources/img2.png",50002);
+    (2,"El pianista de la selva","Re La Mi Do#","Li4vYWN0aXZpdGllc3Jlc291cmNlcy9pbWcyLnBuZw==",50002);
 INSERT INTO Clinical_Cases(ID,Title,Description,Media,TeacherID) VALUES
-    (3,"Muerte accidental","¿Por qué se fue? ¿Y por qué murió? ¿Por qué el Señor me la quitó? Se ha ido al cielo y para poder ir yo...","../activitiesresources/ElUltimoBeso.mp3",50003);
+    (3,"Muerte accidental","¿Por qué se fue? ¿Y por qué murió? ¿Por qué el Señor me la quitó? Se ha ido al cielo y para poder ir yo...","Li4vYWN0aXZpdGllc3Jlc291cmNlcy9FbFVsdGltb0Jlc28ubXAz",50003);
 
 -- Activities
 INSERT INTO Activities(ID,Title,Description,Type,CreationDate,LimitDate,CourseID,ClinicalCaseID,HCNID,Difficulty) VALUES

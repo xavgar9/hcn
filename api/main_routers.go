@@ -120,6 +120,9 @@ func MainRouters(router *mux.Router) {
 	router.HandleFunc("/ClinicalCases/LinkHCN", ccases.LinkHCN).Methods("POST")
 	router.HandleFunc("/ClinicalCases/UnlinkHCN", ccases.UnlinkHCN).Methods("DELETE")
 
+	//router.HandleFunc("/ClinicalCases/DownloadPDF", ccases.DownloadPDF).Methods("GET")
+	//router.HandleFunc("/ClinicalCases/UnlinkHCN", ccases.UnlinkHCN).Methods("DELETE")
+
 	// HCN URLs
 	router.HandleFunc("/HCN/GetAllHCN", hcn.GetAllHCN).Methods("GET")
 	router.HandleFunc("/HCN/GetHCN", hcn.GetHCN).Methods("GET")

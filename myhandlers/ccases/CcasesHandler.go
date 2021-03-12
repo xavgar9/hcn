@@ -9,6 +9,8 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strconv"
+
+	b64 "encoding/base64"
 )
 
 // CreateClinicalCase bla bla...
@@ -42,7 +44,8 @@ func CreateClinicalCase(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "Media is empty or not valid")
 		return
 	default:
-		rows, err := Db.Exec("INSERT INTO Clinical_Cases(Title,Description,Media,TeacherID) VALUES (?,?,?,?)", newClinicalCase.Title, newClinicalCase.Description, newClinicalCase.Media, newClinicalCase.TeacherID)
+		media := b64.StdEncoding.EncodeToString([]byte(*newClinicalCase.Media)) //convert to base64 (BLOB)
+		rows, err := Db.Exec("INSERT INTO Clinical_Cases(Title,Description,Media,TeacherID) VALUES (?,?,?,?)", newClinicalCase.Title, newClinicalCase.Description, media, newClinicalCase.TeacherID)
 		defer Db.Close()
 		if err != nil {
 			fmt.Fprintf(w, "(SQL) %v", err.Error())
@@ -82,7 +85,14 @@ func GetAllClinicalCases(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		var clinicalCase = mymodels.ClinicalCase{ID: &ID, Title: &Title, Description: &Description, Media: &Media, TeacherID: &TeacherID}
+		decodedData, err := b64.StdEncoding.DecodeString(Media)
+		if err != nil {
+			fmt.Fprintf(w, "(Decoder) %v", err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		decodedMedia := string(decodedData)
+		var clinicalCase = mymodels.ClinicalCase{ID: &ID, Title: &Title, Description: &Description, Media: &decodedMedia, TeacherID: &TeacherID}
 		clinicalCases = append(clinicalCases, clinicalCase)
 	}
 	json.NewEncoder(w).Encode(clinicalCases)
@@ -118,7 +128,14 @@ func GetClinicalCase(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	var clinicalCase = mymodels.ClinicalCase{ID: &ID, Title: &Title, Description: &Description, Media: &Media, TeacherID: &TeacherID}
+	decodedData, err := b64.StdEncoding.DecodeString(Media)
+	if err != nil {
+		fmt.Fprintf(w, "(Decoder) %v", err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	decodedMedia := string(decodedData)
+	var clinicalCase = mymodels.ClinicalCase{ID: &ID, Title: &Title, Description: &Description, Media: &decodedMedia, TeacherID: &TeacherID}
 	json.NewEncoder(w).Encode(clinicalCase)
 	w.WriteHeader(http.StatusCreated)
 	return
@@ -157,9 +174,10 @@ func UpdateClinicalCase(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "TeacherID is empty or not valid")
 		return
 	default:
+		media := b64.StdEncoding.EncodeToString([]byte(*updatedClinicalCase.Media)) //convert to base64 (BLOB)
 		var Db, _ = config.MYSQLConnection()
-		row, err := Db.Exec("UPDATE Clinical_Cases SET Title=?, Description=?, Media=?, TeacherID=? WHERE ID=?", updatedClinicalCase.Title, updatedClinicalCase.Description, updatedClinicalCase.Media, updatedClinicalCase.TeacherID, updatedClinicalCase.ID)
 		defer Db.Close()
+		row, err := Db.Exec("UPDATE Clinical_Cases SET Title=?, Description=?, Media=?, TeacherID=? WHERE ID=?", updatedClinicalCase.Title, updatedClinicalCase.Description, media, updatedClinicalCase.TeacherID, updatedClinicalCase.ID)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			fmt.Fprintf(w, "(SQL) %v", err.Error())
@@ -301,4 +319,9 @@ func UnlinkHCN(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "No rows deleted")
 	}
 	return
+}
+
+// DownloadPDF bla bla...
+func DownloadPDFFF(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 }

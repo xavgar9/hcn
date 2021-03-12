@@ -55,6 +55,7 @@ func runTestWithBody(t *testing.T, allTest mymodels.AllTest) {
 	}
 }
 
+/*
 // Teachers test
 func TestGetAllTeachers(t *testing.T) {
 	runTest(t, testhelpers.CasesGetAllTeachers())
@@ -223,6 +224,7 @@ func TestDeleteActivity(t *testing.T) {
 	runTestWithBody(t, testhelpers.CasesDeleteActivity())
 }
 
+
 // Students_Courses test
 func TestGetAllStudentsCourse(t *testing.T) {
 	runTest(t, testhelpers.CasesGetAllStudentsCourse())
@@ -279,9 +281,8 @@ func TestRemoveClinicalCase(t *testing.T) {
 func TestVisibilityClinicalCase(t *testing.T) {
 	runTestWithBody(t, testhelpers.CasesVisibilityClinicalCase())
 }
-
-/*
-
+*/
+////////////////////////////////////////////////////////////////////
 func TestDeleteAllHCNMongo(t *testing.T) {
 	runTest(t, testhelpers.CasesDeleteAllHCNMongo())
 }
@@ -300,4 +301,3 @@ func TestGetAllHCNMongo2(t *testing.T) {
 func TestUpdateHCNMongo(t *testing.T) {
 	runTestWithBody(t, testhelpers.CasesUpdateHCNMongo())
 }
-*/
