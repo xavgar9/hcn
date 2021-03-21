@@ -27,25 +27,25 @@ type AllHCN []HCN
 
 // HCNmongo contains all sections of the nutritional assessment
 type HCNmongo struct {
-	ID                 *string         `json:"_id,omitempty" bson:"_id,omitempty"`
-	GeneralData        *GeneralData    `json:"GeneralData,omitempty" bson:"GeneralData,omitempty"`
-	PatientData        *PatientData    `json:"PatientData,omitempty" bson:"PatientData,omitempty"`
-	ConsultationReason *string         `json:"ConsultationReason,omitempty" bson:"ConsultationReason,omitempty"`
-	Anthropometry      *Anthropometry  `json:"Anthropometry,omitempty" bson:"Anthropometry,omitempty"`
-	Biochemistry       *[]Biochemistry `json:"Biochemistry,omitempty" bson:"Biochemistry,omitempty"`
-	Interpretation     *string         `json:"Interpretation,omitempty" bson:"Interpretation,omitempty"`
-	Feedback           *string         `json:"Feedback,omitempty" bson:"Feedback,omitempty"`
+	ID                 *string        `json:"_id,omitempty" bson:"_id,omitempty"`
+	GeneralData        *GeneralData   `json:"GeneralData,omitempty" bson:"GeneralData,omitempty"`
+	PatientData        *PatientData   `json:"PatientData,omitempty" bson:"PatientData,omitempty"`
+	ConsultationReason *string        `json:"ConsultationReason,omitempty" bson:"ConsultationReason,omitempty"`
+	Anthropometry      *Anthropometry `json:"Anthropometry,omitempty" bson:"Anthropometry,omitempty"`
+	Biochemistry       *Biochemistry  `json:"Biochemistry,omitempty" bson:"Biochemistry,omitempty"`
+	Interpretation     *string        `json:"Interpretation,omitempty" bson:"Interpretation,omitempty"`
+	Feedback           *string        `json:"Feedback,omitempty" bson:"Feedback,omitempty"`
 }
 
 // HCNmongoNoID contains all sections of the nutritional assessment WITHOUT the ID field (for testing only)
 type HCNmongoNoID struct {
-	GeneralData        *GeneralData    `json:"GeneralData,omitempty" bson:"GeneralData,omitempty"`
-	PatientData        *PatientData    `json:"PatientData,omitempty" bson:"PatientData,omitempty"`
-	ConsultationReason *string         `json:"ConsultationReason,omitempty" bson:"ConsultationReason,omitempty"`
-	Anthropometry      *Anthropometry  `json:"Anthropometry,omitempty" bson:"Anthropometry,omitempty"`
-	Biochemistry       *[]Biochemistry `json:"Biochemistry,omitempty" bson:"Biochemistry,omitempty"`
-	Interpretation     *string         `json:"Interpretation,omitempty" bson:"Interpretation,omitempty"`
-	Feedback           *string         `json:"Feedback,omitempty" bson:"Feedback,omitempty"`
+	GeneralData        *GeneralData   `json:"GeneralData,omitempty" bson:"GeneralData,omitempty"`
+	PatientData        *PatientData   `json:"PatientData,omitempty" bson:"PatientData,omitempty"`
+	ConsultationReason *string        `json:"ConsultationReason,omitempty" bson:"ConsultationReason,omitempty"`
+	Anthropometry      *Anthropometry `json:"Anthropometry,omitempty" bson:"Anthropometry,omitempty"`
+	Biochemistry       *Biochemistry  `json:"Biochemistry,omitempty" bson:"Biochemistry,omitempty"`
+	Interpretation     *string        `json:"Interpretation,omitempty" bson:"Interpretation,omitempty"`
+	Feedback           *string        `json:"Feedback,omitempty" bson:"Feedback,omitempty"`
 }
 
 // GeneralData contains all the general data of the nutriotional assessement
@@ -138,15 +138,25 @@ type bmi struct {
 	Feedback       *string `json:"Feedback,omitempty" bson:"Feedback,omitempty"`
 }
 
-// Biochemistry contains all the anthropometry data of the patient
+// Biochemistry contains all the biochemistry data of the patient
 type Biochemistry struct {
-	Date           *string `json:"Date,omitempty" bson:"Date,omitempty"`
-	Parameter      *string `json:"parameter,omitempty" bson:"parameter,omitempty"`
-	Value          *string `json:"Value,omitempty" bson:"Value,omitempty"`
-	ReferenceValue *string `json:"ReferenceValue,omitempty" bson:"ReferenceValue,omitempty"`
-	Interpretation *string `json:"Interpretation,omitempty" bson:"Interpretation,omitempty"`
-	Feedback       *string `json:"Feedback,omitempty" bson:"Feedback,omitempty"`
+	Parameters     *AllBiochemistryParameters `json:"Parameters,omitempty" bson:"Parameters,omitempty"`
+	Interpretation *string                    `json:"Interpretation,omitempty" bson:"Interpretation,omitempty"`
+	Feedback       *string                    `json:"Feedback,omitempty" bson:"Feedback,omitempty"`
 }
+
+// BiochemistryParameters contains all the anthropometry data of the patient
+type BiochemistryParameters struct {
+	Date           string `json:"Date,omitempty" bson:"Date,omitempty"`
+	Parameter      string `json:"parameter,omitempty" bson:"parameter,omitempty"`
+	Value          string `json:"Value,omitempty" bson:"Value,omitempty"`
+	ReferenceValue string `json:"ReferenceValue,omitempty" bson:"ReferenceValue,omitempty"`
+	Interpretation string `json:"Interpretation,omitempty" bson:"Interpretation,omitempty"`
+	Feedback       string `json:"Feedback,omitempty" bson:"Feedback,omitempty"`
+}
+
+// AllBiochemistryParameters bla bla...
+type AllBiochemistryParameters []BiochemistryParameters
 
 // AllHCNmongo bla bla...
 type AllHCNmongo []HCNmongo

@@ -1,0 +1,96 @@
+{
+    "GeneralData": {
+		"ValorationDate": "2020/02/06",
+		"HCNNumber": "526",
+		"AdmissionDate": "2020/02/06",
+        "Room": "26",
+        "Interpretation": "Interpretación general de GeneralData",
+        "Feedback": "Feedback general de GeneralData"
+    },
+    "PatientData": {
+		"FullName": "Benito Antonio Martínez",
+		"Birthdate": "526",
+		"Gender": "2020/02/06",
+        "Sex": "M",
+        "Age": "26", 
+        "EPS": "PR Salud", 
+        "Telephone": "31658245", 
+        "Occupation": "Singer",
+        "CivilStatus": "Single",        
+        "Interpretation": "Interpretación general de PatientData",
+        "Feedback": "Feedback general de PatientData"        
+	},
+	"ConsultationReason": "fatiga",
+	"Anthropometry": {
+		"Weight": {
+			"Actual": "63.2",
+			"Usual": "65",
+			"Reference": "64",
+			"ChangeWeight": "0.05",
+			"Interpretation": "Interpretación de weight",
+			"Feedback": "Buen trabajo"
+		},
+		"TricipitalFold": {
+			"Value": "12.6",	
+			"Interpretation": "Interpretación tricipal",
+			"Feedback": "Buen trabajo"
+        },
+        "BrachialPerimeter": {
+			"Value": "12.6",	
+			"Interpretation": "Interpretación braquial",
+			"Feedback": "Buen trabajo"
+        },
+        "AbdominalPerimeter": {
+			"Value": "12.6",	
+			"Interpretation": "Interpretación abdominal",
+			"Feedback": "Buen trabajo"
+        },
+        "SubscapularFold": {
+			"Value": "12.6",	
+			"Interpretation": "Interpretación subescapular",
+			"Feedback": "Buen trabajo"
+        },
+
+        "Height": {
+			"Value": "12.6",	
+			"Interpretation": "Interpretación altura",
+			"Feedback": "Buen trabajo"
+        },
+        "Structure": {
+			"Value": "12.6",	
+			"Interpretation": "Interpretación estructura",
+			"Feedback": "Buen trabajo"
+        },
+        "BMI": {
+			"Value": "12.6",	
+			"Interpretation": "Interpretación IMC",
+			"Feedback": "Buen trabajo"
+        },
+        "Interpretation": "Interpretación general de Anthropometry",
+        "Feedback": "Feedback general de Anthropometry"
+    },
+    "Biochemistry": {
+        "Parameters": [
+            {
+                "Date": "2020/01/02",
+                "Parameter": "El parmaétro",
+                "Value": "26.2",
+                "ReferenceValue":"25",
+                "Interpretation": "Está un toque mal",
+                "Feedback": "Buen trabajo"
+            },
+            {
+                "Date": "2020/01/02",
+                "Parameter": "El parmaétro dos",
+                "Value": "26.2",
+                "ReferenceValue":"25",
+                "Interpretation": "Está un toque mal",
+                "Feedback": "Buen trabajo"
+            }
+        ],
+        "Interpretation": "Interpretación general de Biochemistry",
+        "Feedback": "Feedback general de Biochemistry"
+    },
+    "Interpretation": "Interpretación general de toda la HCN",
+    "Feedback": "Feedback general de toda la HCN"
+}

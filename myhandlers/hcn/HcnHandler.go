@@ -240,10 +240,11 @@ func CreateHCNMongo(w http.ResponseWriter, r *http.Request) {
 	// Prepare the data for insert
 	reqEmpty := true
 	var newGeneralData *mymodels.GeneralData
-	var newReason *string
+	var newConsultationReason *string
 	var newPatientData *mymodels.PatientData
 	var newAnthropometry *mymodels.Anthropometry
-	var newBiochemistry *[]mymodels.Biochemistry
+	var newGeneralInterpretation *string
+	var newGeneralFeedback *string
 
 	if gjson.Get(string(reqBody), "GeneralData").Exists() {
 		generalData := gjson.Get(string(reqBody), "GeneralData")
@@ -251,9 +252,15 @@ func CreateHCNMongo(w http.ResponseWriter, r *http.Request) {
 		reqEmpty = false
 	}
 
+	if gjson.Get(string(reqBody), "PatientData").Exists() {
+		patientData := gjson.Get(string(reqBody), "PatientData")
+		json.Unmarshal([]byte(patientData.Raw), &newPatientData)
+		reqEmpty = false
+	}
+
 	if gjson.Get(string(reqBody), "ConsultationReason").Exists() {
 		consultationReason := gjson.Get(string(reqBody), "ConsultationReason")
-		json.Unmarshal([]byte(consultationReason.Raw), &newReason)
+		json.Unmarshal([]byte(consultationReason.Raw), &newConsultationReason)
 		reqEmpty = false
 	}
 
@@ -263,20 +270,55 @@ func CreateHCNMongo(w http.ResponseWriter, r *http.Request) {
 		reqEmpty = false
 	}
 
+	var newAllBiochemistryParameters mymodels.AllBiochemistryParameters
+	var interpretation *string
+	var feedback *string
 	if gjson.Get(string(reqBody), "Biochemistry").Exists() {
-		biochemistry := gjson.Get(string(reqBody), "Biochemistry")
-		json.Unmarshal([]byte(biochemistry.Raw), &newBiochemistry)
+
+		// Look for the array of parameters
+		biochemistryParameters := gjson.Get(string(reqBody), "Biochemistry.Parameters")
+		// Loop the array of parameters
+		for _, parameter := range biochemistryParameters.Array() {
+			var newParameter mymodels.BiochemistryParameters
+			json.Unmarshal([]byte(parameter.Raw), &newParameter)
+			newAllBiochemistryParameters = append(newAllBiochemistryParameters, newParameter)
+		}
+
+		biochemistryInterpretation := gjson.Get(string(reqBody), "Biochemistry.Interpretation")
+		biochemistryFeedback := gjson.Get(string(reqBody), "Biochemistry.Feedback")
+		json.Unmarshal([]byte(biochemistryInterpretation.Raw), &interpretation)
+		json.Unmarshal([]byte(biochemistryFeedback.Raw), &feedback)
 		reqEmpty = false
+	}
+
+	if gjson.Get(string(reqBody), "Interpretation").Exists() {
+		interpretation := gjson.Get(string(reqBody), "Interpretation")
+		json.Unmarshal([]byte(interpretation.Raw), &newGeneralInterpretation)
+	}
+
+	if gjson.Get(string(reqBody), "Feedback").Exists() {
+		feedback := gjson.Get(string(reqBody), "Feedback")
+		json.Unmarshal([]byte(feedback.Raw), &newGeneralFeedback)
+	}
+
+	// We have to create the biochemistry struct like this
+	// because it has an array of structs
+	newBiochemistry := mymodels.Biochemistry{
+		Parameters:     &newAllBiochemistryParameters,
+		Interpretation: interpretation,
+		Feedback:       feedback,
 	}
 
 	// This strange way of initialize the struct if looking for
 	// no storing empty fields in mongo
 	newHCNmongo := mymodels.HCNmongo{
 		GeneralData:        *&newGeneralData,
-		ConsultationReason: *&newReason,
+		ConsultationReason: *&newConsultationReason,
 		PatientData:        *&newPatientData,
 		Anthropometry:      *&newAnthropometry,
-		Biochemistry:       *&newBiochemistry,
+		Biochemistry:       &newBiochemistry,
+		Interpretation:     *&newGeneralInterpretation,
+		Feedback:           *&newGeneralFeedback,
 	}
 
 	if !reqEmpty {
@@ -351,9 +393,9 @@ func GetAllHCNMongo(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(`{ "error": "` + err.Error() + `" }`))
 		return
 	}
-	// Use next line for testing
+	// Use next "if" line for testing
 	//if allHCNsNoID == nil {
-	// Use next line for production
+	// Use next "if" line for production
 	if allHCNs == nil {
 		var emptyTest mymodels.EmptyTest
 		json.NewEncoder(w).Encode(emptyTest)
@@ -402,13 +444,14 @@ func GetHCNMongo(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(nil)
 	} else {
 		// For testing only
-		var newHCNnoID mymodels.HCNmongoNoID
-		newhcn, _ := json.Marshal(newHCN)
-		json.Unmarshal([]byte(newhcn), &newHCNnoID)
-		json.NewEncoder(w).Encode(newHCNnoID)
+		// var newHCNnoID mymodels.HCNmongoNoID
+		// newhcn, _ := json.Marshal(newHCN)
+		// json.Unmarshal([]byte(newhcn), &newHCNnoID)
+		// json.NewEncoder(w).Encode(newHCNnoID)
+		fmt.Println()
 
 		//Use this in production
-		//json.NewEncoder(w).Encode(newHCN)
+		json.NewEncoder(w).Encode(newHCN)
 	}
 
 }
@@ -426,10 +469,13 @@ func UpdateHCNMongo(w http.ResponseWriter, r *http.Request) {
 	}
 	// Prepare the data for insert
 	var newHCN mymodels.HCNmongo
-	var newGeneralData mymodels.GeneralData
-	var newPatientData mymodels.PatientData
-	var newAnthropometry mymodels.Anthropometry
-	var newBiochemistry []mymodels.Biochemistry
+	var newGeneralData *mymodels.GeneralData
+	var newPatientData *mymodels.PatientData
+	var newConsultationReason *string
+	var newAnthropometry *mymodels.Anthropometry
+
+	var newGeneralInterpretation *string
+	var newGeneralFeedback *string
 
 	// All json assessment data
 	json.Unmarshal(reqBody, &newHCN)
@@ -442,13 +488,49 @@ func UpdateHCNMongo(w http.ResponseWriter, r *http.Request) {
 	patientData := gjson.Get(string(reqBody), "PatientData")
 	json.Unmarshal([]byte(patientData.Raw), &newPatientData)
 
+	// Consultation reason nutritional assessment data
+	consultationReason := gjson.Get(string(reqBody), "ConsultationReason")
+	json.Unmarshal([]byte(consultationReason.Raw), &newConsultationReason)
+
 	// Anthropometry data
 	Anthropometry := gjson.Get(string(reqBody), "Anthropometry")
 	json.Unmarshal([]byte(Anthropometry.Raw), &newAnthropometry)
 
 	// Biochemistry data
-	biochemistry := gjson.Get(string(reqBody), "Biochemistry")
-	json.Unmarshal([]byte(biochemistry.Raw), &newBiochemistry)
+	//////////////////////////////////////////
+	var newAllBiochemistryParameters mymodels.AllBiochemistryParameters
+	var interpretation *string
+	var feedback *string
+	// Look for the array of parameters
+	biochemistryParameters := gjson.Get(string(reqBody), "Biochemistry.Parameters")
+	// Loop the array of parameters
+	for _, parameter := range biochemistryParameters.Array() {
+		var newParameter mymodels.BiochemistryParameters
+		json.Unmarshal([]byte(parameter.Raw), &newParameter)
+		newAllBiochemistryParameters = append(newAllBiochemistryParameters, newParameter)
+	}
+
+	biochemistryInterpretation := gjson.Get(string(reqBody), "Biochemistry.Interpretation")
+	biochemistryFeedback := gjson.Get(string(reqBody), "Biochemistry.Feedback")
+	json.Unmarshal([]byte(biochemistryInterpretation.Raw), &interpretation)
+	json.Unmarshal([]byte(biochemistryFeedback.Raw), &feedback)
+
+	// We have to create the biochemistry struct like this
+	// because it has an array of structs
+	newBiochemistry := mymodels.Biochemistry{
+		Parameters:     &newAllBiochemistryParameters,
+		Interpretation: interpretation,
+		Feedback:       feedback,
+	}
+	//////////////////////////////////////////
+
+	// General interpretation data
+	generalInterpretation := gjson.Get(string(reqBody), "Interpretation")
+	json.Unmarshal([]byte(generalInterpretation.Raw), &newGeneralInterpretation)
+
+	// General feedback data
+	generalFeedback := gjson.Get(string(reqBody), "Feedback")
+	json.Unmarshal([]byte(generalFeedback.Raw), &newGeneralFeedback)
 
 	client, ctx := config.MongoConnection()
 	collection := client.Database("HCNProject").Collection("HCN")
@@ -461,8 +543,11 @@ func UpdateHCNMongo(w http.ResponseWriter, r *http.Request) {
 			{"$set", bson.D{
 				{"GeneralData", newGeneralData},
 				{"PatientData", newPatientData},
+				{"ConsultationReason", newConsultationReason},
 				{"Anthropometry", newAnthropometry},
-				{"Biochemistry", newBiochemistry}}},
+				{"Biochemistry", newBiochemistry},
+				{"Interpretation", newGeneralInterpretation},
+				{"Feedback", newGeneralFeedback}}},
 		},
 	)
 
@@ -503,10 +588,6 @@ func DeleteAllHCNMongo(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	//json.NewEncoder(w).Encode(cnt)
 }
-
-////////////////////////////////////////
-// HAY QUE METERLE SQL A TODO MONGO HCN
-////////////////////////////////////////
 
 // DeleteHCNMongo bla bla...
 func DeleteHCNMongo(w http.ResponseWriter, r *http.Request) {
