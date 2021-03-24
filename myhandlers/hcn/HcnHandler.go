@@ -1,6 +1,7 @@
 package hcn
 
 import (
+	"bytes"
 	"database/sql"
 	"encoding/json"
 	"errors"
@@ -25,6 +26,7 @@ func CreateHCN(w http.ResponseWriter, r *http.Request) {
 	reqBody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
+		fmt.Println(err.Error())
 		fmt.Fprintf(w, "(USER) %v", err.Error())
 		return
 	}
@@ -34,13 +36,17 @@ func CreateHCN(w http.ResponseWriter, r *http.Request) {
 	switch {
 	case (newHCN.TeacherID == nil) || (*newHCN.TeacherID*1 <= 0):
 		w.WriteHeader(http.StatusBadRequest)
+		fmt.Println("TeacherID")
 		fmt.Fprintf(w, "TeacherID is empty or not valid")
 		return
 	case (newHCN.MongoID == nil) || (len(*newHCN.MongoID) == 0):
 		w.WriteHeader(http.StatusBadRequest)
+		fmt.Println("MongoID")
 		fmt.Fprintf(w, "MongoID is empty or not valid")
 		return
 	default:
+		fmt.Println("Aja hey")
+		fmt.Println("Aja", *newHCN.TeacherID, *newHCN.MongoID)
 		rows, err := Db.Exec("INSERT INTO HCN(TeacherID, MongoID) VALUES (?, ?)", newHCN.TeacherID, newHCN.MongoID)
 		defer Db.Close()
 		if err != nil {
@@ -245,6 +251,7 @@ func CreateHCNMongo(w http.ResponseWriter, r *http.Request) {
 	var newAnthropometry *mymodels.Anthropometry
 	var newGeneralInterpretation *string
 	var newGeneralFeedback *string
+	var teacherID *int
 
 	if gjson.Get(string(reqBody), "GeneralData").Exists() {
 		generalData := gjson.Get(string(reqBody), "GeneralData")
@@ -301,6 +308,11 @@ func CreateHCNMongo(w http.ResponseWriter, r *http.Request) {
 		json.Unmarshal([]byte(feedback.Raw), &newGeneralFeedback)
 	}
 
+	if gjson.Get(string(reqBody), "TeacherID").Exists() {
+		teacherid := gjson.Get(string(reqBody), "TeacherID")
+		json.Unmarshal([]byte(teacherid.Raw), &teacherID)
+	}
+
 	// We have to create the biochemistry struct like this
 	// because it has an array of structs
 	newBiochemistry := mymodels.Biochemistry{
@@ -309,7 +321,7 @@ func CreateHCNMongo(w http.ResponseWriter, r *http.Request) {
 		Feedback:       feedback,
 	}
 
-	// This strange way of initialize the struct if looking for
+	// This strange way of initialize the struct is looking for
 	// no storing empty fields in mongo
 	newHCNmongo := mymodels.HCNmongo{
 		GeneralData:        *&newGeneralData,
@@ -346,13 +358,28 @@ func CreateHCNMongo(w http.ResponseWriter, r *http.Request) {
 			}
 			return
 		*/
-
-		w.WriteHeader(http.StatusCreated)
-
+		mongoID := strings.Split(fmt.Sprintf("%v", result.InsertedID), `"`)[1]
+		fmt.Println("Datos antes", *teacherID, mongoID)
+		hcn := mymodels.HCN{TeacherID: teacherID, MongoID: &mongoID}
+		endpoint := "http://" + config.ServerIP + ":" + config.ServerPort + "/HCN/CreateHCN"
+		jsonValue, _ := json.Marshal(hcn)
+		req, _ := http.NewRequest("POST", endpoint, bytes.NewBuffer(jsonValue))
+		req.Header.Set("Content-Type", "application/json")
+		clientReq := &http.Client{}
+		res, err := clientReq.Do(req)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			fmt.Fprintf(w, err.Error())
+			return
+		}
+		fmt.Println(res.Status)
+		if res.Status == "201 Created" {
+			w.WriteHeader(http.StatusCreated)
+		}
 		// Use next line for testing
 		//json.NewEncoder(w).Encode(newHCNmongo)
 		// Use next line for production
-		json.NewEncoder(w).Encode(strings.Split(fmt.Sprintf("%v", result.InsertedID), `"`)[1])
+		json.NewEncoder(w).Encode(mongoID)
 	}
 
 }
@@ -497,7 +524,6 @@ func UpdateHCNMongo(w http.ResponseWriter, r *http.Request) {
 	json.Unmarshal([]byte(Anthropometry.Raw), &newAnthropometry)
 
 	// Biochemistry data
-	//////////////////////////////////////////
 	var newAllBiochemistryParameters mymodels.AllBiochemistryParameters
 	var interpretation *string
 	var feedback *string
@@ -522,7 +548,6 @@ func UpdateHCNMongo(w http.ResponseWriter, r *http.Request) {
 		Interpretation: interpretation,
 		Feedback:       feedback,
 	}
-	//////////////////////////////////////////
 
 	// General interpretation data
 	generalInterpretation := gjson.Get(string(reqBody), "Interpretation")

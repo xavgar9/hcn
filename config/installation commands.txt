@@ -52,5 +52,6 @@ INSTALACIÓN DE RECURSOS PARA EL PROYECTO EN UBUNTU SERVER 18.04
 4) echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu bionic/mongodb-org/4.4 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.4.list
 5) sudo apt-get update
 6) sudo apt-get install -y mongodb-org
+7) sudo systemctl start mongod
 
 
