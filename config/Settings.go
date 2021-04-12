@@ -6,6 +6,9 @@ const ServerIP string = "192.168.1.18"
 // ServerPort bla bla...
 const ServerPort string = "3600"
 
+// JWTSecret bla bla...
+const JWTSecret string = ("JodddaaaaEsteSecretoSeguro")
+
 // SiteShortName bla bla...
 const SiteShortName string = "SimHCN"
 

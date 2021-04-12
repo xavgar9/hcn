@@ -1,5 +1,5 @@
 -- Created by Vertabelo (http://vertabelo.com)
--- Last modification date: 2021-02-28 22:05:35.628
+-- Last modification date: 2021-04-12 00:19:40.573
 
 -- tables
 -- Table: Activities
@@ -40,7 +40,7 @@ CREATE TABLE Clinical_Cases (
     ID int NOT NULL AUTO_INCREMENT,
     Title varchar(100) NOT NULL,
     Description varchar(3000) NOT NULL,
-    Media varchar(2000) NOT NULL,
+    Media longblob NOT NULL,
     TeacherID int NOT NULL,
     CONSTRAINT Clinical_Cases_pk PRIMARY KEY (ID)
 );
@@ -80,6 +80,15 @@ CREATE TABLE HCN (
     CONSTRAINT HCN_pk PRIMARY KEY (ID)
 );
 
+-- Table: Sessions
+CREATE TABLE Sessions (
+    ID int NOT NULL AUTO_INCREMENT,
+    TeacherID int NOT NULL,
+    Token varchar(256) NOT NULL,
+    ExpirationDate datetime NOT NULL,
+    CONSTRAINT Sessions_pk PRIMARY KEY (ID)
+);
+
 -- Table: Solved_HCN
 CREATE TABLE Solved_HCN (
     ID int NOT NULL AUTO_INCREMENT,
@@ -111,6 +120,7 @@ CREATE TABLE Teachers (
     ID int NOT NULL,
     Name varchar(100) NOT NULL,
     Email varchar(100) NOT NULL,
+    Password varchar(100) NOT NULL,
     CONSTRAINT Teachers_pk PRIMARY KEY (ID)
 );
 
@@ -171,6 +181,10 @@ ALTER TABLE Students_Courses ADD CONSTRAINT Courses_Students_Students FOREIGN KE
 ALTER TABLE HCN ADD CONSTRAINT HCN_Teachers FOREIGN KEY HCN_Teachers (TeacherID)
     REFERENCES Teachers (ID);
 
+-- Reference: Session_Teachers (table: Sessions)
+ALTER TABLE Sessions ADD CONSTRAINT Session_Teachers FOREIGN KEY Session_Teachers (TeacherID)
+    REFERENCES Teachers (ID);
+
 -- Reference: Solved_HCN_HCN (table: Solved_HCN)
 ALTER TABLE Solved_HCN ADD CONSTRAINT Solved_HCN_HCN FOREIGN KEY Solved_HCN_HCN (OriginalHCN)
     REFERENCES HCN (ID);
@@ -178,12 +192,6 @@ ALTER TABLE Solved_HCN ADD CONSTRAINT Solved_HCN_HCN FOREIGN KEY Solved_HCN_HCN 
 -- Reference: Techers_Courses (table: Courses)
 ALTER TABLE Courses ADD CONSTRAINT Techers_Courses FOREIGN KEY Techers_Courses (TeacherID)
     REFERENCES Teachers (ID);
-
--- Constraints
-ALTER TABLE Students_Courses ADD CONSTRAINT uq_Students_Courses UNIQUE(CourseID, StudentID);
-ALTER TABLE CCases_HCN ADD CONSTRAINT uq_CCases_HCN UNIQUE(ClinicalCaseID, HCNID);
-ALTER TABLE Courses_HCN ADD CONSTRAINT uq_Courses_HCN UNIQUE(CourseID, HCNID);
-ALTER TABLE Courses_CCases ADD CONSTRAINT uq_Courses_CCases UNIQUE(CourseID, ClinicalCaseID);
 
 -- End of file.
 
