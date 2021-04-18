@@ -2,3 +2,7 @@
 {"level":"info","ts":1618709511.4780731,"msg":"Server started at 2021-04-17 21:31:51.475393612 -0400 EDT"}
 {"level":"info","ts":1618714733.967488,"msg":"Server started at 2021-04-17 22:58:53.9645115 -0400 EDT"}
 {"level":"info","ts":1618715127.695369,"msg":"Server started at 2021-04-17 23:05:27.693226365 -0400 EDT"}
+{"level":"info","ts":1618715911.8568165,"msg":"Server started at 2021-04-17 23:18:31.8547461 -0400 EDT"}
+{"level":"error","ts":1618716062.172458,"msg":"http: Server closed"}
+{"level":"info","ts":1618716066.4734387,"msg":"Server started at 2021-04-17 23:21:06.470709426 -0400 EDT"}
+{"level":"info","ts":1618716167.3143716,"msg":"Server started at 2021-04-17 23:22:47.312298887 -0400 EDT"}

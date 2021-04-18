@@ -56,6 +56,12 @@ func IsValid(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	json.Unmarshal(reqBody, &teacherToken)
+	if (teacherToken.Token == nil) || (len(*teacherToken.Token) == 0) {
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Println("Token is empty or not valid")
+		fmt.Fprintf(w, "Token is empty or not valid")
+		return
+	}
 	_, err = token.VerifyAuthenticity(*teacherToken.Token)
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
