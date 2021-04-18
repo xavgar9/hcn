@@ -28,8 +28,8 @@ func MainRouters(router *mux.Router) {
 	router.HandleFunc("/", PingPong).Methods("GET")
 
 	// Authentication URLs
-	router.HandleFunc("/Authentication/Login", authentication.Login).Methods("POST")
-	router.HandleFunc("/Authentication/IsValid", authentication.IsValid).Methods("POST")
+	router.HandleFunc("/Authentication/Login", authentication.Login).Methods("POST", "OPTIONS")
+	router.HandleFunc("/Authentication/IsValid", authentication.IsValid).Methods("POST", "OPTIONS")
 
 	// Teachers URLs
 	router.HandleFunc("/Teachers/GetAllTeachers", middleware.Middleware(teachers.GetAllTeachers, "/Teachers/GetAllTeachers")).Methods("GET")
