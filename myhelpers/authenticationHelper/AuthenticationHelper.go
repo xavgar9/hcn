@@ -102,6 +102,7 @@ func UserAuthentication(teacher mymodels.Teacher) (mymodels.Token, error) {
 				if err != nil {
 					return finalToken, err
 				}
+				fmt.Println("user 5.1", *claims.ExpirationDate)
 				rows, err := Db.Query("SELECT SaveToken(?,?,?)", claims.Email, newToken, claims.ExpirationDate)
 				defer rows.Close()
 				fmt.Println("user 6", err)

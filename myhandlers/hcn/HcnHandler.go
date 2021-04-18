@@ -359,7 +359,7 @@ func CreateHCNMongo(w http.ResponseWriter, r *http.Request) {
 			return
 		*/
 		mongoID := strings.Split(fmt.Sprintf("%v", result.InsertedID), `"`)[1]
-		fmt.Println("Datos antes", *teacherID, mongoID)
+		//fmt.Println("Datos antes", *teacherID, mongoID)
 		hcn := mymodels.HCN{TeacherID: teacherID, MongoID: &mongoID}
 		endpoint := "http://" + config.ServerIP + ":" + config.ServerPort + "/HCN/CreateHCN"
 		jsonValue, _ := json.Marshal(hcn)
