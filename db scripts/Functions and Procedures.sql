@@ -28,7 +28,7 @@ DELIMITER ;
 ###########################################################################################
 DROP FUNCTION IF EXISTS SaveToken;
 DELIMITER //
-CREATE FUNCTION SaveToken(email VARCHAR(100), token VARCHAR(500), expirationDate VARCHAR(19))
+CREATE FUNCTION SaveToken(email VARCHAR(100), token VARCHAR(500), expirationDate VARCHAR(30))
   RETURNS VARCHAR(20)
 
   BEGIN
@@ -38,11 +38,11 @@ CREATE FUNCTION SaveToken(email VARCHAR(100), token VARCHAR(500), expirationDate
     IF (EXISTS(SELECT 1 FROM Teachers WHERE Teachers.Email=email)) THEN
         SELECT Teachers.ID INTO teacherID FROM Teachers WHERE Teachers.Email=email;
         IF (EXISTS(SELECT 1 FROM Sessions WHERE Sessions.TeacherID=teacherID)) THEN
-          UPDATE Sessions SET Token=token, ExpirationDate=expirationDate WHERE Sessions.TeacherID=teacherID;
+          UPDATE Sessions SET Token=token, ExpirationDate=SUBSTRING(expirationDate, 1, 19) WHERE Sessions.TeacherID=teacherID;
           SET s = "Updated";
         ELSE
             INSERT INTO Sessions (TeacherID, Token, ExpirationDate)
-                VALUES (teacherID, token, expirationDate);
+                VALUES (teacherID, token, SUBSTRING(expirationDate, 1, 19));
             SET s = "Insert";
         END IF;                                        
     ELSE

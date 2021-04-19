@@ -46,7 +46,7 @@ func getTime(expirationTime interface{}) time.Time {
 // CreateToken function receives a teacher model
 // Returns the teacher signed token
 func CreateToken(teacher mymodels.Teacher) (string, error) {
-	expirationTime := time.Now().Add(60 * time.Minute)
+	expirationTime := time.Now().Add(10 * time.Minute)
 	claims := claims{
 		*teacher.ID,
 		*teacher.Name,
@@ -100,7 +100,9 @@ func GetTokenClaims(receivedToken string) (mymodels.Token, error) {
 // Returns the authenticity verification
 func VerifyAuthenticity(receivedToken string) (bool, error) {
 	//fmt.Println("received token: ", receivedToken)
+	fmt.Println("auth verify 0")
 	if receivedToken != "" {
+		fmt.Println("auth verify 0.1")
 		token, err := jwt.Parse(receivedToken, func(token *jwt.Token) (interface{}, error) {
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 				return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
@@ -108,6 +110,7 @@ func VerifyAuthenticity(receivedToken string) (bool, error) {
 			return []byte(config.JWTSecret), nil
 		})
 		if err != nil {
+			fmt.Println("auth verify 1")
 			return false, err
 		}
 		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
@@ -117,16 +120,21 @@ func VerifyAuthenticity(receivedToken string) (bool, error) {
 			if tokenTime.Sub(actualTime) < 0 {
 				Db, err := config.MYSQLConnection()
 				if err != nil {
+					fmt.Println("auth verify 2")
 					return false, err
 				}
 				Db.Query("SELECT DeleteToken(?)", token)
 				defer Db.Close()
+				fmt.Println("auth verify 3")
 				return false, fmt.Errorf("Token expired")
 			}
+			fmt.Println("auth verify 3.1")
 			return true, nil
 		}
+		fmt.Println("auth verify 4")
 		return false, err
 	}
+	fmt.Println("auth verify 5")
 	return false, fmt.Errorf("Token not valid:" + receivedToken)
 }
 
@@ -137,38 +145,57 @@ func IsValid(receivedToken string) (bool, error) {
 	// Verify token authenticity
 	ok, err := VerifyAuthenticity(receivedToken)
 	if ok {
+		fmt.Println("IsValid Error 0")
 		claims, err := GetTokenClaims(receivedToken)
 		if err != nil {
+			fmt.Println("IsValid Error 1")
 			return false, err
 		}
+		fmt.Println("IsValid Error 1.1")
 		email := *claims.Email
+		fmt.Println("IsValid Error 1.2")
 		if email != "" {
+			fmt.Println("IsValid Error 1.3")
 			// Verify token in db
 			Db, err := config.MYSQLConnection()
 			defer Db.Close()
 			if err != nil {
+				fmt.Println("IsValid Error 2")
 				return false, err
 			}
-			rows, err := Db.Query("SELECT IsValidToken(?)", receivedToken)
+			fmt.Println("IsValid Error 2.1", receivedToken)
+			rows, err := Db.Query("SELECT IsValidToken(?,?)", claims.ID, receivedToken)
+			fmt.Println("IsValid Error 2.11")
 			if err == nil {
+				fmt.Println("IsValid Error 2.12")
 				for rows.Next() {
+					fmt.Println("IsValid Error 2.13")
 					var result string
 					err = rows.Scan(&result)
 					if err == nil {
+						fmt.Println("IsValid Error 2.14")
 						switch result {
 						case "True":
+							fmt.Println("IsValid Error 2.15")
 							return true, nil
 						case "False":
+							fmt.Println("IsValid Error 2.16")
 							return false, errors.New("SQL function returned False")
 						}
 					}
 				}
+				return false, errors.New("SQL function returned False")
 			} else {
+				fmt.Println("IsValid Error 3")
 				return false, err
 			}
+			fmt.Println("IsValid Error 3 final")
 		} else {
+			fmt.Println("IsValid verify 3.1")
 			err = errors.New("UserID does not exist")
 		}
+		fmt.Println("IsValid Error 3 final final")
 	}
+	fmt.Println(" IsValid Error 4")
 	return false, err
 }

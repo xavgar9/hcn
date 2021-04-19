@@ -29,6 +29,7 @@ func CreateSolvedHCN(w http.ResponseWriter, r *http.Request) {
 	json.Unmarshal(reqBody, &newSolvedHCN)
 
 	// find all students of the course
+	fmt.Println("Solved 1")
 	students, err := courses.GetAllStudentsCourseNoHTTP(*newSolvedHCN.CourseID)
 	if err != nil {
 		fmt.Println("2 ", err.Error())
@@ -37,7 +38,9 @@ func CreateSolvedHCN(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	students = append(students, mymodels.Student{ID: newSolvedHCN.TeacherID})
+
 	// find the mongo id of the HCN
+	fmt.Println("Solved 2")
 	hcnMongoID, err := hcn.GetHCNMongoIDNoHTTP(*newSolvedHCN.OriginalHCN)
 	if err != nil {
 		fmt.Println("3 ", err.Error())
@@ -46,6 +49,7 @@ func CreateSolvedHCN(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// find the mongo document of the HCN
+	fmt.Println("Solved 3")
 	hcnMongo, err := hcn.GetHCNMongoNoHTTP(hcnMongoID)
 	if err != nil {
 		fmt.Println("4 ", err.Error(), hcnMongoID)
@@ -54,14 +58,32 @@ func CreateSolvedHCN(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	endpoint := "http://" + config.ServerIP + ":" + config.ServerPort + "/HCN/CreateHCNMongo"
-	jsonValue, _ := json.Marshal(hcnMongo)
-	req, _ := http.NewRequest("POST", endpoint, bytes.NewBuffer(jsonValue))
+	jsonValue, err := json.Marshal(hcnMongo)
+	fmt.Println("Solved 4")
+	if err != nil {
+		fmt.Println("5 ", err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(w, err.Error())
+		return
+	}
+	fmt.Println("Solved 5")
+	req, err := http.NewRequest("POST", endpoint, bytes.NewBuffer(jsonValue))
+	if err != nil {
+		fmt.Println("6 ", err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(w, err.Error())
+		return
+	}
+
 	req.Header.Set("Content-Type", "application/json")
 	client := &http.Client{}
 
+	fmt.Println("Solved 6")
 	hcnCreated := 0
 	for _, student := range students {
+		fmt.Println("Solved 7")
 		req, err := client.Do(req)
+		fmt.Println("Solved 7.1", *student.ID)
 		if err != nil {
 			fmt.Fprintf(w, err.Error())
 			break
@@ -70,7 +92,7 @@ func CreateSolvedHCN(w http.ResponseWriter, r *http.Request) {
 				var hcnID string
 				reqBody, err := ioutil.ReadAll(req.Body)
 				if err != nil {
-					fmt.Println(err.Error())
+					fmt.Println("Error here ", err.Error())
 					w.WriteHeader(http.StatusBadRequest)
 					fmt.Fprintf(w, "(USER) %v", err.Error())
 					return

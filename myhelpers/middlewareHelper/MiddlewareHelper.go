@@ -27,6 +27,7 @@ func Middleware(handler http.HandlerFunc, endpoint string) http.HandlerFunc {
 		} else {
 			originIP = r.RemoteAddr
 		}
+		fmt.Println("A", r.Header.Get("Token"))
 		isAuth, err := token.IsValid(r.Header.Get("Token"))
 		fmt.Println("IP -> ", originIP, "Endpoint ->", endpoint, "        isAuth:", isAuth, err)
 		if !isAuth {

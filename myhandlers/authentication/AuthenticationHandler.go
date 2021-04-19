@@ -62,10 +62,12 @@ func IsValid(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "Token is empty or not valid")
 		return
 	}
-	_, err = token.VerifyAuthenticity(*teacherToken.Token)
+	_, err = token.IsValid(*teacherToken.Token)
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(err.Error())
+		json.NewEncoder(w).Encode("False: " + err.Error())
+		return
 	}
+	json.NewEncoder(w).Encode("True")
 	return
 }
