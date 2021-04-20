@@ -1,13 +1,13 @@
 package solvedhcn
 
 import (
-	"bytes"
 	"database/sql"
 	"encoding/json"
 	"fmt"
 	"hcn/config"
+	"hcn/helpers/hcnHelper"
+	"hcn/helpers/mongoHelper"
 	"hcn/myhandlers/courses"
-	"hcn/myhandlers/hcn"
 	"hcn/mymodels"
 	"io/ioutil"
 	"net/http"
@@ -27,109 +27,108 @@ func CreateSolvedHCN(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	json.Unmarshal(reqBody, &newSolvedHCN)
-
-	// find all students of the course
-	fmt.Println("Solved 1")
-	students, err := courses.GetAllStudentsCourseNoHTTP(*newSolvedHCN.CourseID)
-	if err != nil {
-		fmt.Println("2 ", err.Error())
+	switch {
+	case (newSolvedHCN.CourseID == nil) || (*newSolvedHCN.CourseID*1 <= 0):
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, err.Error())
+		fmt.Fprintf(w, "CourseID is empty or not valid")
 		return
-	}
-	students = append(students, mymodels.Student{ID: newSolvedHCN.TeacherID})
-
-	// find the mongo id of the HCN
-	fmt.Println("Solved 2")
-	hcnMongoID, err := hcn.GetHCNMongoIDNoHTTP(*newSolvedHCN.OriginalHCN)
-	if err != nil {
-		fmt.Println("3 ", err.Error())
+	case (newSolvedHCN.ActivityID == nil) || (*newSolvedHCN.ActivityID*1 <= 0):
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, err.Error())
+		fmt.Fprintf(w, "ActivityID is empty or not valid")
 		return
-	}
-	// find the mongo document of the HCN
-	fmt.Println("Solved 3")
-	hcnMongo, err := hcn.GetHCNMongoNoHTTP(hcnMongoID)
-	if err != nil {
-		fmt.Println("4 ", err.Error(), hcnMongoID)
+	case (newSolvedHCN.OriginalHCN == nil) || (*newSolvedHCN.OriginalHCN*1 <= 0):
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, err.Error())
+		fmt.Fprintf(w, "OriginalHCN is empty or not valid")
 		return
-	}
-	endpoint := "http://" + config.ServerIP + ":" + config.ServerPort + "/HCN/CreateHCNMongo"
-	jsonValue, err := json.Marshal(hcnMongo)
-	fmt.Println("Solved 4")
-	if err != nil {
-		fmt.Println("5 ", err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(w, err.Error())
+	case (newSolvedHCN.TeacherID == nil) || (*newSolvedHCN.TeacherID*1 <= 0):
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, "TeacherID is empty or not valid")
 		return
-	}
-	fmt.Println("Solved 5")
-	req, err := http.NewRequest("POST", endpoint, bytes.NewBuffer(jsonValue))
-	if err != nil {
-		fmt.Println("6 ", err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(w, err.Error())
-		return
-	}
-
-	req.Header.Set("Content-Type", "application/json")
-	client := &http.Client{}
-
-	fmt.Println("Solved 6")
-	hcnCreated := 0
-	for _, student := range students {
-		fmt.Println("Solved 7")
-		req, err := client.Do(req)
-		fmt.Println("Solved 7.1", *student.ID)
+	default:
+		// find all students of the course
+		students, err := courses.GetAllStudentsCourseNoHTTP(*newSolvedHCN.CourseID)
 		if err != nil {
+			fmt.Println("2 ", err.Error())
+			w.WriteHeader(http.StatusBadRequest)
 			fmt.Fprintf(w, err.Error())
-			break
-		} else {
-			if req.Status == "201 Created" {
-				var hcnID string
-				reqBody, err := ioutil.ReadAll(req.Body)
+			return
+		}
+		// the teacher could solve the activity
+		students = append(students, mymodels.Student{ID: newSolvedHCN.TeacherID})
+
+		// find the mongo id of the HCN
+		mongoID, err := hcnHelper.GetSqlID(*newSolvedHCN.OriginalHCN)
+		//hcnMongoID, err := hcn.GetHCNMongoIDNoHTTP(*newSolvedHCN.OriginalHCN)
+		if err != nil {
+			fmt.Println("3 ", err.Error())
+			w.WriteHeader(http.StatusBadRequest)
+			fmt.Fprintf(w, err.Error())
+			return
+		}
+		// find the mongo document of the HCN
+		hcnMongo, err := mongoHelper.GetHCN(mongoID)
+		if err != nil {
+			fmt.Println("4 ", err.Error(), mongoID)
+			w.WriteHeader(http.StatusNotFound)
+			fmt.Fprintf(w, err.Error())
+			return
+		}
+
+		hcnCreated := 0
+		for _, student := range students {
+			mongoID, err := mongoHelper.CreateHCNMongo(hcnMongo)
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				fmt.Println("5 ", err.Error())
+				fmt.Fprintf(w, err.Error())
+				return
+			} else {
+				Db, err := config.MYSQLConnection()
+				defer Db.Close()
 				if err != nil {
-					fmt.Println("Error here ", err.Error())
-					w.WriteHeader(http.StatusBadRequest)
-					fmt.Fprintf(w, "(USER) %v", err.Error())
+					w.WriteHeader(http.StatusInternalServerError)
+					fmt.Fprintf(w, err.Error())
 					return
 				}
-				json.Unmarshal(reqBody, &hcnID)
-				var Db, _ = config.MYSQLConnection()
-				defer Db.Close()
-				rows, err := Db.Exec("INSERT INTO Solved_HCN(OriginalHCN, MongoID, Solver, Reviewed) VALUES (?,?,?,?)", *newSolvedHCN.OriginalHCN, hcnID, *student.ID, 0)
+				rows, err := Db.Exec("INSERT INTO Solved_HCN(ActivityID, OriginalHCN, MongoID, Solver, Reviewed) VALUES (?,?,?,?,?)", *newSolvedHCN.ActivityID, *newSolvedHCN.OriginalHCN, mongoID, *student.ID, 0)
 				if err == nil {
 					cnt, _ := rows.RowsAffected()
 					if cnt == 1 {
 						hcnCreated++
 					}
-				} else {
-					fmt.Fprintf(w, err.Error())
-					break
 				}
 			}
 		}
-		defer req.Body.Close()
+		if len(students) == hcnCreated {
+			w.WriteHeader(http.StatusCreated)
+			fmt.Fprintf(w, "HCNs created: "+strconv.Itoa(hcnCreated))
+		} else {
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+		return
 	}
-	if len(students) == hcnCreated {
-		w.WriteHeader(http.StatusCreated)
-	} else {
-		w.WriteHeader(http.StatusInternalServerError)
-	}
-	fmt.Fprintf(w, "HCNs created: "+strconv.Itoa(hcnCreated))
-	return
 }
 
 // GetAllSolvedHCN creates blank hcn for the students. Takes the
 // mongoID of the original HCN and creates as copies as students in the course
 func GetAllSolvedHCN(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+	keys, ok := r.URL.Query()["id"]
+	if !ok || len(keys[0]) < 1 {
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, "ID is empty or not valid")
+		return
+	}
+	activityID, err := strconv.Atoi(keys[0])
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, "ID is empty or not valid")
+		return
+	}
+	fmt.Println("ActivityID", activityID)
 	var allSolvedHCN mymodels.AllSolvedHCN
 	var Db, _ = config.MYSQLConnection()
-	rows, err := Db.Query("SELECT ID, OriginalHCN, MongoID, Solver, Reviewed FROM Solved_HCN")
+	rows, err := Db.Query("SELECT ID, ActivityID, OriginalHCN, MongoID, Solver, Reviewed FROM Solved_HCN WHERE ActivityID=?", activityID)
 	defer Db.Close()
 	if err != nil {
 		if err != sql.ErrNoRows {
@@ -139,16 +138,16 @@ func GetAllSolvedHCN(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	for rows.Next() {
-		var ID, OriginalHCN, Solver, Reviewed int
-		var MongoID string
-		if err := rows.Scan(&ID, &OriginalHCN, &MongoID, &Solver, &Reviewed); err != nil {
+		var id, activityID, originalHCN, solver, reviewed int
+		var mongoID string
+		if err := rows.Scan(&id, &activityID, &originalHCN, &mongoID, &solver, &reviewed); err != nil {
 			fmt.Fprintf(w, "(SQL) %v", err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		fmt.Println(MongoID)
+		fmt.Println(mongoID)
 
-		var solvedHCN = mymodels.SolvedHCN{ID: &ID, OriginalHCN: &OriginalHCN, MongoID: &MongoID, Solver: &Solver, Reviewed: &Reviewed}
+		var solvedHCN = mymodels.SolvedHCN{ID: &id, ActivityID: &activityID, OriginalHCN: &originalHCN, MongoID: &mongoID, Solver: &solver, Reviewed: &reviewed}
 		allSolvedHCN = append(allSolvedHCN, solvedHCN)
 	}
 	if allSolvedHCN == nil {

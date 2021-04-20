@@ -14,18 +14,13 @@ import (
 // runTest basic test for running endpoints test.
 func runTest(t *testing.T, allTest mymodels.AllTest) {
 	for i, test := range allTest {
-		// Arrange
 		req, err := http.NewRequest(test.Method, test.URL, nil)
 		if err != nil {
 			t.Fatal(err)
 		}
-
-		// Act
 		rr := httptest.NewRecorder()
 		handler := http.HandlerFunc(test.Function)
 		handler.ServeHTTP(rr, req)
-
-		//Assert
 		if status := rr.Code; status != test.StatusCode {
 			t.Errorf("Test #%v: Handler returned wrong status code: got %v want %v",
 				i, status, test.StatusCode)
@@ -41,18 +36,13 @@ func runTest(t *testing.T, allTest mymodels.AllTest) {
 // runUpdateTest basic test for running endpoints test.
 func runTestWithBody(t *testing.T, allTest mymodels.AllTest) {
 	for i, test := range allTest {
-		// Arrange
 		req, err := http.NewRequest(test.Method, test.URL, bytes.NewBuffer([]byte(test.Body)))
 		if err != nil {
 			t.Fatal(err)
 		}
-
-		// Act
 		rr := httptest.NewRecorder()
 		handler := http.HandlerFunc(test.Function)
 		handler.ServeHTTP(rr, req)
-
-		//Assert
 		if status := rr.Code; status != test.StatusCode {
 			t.Errorf("Test #%v: Handler returned wrong status code: got %v want %v",
 				i, status, test.StatusCode)

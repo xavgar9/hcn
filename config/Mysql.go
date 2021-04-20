@@ -9,9 +9,10 @@ import (
 // MYSQLConnection bla bla...
 func MYSQLConnection() (db *sql.DB, err error) {
 	dbDriver := "mysql"
-	dbUser := "root"
-	dbPass := "root"
+	dbUser := "root1"
+	dbPass := "root1"
 	dbName := "teachers_hcn"
-	db, err = sql.Open(dbDriver, dbUser+":"+dbPass+"@/"+dbName)
+	dbURL := "192.168.120.42:3306"
+	db, err = sql.Open(dbDriver, dbUser+":"+dbPass+"@tcp("+dbURL+")/"+dbName)
 	return db, err
 }

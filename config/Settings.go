@@ -1,13 +1,16 @@
 package config
 
 // ServerIP bla bla...
-const ServerIP string = "192.168.1.18"
+const ServerIP string = "192.168.120.42"
 
 // ServerPort bla bla...
 const ServerPort string = "3600"
 
-// JWTSecret bla bla...
-const JWTSecret string = ("JodddaaaaEsteSecretoSeguro")
+// MongoDB bla bla...
+const MongoDB string = "HCNProject"
+
+// MongoCollection bla bla...
+const MongoCollection string = "HCN"
 
 // SiteShortName bla bla...
 const SiteShortName string = "SimHCN"

@@ -1,5 +1,5 @@
 -- Created by Vertabelo (http://vertabelo.com)
--- Last modification date: 2021-04-12 00:19:40.573
+-- Last modification date: 2021-04-19 20:30:55.316
 
 -- tables
 -- Table: Activities
@@ -92,6 +92,7 @@ CREATE TABLE Sessions (
 -- Table: Solved_HCN
 CREATE TABLE Solved_HCN (
     ID int NOT NULL AUTO_INCREMENT,
+    ActivityID int NOT NULL,
     OriginalHCN int NOT NULL,
     MongoID varchar(50) NOT NULL,
     Solver int NOT NULL,
@@ -185,6 +186,10 @@ ALTER TABLE HCN ADD CONSTRAINT HCN_Teachers FOREIGN KEY HCN_Teachers (TeacherID)
 ALTER TABLE Sessions ADD CONSTRAINT Session_Teachers FOREIGN KEY Session_Teachers (TeacherID)
     REFERENCES Teachers (ID);
 
+-- Reference: Solved_HCN_Activities (table: Solved_HCN)
+ALTER TABLE Solved_HCN ADD CONSTRAINT Solved_HCN_Activities FOREIGN KEY Solved_HCN_Activities (ActivityID)
+    REFERENCES Activities (ID);
+
 -- Reference: Solved_HCN_HCN (table: Solved_HCN)
 ALTER TABLE Solved_HCN ADD CONSTRAINT Solved_HCN_HCN FOREIGN KEY Solved_HCN_HCN (OriginalHCN)
     REFERENCES HCN (ID);
@@ -192,6 +197,12 @@ ALTER TABLE Solved_HCN ADD CONSTRAINT Solved_HCN_HCN FOREIGN KEY Solved_HCN_HCN 
 -- Reference: Techers_Courses (table: Courses)
 ALTER TABLE Courses ADD CONSTRAINT Techers_Courses FOREIGN KEY Techers_Courses (TeacherID)
     REFERENCES Teachers (ID);
+
+-- Constraints
+ALTER TABLE Students_Courses ADD CONSTRAINT uq_Students_Courses UNIQUE(CourseID, StudentID);
+ALTER TABLE CCases_HCN ADD CONSTRAINT uq_CCases_HCN UNIQUE(ClinicalCaseID, HCNID);
+ALTER TABLE Courses_HCN ADD CONSTRAINT uq_Courses_HCN UNIQUE(CourseID, HCNID);
+ALTER TABLE Courses_CCases ADD CONSTRAINT uq_Courses_CCases UNIQUE(CourseID, ClinicalCaseID);
 
 -- End of file.
 

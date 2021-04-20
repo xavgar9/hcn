@@ -1,10 +1,9 @@
 package api
 
 import (
-	"fmt"
+	"hcn/config"
 	"hcn/myhandlers/activities"
 	"hcn/myhandlers/announcements"
-	authentication "hcn/myhandlers/authentication"
 	"hcn/myhandlers/ccases"
 	"hcn/myhandlers/courses"
 	"hcn/myhandlers/feedbacks"
@@ -12,27 +11,51 @@ import (
 	solvedhcn "hcn/myhandlers/solvedHCN"
 	"hcn/myhandlers/students"
 	"hcn/myhandlers/teachers"
-	middleware "hcn/myhelpers/middlewareHelper"
+	"html/template"
 	"net/http"
 
+	"github.com/gorilla/csrf"
 	"github.com/gorilla/mux"
 )
 
-// PingPong checks if the server is ok
-func PingPong(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Pong")
+// contextData are the most widely use common variables for each pages to load.
+type contextData map[string]interface{}
+
+// Home function is to render the homepage page.
+func Home(w http.ResponseWriter, r *http.Request) {
+	//tmpl := template.Must(template.ParseFiles(config.SiteRootTemplate+"front/index.html", config.SiteHeaderTemplate, config.SiteFooterTemplate))
+	tmpl := template.Must(template.ParseFiles(config.SiteRootTemplate + "front/index.html"))
+
+	data := contextData{
+		"PageTitle":    config.SiteFullName,
+		"PageMetaDesc": config.SiteSlogan,
+		"CanonicalURL": r.RequestURI,
+		"CsrfToken":    csrf.Token(r),
+		"Settings":     config.SiteSettings,
+	}
+	tmpl.Execute(w, data)
 }
+
+/*
+func testPage(w http.ResponseWriter, r *http.Request) {
+	tmpl := template.Must(template.ParseFiles(config.SiteRootTemplate + "front/index.html"))
+	data := contextData{
+		"PageTitle":    "POST",
+		"PageMetaDesc": config.SiteSlogan,
+		"CanonicalURL": r.RequestURI,
+		"CsrfToken":    csrf.Token(r),
+		"Settings":     config.SiteSettings,
+	}
+	tmpl.Execute(w, data)
+}
+*/
 
 // MainRouters are the collection of all URLs for the Main App.
 func MainRouters(router *mux.Router) {
-	router.HandleFunc("/", PingPong).Methods("GET")
-
-	// Authentication URLs
-	router.HandleFunc("/Authentication/Login", authentication.Login).Methods("POST", "OPTIONS")
-	router.HandleFunc("/Authentication/IsValid", authentication.IsValid).Methods("POST", "OPTIONS")
+	router.HandleFunc("/", Home).Methods("GET")
 
 	// Teachers URLs
-	router.HandleFunc("/Teachers/GetAllTeachers", middleware.Middleware(teachers.GetAllTeachers, "/Teachers/GetAllTeachers")).Methods("GET")
+	router.HandleFunc("/Teachers/GetAllTeachers", teachers.GetAllTeachers).Methods("GET")
 	router.HandleFunc("/Teachers/GetTeacher", teachers.GetTeacher).Methods("GET")
 	router.HandleFunc("/Teachers/UpdateTeacher", teachers.UpdateTeacher).Methods("POST", "OPTIONS")
 	router.HandleFunc("/Teachers/CreateTeacher", teachers.CreateTeacher).Methods("POST", "OPTIONS")
