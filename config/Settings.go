@@ -12,6 +12,9 @@ const MongoDB string = "HCNProject"
 // MongoCollection bla bla...
 const MongoCollection string = "HCN"
 
+// JWTSecret bla bla...
+const JWTSecret string = "JummQuéSecretazo123"
+
 // SiteShortName bla bla...
 const SiteShortName string = "SimHCN"
 

@@ -16,7 +16,7 @@ package config
 // Settings is where the common settings.go constant variables.
 type Settings struct {
 	SiteFullName, SiteSlogan, SiteBaseURL, SiteTopMenuLogo, SiteProperDomainName,
-	SiteShortName, SiteEmail, SitePhoneNumbers, SiteCompanyAddress, ServerIP, ServerPort, MongoDB, MongoCollection string
+	SiteShortName, SiteEmail, SitePhoneNumbers, SiteCompanyAddress, JWTSecret, ServerIP, ServerPort, MongoDB, MongoCollection string
 	SiteYear int
 }
 
