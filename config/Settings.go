@@ -1,7 +1,7 @@
 package config
 
 // ServerIP bla bla...
-const ServerIP string = "192.168.120.42"
+const ServerIP string = "192.168.1.18"
 
 // ServerPort bla bla...
 const ServerPort string = "3600"

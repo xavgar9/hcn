@@ -63,43 +63,52 @@ func CreateActivity(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "TeacherID is empty or not valid")
 		return
 	default:
-		newSolvedHCN := mymodels.SolvedHCN{
-			CourseID:    newActivity.CourseID,
-			OriginalHCN: newActivity.HCNID,
-			TeacherID:   newActivity.TeacherID,
-		}
-		endpoint := "http://" + config.ServerIP + ":" + config.ServerPort + "/SolvedHCN/CreateSolvedHCN"
-		jsonValue, _ := json.Marshal(newSolvedHCN)
-		req, _ := http.NewRequest("POST", endpoint, bytes.NewBuffer(jsonValue))
-		req.Header.Set("Content-Type", "application/json")
-		client := &http.Client{}
-		resp, err := client.Do(req)
+		var Db, _ = config.MYSQLConnection()
+		defer Db.Close()
+		rows, err := Db.Exec("INSERT INTO Activities(Title,Description,Type,CreationDate,LimitDate,CourseID,ClinicalCaseID,HCNID,Difficulty) VALUES (?,?,?,NOW(),?,?,?,?,?)", newActivity.Title, newActivity.Description, newActivity.Type, newActivity.LimitDate, newActivity.CourseID, newActivity.ClinicalCaseID, newActivity.HCNID, newActivity.Difficulty)
 		if err != nil {
-			fmt.Fprintf(w, err.Error())
-			break
+			fmt.Fprintf(w, "(SQL) %v", err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
 		}
-		if resp.Status == "201 Created" {
-			var Db, _ = config.MYSQLConnection()
-			defer Db.Close()
-			rows, err := Db.Exec("INSERT INTO Activities(Title,Description,Type,CreationDate,LimitDate,CourseID,ClinicalCaseID,HCNID,Difficulty) VALUES (?,?,?,NOW(),?,?,?,?,?)", newActivity.Title, newActivity.Description, newActivity.Type, newActivity.LimitDate, newActivity.CourseID, newActivity.ClinicalCaseID, newActivity.HCNID, newActivity.Difficulty)
-			if err != nil {
-				fmt.Fprintf(w, "(SQL) %v", err.Error())
-				w.WriteHeader(http.StatusInternalServerError)
-				return
+		cnt, _ := rows.RowsAffected()
+		if cnt == 1 {
+			newSolvedHCN := mymodels.SolvedHCN{
+				CourseID:    newActivity.CourseID,
+				OriginalHCN: newActivity.HCNID,
+				TeacherID:   newActivity.TeacherID,
 			}
-			cnt, _ := rows.RowsAffected()
-			if cnt == 1 {
-				int64ID, _ := rows.LastInsertId()
-				intID := int(int64ID)
-				newActivity.ID = &intID
+
+			int64ID, _ := rows.LastInsertId()
+			intID := int(int64ID)
+			newActivity.ID = &intID
+			newSolvedHCN.ActivityID = &intID
+
+			endpoint := "http://" + config.ServerIP + ":" + config.ServerPort + "/SolvedHCN/CreateSolvedHCN"
+			jsonValue, _ := json.Marshal(newSolvedHCN)
+			req, _ := http.NewRequest("POST", endpoint, bytes.NewBuffer(jsonValue))
+			req.Header.Set("Content-Type", "application/json")
+			client := &http.Client{}
+			resp, err := client.Do(req)
+			if err != nil {
+				fmt.Fprintf(w, err.Error())
+				break
+			}
+			if resp.Status == "201 Created" {
 				w.WriteHeader(http.StatusCreated)
 				json.NewEncoder(w).Encode(newActivity)
+				return
 			}
-		} else {
-			fmt.Fprintf(w, "Can't create solvedHCN %v", resp.Body)
+			if resp.StatusCode == 400 {
+				w.WriteHeader(http.StatusBadRequest)
+			} else {
+				w.WriteHeader(http.StatusInternalServerError)
+			}
+			fmt.Fprintf(w, "Can't create solvedHCN: %v", resp.Body)
 		}
-		return
 	}
+
+	return
 }
 
 // GetAllActivities bla bla...
