@@ -32,7 +32,7 @@ import (
 	"github.com/itrepablik/sakto"
 )
 
-//CurrentLocalTime bla bla...
+//CurrentLocalTime ...
 var CurrentLocalTime = sakto.GetCurDT(time.Now(), "America/New_York")
 
 func main() {

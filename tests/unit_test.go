@@ -8,7 +8,6 @@ import (
 	"testing"
 
 	"hcn/mymodels"
-	"hcn/tests/testhelpers"
 )
 
 // runTest basic test for running endpoints test.
@@ -56,76 +55,13 @@ func runTestWithBody(t *testing.T, allTest mymodels.AllTest) {
 }
 
 /*
-// Teachers test
-func TestGetAllTeachers(t *testing.T) {
-	runTest(t, testhelpers.CasesGetAllTeachers())
-}
-
-func TestGetTeacher(t *testing.T) {
-	runTest(t, testhelpers.CasesGetTeacher())
-}
-
-func TestCreateTeacher(t *testing.T) {
-	runTestWithBody(t, testhelpers.CasesCreateTeacher())
-}
-
-func TestUpdateTeacher(t *testing.T) {
-	runTestWithBody(t, testhelpers.CasesUpdateTeacher())
-}
-
-func TestDeleteTeacher(t *testing.T) {
-	runTestWithBody(t, testhelpers.CasesDeleteTeacher())
-}
-
-// Students test
-func TestGetAllStudents(t *testing.T) {
-	runTest(t, testhelpers.CasesGetAllStudents())
-}
-
-func TestGetStudent(t *testing.T) {
-	runTest(t, testhelpers.CasesGetStudent())
-}
-
-func TestCreateStudent(t *testing.T) {
-	runTestWithBody(t, testhelpers.CasesCreateStudent())
-}
-
-func TestUpdateStudent(t *testing.T) {
-	runTestWithBody(t, testhelpers.CasesUpdateStudent())
-}
-
-func TestDeleteStudent(t *testing.T) {
-	runTestWithBody(t, testhelpers.CasesDeleteStudent())
-}
-
-// Courses test
-func TestGetAllCourses(t *testing.T) {
-	runTest(t, testhelpers.CasesGetAllCourses())
-}
-
-func TestGetCourse(t *testing.T) {
-	runTest(t, testhelpers.CasesGetCourse())
-}
-
-func TestCreateCourse(t *testing.T) {
-	runTestWithBody(t, testhelpers.CasesCreateCourse())
-}
-
-func TestUpdateCourses(t *testing.T) {
-	runTestWithBody(t, testhelpers.CasesUpdateCourse())
-}
-
-func TestDeleteCourses(t *testing.T) {
-	runTestWithBody(t, testhelpers.CasesDeleteCourse())
-}
-
 // Announcements test
 func TestGetAllAnnouncements(t *testing.T) {
 	runTest(t, testhelpers.CasesGetAllAnnouncements())
 }
 
 func TestGetAnnouncement(t *testing.T) {
-	runTest(t, testhelpers.CasesGetAnnouncement())
+	runTestWithBody(t, testhelpers.CasesGetAnnouncement())
 }
 
 func TestCreateAnnouncement(t *testing.T) {
@@ -140,6 +76,107 @@ func TestDeleteAnnouncement(t *testing.T) {
 	runTestWithBody(t, testhelpers.CasesDeleteAnnouncement())
 }
 
+// Students test
+func TestGetAllStudents(t *testing.T) {
+	runTest(t, testhelpers.CasesGetAllStudents())
+}
+
+func TestGetStudent(t *testing.T) {
+	runTestWithBody(t, testhelpers.CasesGetStudent())
+}
+
+func TestCreateStudent(t *testing.T) {
+	runTestWithBody(t, testhelpers.CasesCreateStudent())
+}
+
+func TestUpdateStudent(t *testing.T) {
+	runTestWithBody(t, testhelpers.CasesUpdateStudent())
+}
+
+func TestDeleteStudent(t *testing.T) {
+	runTestWithBody(t, testhelpers.CasesDeleteStudent())
+}
+
+// Activities test
+func TestGetAllActivities(t *testing.T) {
+	runTest(t, testhelpers.CasesGetAllActivities())
+}
+
+func TestGetActivity(t *testing.T) {
+	runTestWithBody(t, testhelpers.CasesGetActivity())
+}
+
+func TestCreateActivity(t *testing.T) {
+	runTestWithBody(t, testhelpers.CasesCreateActivity())
+}
+
+func TestUpdateUpdateActivity(t *testing.T) {
+	runTestWithBody(t, testhelpers.CasesUpdateActivity())
+}
+
+func TestDeleteActivity(t *testing.T) {
+	runTestWithBody(t, testhelpers.CasesDeleteActivity())
+}
+
+
+// Teachers test
+func TestGetAllTeachers(t *testing.T) {
+	runTest(t, testhelpers.CasesGetAllTeachers())
+}
+
+func TestGetTeacher(t *testing.T) {
+	runTestWithBody(t, testhelpers.CasesGetTeacher())
+}
+
+func TestCreateTeacher(t *testing.T) {
+	runTestWithBody(t, testhelpers.CasesCreateTeacher())
+}
+
+func TestUpdateTeacher(t *testing.T) {
+	runTestWithBody(t, testhelpers.CasesUpdateTeacher())
+}
+
+func TestDeleteTeacher(t *testing.T) {
+	runTestWithBody(t, testhelpers.CasesDeleteTeacher())
+}
+
+
+// Courses test
+func TestGetAllCourses(t *testing.T) {
+	runTest(t, testhelpers.CasesGetAllCourses())
+}
+
+func TestGetCourse(t *testing.T) {
+	runTestWithBody(t, testhelpers.CasesGetCourse())
+}
+
+func TestCreateCourse(t *testing.T) {
+	runTestWithBody(t, testhelpers.CasesCreateCourse())
+}
+
+func TestUpdateCourses(t *testing.T) {
+	runTestWithBody(t, testhelpers.CasesUpdateCourse())
+}
+
+func TestDeleteCourses(t *testing.T) {
+	runTestWithBody(t, testhelpers.CasesDeleteCourse())
+}
+
+// Students_Courses test
+func TestGetAllStudentsCourse(t *testing.T) {
+	runTestWithBody(t, testhelpers.CasesGetAllStudentsCourse())
+}
+
+func TestAddStudent(t *testing.T) {
+	runTestWithBody(t, testhelpers.CasesAddStudent())
+}
+
+func TestRemoveStudent(t *testing.T) {
+	runTestWithBody(t, testhelpers.CasesRemoveStudent())
+}
+*/
+
+/*
 // Feedbacks test
 // func TestGetAllFeedbacks(t *testing.T) {
 // 	runTest(t, testhelpers.CasesGetAllFeedbacks())
@@ -203,40 +240,6 @@ func TestDeleteClinicalCase(t *testing.T) {
 	runTestWithBody(t, testhelpers.CasesDeleteClinicalCase())
 }
 
-// Activities test
-func TestGetAllActivities(t *testing.T) {
-	runTest(t, testhelpers.CasesGetAllActivities())
-}
-
-func TestGetActivity(t *testing.T) {
-	runTest(t, testhelpers.CasesGetActivity())
-}
-
-func TestCreateActivity(t *testing.T) {
-	runTestWithBody(t, testhelpers.CasesCreateActivity())
-}
-
-func TestUpdateUpdateActivity(t *testing.T) {
-	runTestWithBody(t, testhelpers.CasesUpdateActivity())
-}
-
-func TestDeleteActivity(t *testing.T) {
-	runTestWithBody(t, testhelpers.CasesDeleteActivity())
-}
-
-
-// Students_Courses test
-func TestGetAllStudentsCourse(t *testing.T) {
-	runTest(t, testhelpers.CasesGetAllStudentsCourse())
-}
-
-func TestAddStudent(t *testing.T) {
-	runTestWithBody(t, testhelpers.CasesAddStudent())
-}
-
-func TestRemoveStudent(t *testing.T) {
-	runTestWithBody(t, testhelpers.CasesRemoveStudent())
-}
 
 // CCases_HCN test
 
@@ -283,6 +286,7 @@ func TestVisibilityClinicalCase(t *testing.T) {
 }
 */
 ////////////////////////////////////////////////////////////////////
+/*
 func TestDeleteAllHCNMongo(t *testing.T) {
 	runTest(t, testhelpers.CasesDeleteAllHCNMongo())
 }
@@ -301,3 +305,4 @@ func TestGetAllHCNMongo2(t *testing.T) {
 func TestUpdateHCNMongo(t *testing.T) {
 	runTestWithBody(t, testhelpers.CasesUpdateHCNMongo())
 }
+*/

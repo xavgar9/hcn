@@ -25,51 +25,51 @@ func CasesGetCourse() mymodels.AllTest {
 	return mymodels.AllTest{
 		{
 			Method:       "GET",
-			URL:          "/Courses/GetCourse?idddd=1",
+			URL:          "/Courses/GetCourse",
 			Function:     courses.GetCourse,
-			Body:         "",
+			Body:         `{"IDDDD": 1}`,
 			ExpectedBody: `ID is empty or not valid`,
 			StatusCode:   http.StatusBadRequest,
 		},
 		{
 			Method:       "GET",
-			URL:          "/Courses/GetCourse?id=",
+			URL:          "/Courses/GetCourse",
 			Function:     courses.GetCourse,
-			Body:         "",
+			Body:         `{"ID":}`,
 			ExpectedBody: `ID is empty or not valid`,
 			StatusCode:   http.StatusBadRequest,
 		},
 		{
 			Method:       "GET",
-			URL:          "/Courses/GetCourse?id=1",
+			URL:          "/Courses/GetCourse",
 			Function:     courses.GetCourse,
-			Body:         "",
+			Body:         `{"ID": 1}`,
 			ExpectedBody: `{"ID":1,"TeacherID":50001,"Name":"Introducción a Matlab","CreationDate":"2021-01-01 12:00:00"}`,
 			StatusCode:   http.StatusOK,
 		},
 		{
 			Method:       "GET",
-			URL:          "/Courses/GetCourse?id=2",
+			URL:          "/Courses/GetCourse",
 			Function:     courses.GetCourse,
-			Body:         "",
+			Body:         `{"ID":2}`,
 			ExpectedBody: `{"ID":2,"TeacherID":50001,"Name":"Matlab avanzado","CreationDate":"2021-01-01 12:20:08"}`,
 			StatusCode:   http.StatusOK,
 		},
 		{
 			Method:       "GET",
-			URL:          "/Courses/GetCourse?id=3",
+			URL:          "/Courses/GetCourse",
 			Function:     courses.GetCourse,
-			Body:         "",
+			Body:         `{"ID":3}`,
 			ExpectedBody: `{"ID":3,"TeacherID":50002,"Name":"Clases de piano","CreationDate":"2021-01-06 15:21:50"}`,
 			StatusCode:   http.StatusOK,
 		},
 		{
 			Method:       "GET",
-			URL:          "/Courses/GetCourse?id=15",
+			URL:          "/Courses/GetCourse",
 			Function:     courses.GetCourse,
-			Body:         "",
-			ExpectedBody: ``,
-			StatusCode:   http.StatusOK,
+			Body:         `{"ID":211}`,
+			ExpectedBody: "(db 2) element does not exist in db",
+			StatusCode:   http.StatusNotFound,
 		},
 	}
 }
@@ -82,7 +82,7 @@ func CasesUpdateCourse() mymodels.AllTest {
 			URL:          "/Courses/UpdateCourse",
 			Function:     courses.UpdateCourse,
 			Body:         `{"ID":1,"TeacherID":50001,"Name":"Introducción a Amongos","CreationDate":"2021-01-01 12:00:00"}`,
-			ExpectedBody: `{"ID":1,"TeacherID":50001,"Name":"Introducción a Amongos","CreationDate":"2021-01-01 12:00:00"}`,
+			ExpectedBody: "",
 			StatusCode:   http.StatusOK,
 		},
 		{
@@ -90,7 +90,7 @@ func CasesUpdateCourse() mymodels.AllTest {
 			URL:          "/Courses/UpdateCourse",
 			Function:     courses.UpdateCourse,
 			Body:         `{"ID":2,"TeacherID":50001,"Name":"Amongos avanzado","CreationDate":"2021-01-01 12:20:08"}`,
-			ExpectedBody: `{"ID":2,"TeacherID":50001,"Name":"Amongos avanzado","CreationDate":"2021-01-01 12:20:08"}`,
+			ExpectedBody: "",
 			StatusCode:   http.StatusOK,
 		},
 		{
@@ -98,7 +98,7 @@ func CasesUpdateCourse() mymodels.AllTest {
 			URL:          "/Courses/UpdateCourse",
 			Function:     courses.UpdateCourse,
 			Body:         `{"ID":1,"TeacherID":50001,"Name":"Introducción a Matlab","CreationDate":"2021-01-01 12:00:00"}`,
-			ExpectedBody: `{"ID":1,"TeacherID":50001,"Name":"Introducción a Matlab","CreationDate":"2021-01-01 12:00:00"}`,
+			ExpectedBody: "",
 			StatusCode:   http.StatusOK,
 		},
 		{
@@ -106,16 +106,16 @@ func CasesUpdateCourse() mymodels.AllTest {
 			URL:          "/Courses/UpdateCourse",
 			Function:     courses.UpdateCourse,
 			Body:         `{"ID":2,"TeacherID":50001,"Name":"Matlab avanzado","CreationDate":"2021-01-01 12:20:08"}`,
-			ExpectedBody: `{"ID":2,"TeacherID":50001,"Name":"Matlab avanzado","CreationDate":"2021-01-01 12:20:08"}`,
+			ExpectedBody: "",
 			StatusCode:   http.StatusOK,
 		},
 		{
 			Method:       "POST",
 			URL:          "/Students/UpdateCourse",
 			Function:     courses.UpdateCourse,
-			Body:         `{"ID":55,"Name":"Ghost User","Email":"Ghost@email.com"}`,
-			ExpectedBody: `No rows updated`,
-			StatusCode:   http.StatusOK,
+			Body:         `{"ID":55,"TeacherID":50001,"Name":"Matlab avanzado","CreationDate":"2021-01-01 12:20:08"}`,
+			ExpectedBody: "(db 2) element does not exist in db",
+			StatusCode:   http.StatusNotFound,
 		},
 	}
 }
@@ -128,7 +128,7 @@ func CasesCreateCourse() mymodels.AllTest {
 			URL:          "/Courses/CreateCourse",
 			Function:     courses.CreateCourse,
 			Body:         `{"TeacherID":50001,"Name":"Apoyo moral","CreationDate":"2021-01-12 12:33:50"}`,
-			ExpectedBody: `{"ID":5,"TeacherID":50001,"Name":"Apoyo moral","CreationDate":"2021-01-12 12:33:50"}`,
+			ExpectedBody: "",
 			StatusCode:   http.StatusCreated,
 		},
 		{
@@ -158,15 +158,15 @@ func CasesDeleteCourse() mymodels.AllTest {
 			URL:          "/Courses/DeleteCourse",
 			Function:     courses.DeleteCourse,
 			Body:         `{"ID":10}`,
-			ExpectedBody: `No rows deleted`,
-			StatusCode:   http.StatusOK,
+			ExpectedBody: "(db 2) element does not exist in db",
+			StatusCode:   http.StatusNotFound,
 		},
 		{
 			Method:       "DELETE",
 			URL:          "/Courses/DeleteCourse",
 			Function:     courses.DeleteCourse,
 			Body:         `{"ID":5}`,
-			ExpectedBody: `One row deleted`,
+			ExpectedBody: "",
 			StatusCode:   http.StatusOK,
 		},
 		{
@@ -180,6 +180,53 @@ func CasesDeleteCourse() mymodels.AllTest {
 	}
 }
 
+/////////////////////////////////////////////////////////////////////////////
+// CasesGetAllStudentsCourse bla bla...
+func CasesGetAllStudentsCourse() mymodels.AllTest {
+	return mymodels.AllTest{
+		{
+			Method:       "GET",
+			URL:          "/Students/GetAllStudentsCourse",
+			Function:     courses.GetAllStudentsCourse,
+			Body:         `{"CourseIDDD": 1}`,
+			ExpectedBody: `CourseID is empty or not valid`,
+			StatusCode:   http.StatusBadRequest,
+		},
+		{
+			Method:       "GET",
+			URL:          "/Students/GetAllStudentsCourse",
+			Function:     courses.GetAllStudentsCourse,
+			Body:         `{"CourseID": 1}`,
+			ExpectedBody: `[{"ID":10001,"Name":"Daniel Gómez Sermeño","Email":"goma@email.com"},{"ID":10002,"Name":"Xavier Garzón López","Email":"xavgar9@email.com"},{"ID":10003,"Name":"Juan F. Gil","Email":"transfer10@email.com"},{"ID":10004,"Name":"Edgar Silva","Email":"ednosil@email.com"}]`,
+			StatusCode:   http.StatusOK,
+		},
+		{
+			Method:       "GET",
+			URL:          "/Students/GetAllStudentsCourse",
+			Function:     courses.GetAllStudentsCourse,
+			Body:         `{"CourseID": 2}`,
+			ExpectedBody: `[{"ID":10005,"Name":"Juanita María Parra Villamíl","Email":"juanitamariap@email.com"},{"ID":10006,"Name":"Sebastián Rodríguez Osorio Silva","Email":"sebasrosorio98@email.com"},{"ID":10007,"Name":"Andrés Felipe Garcés","Email":"andylukast@email.com"}]`,
+			StatusCode:   http.StatusOK,
+		},
+		{
+			Method:       "GET",
+			URL:          "/Students/GetAllStudentsCourse",
+			Function:     courses.GetAllStudentsCourse,
+			Body:         ``,
+			ExpectedBody: `CourseID is empty or not valid`,
+			StatusCode:   http.StatusBadRequest,
+		},
+		{
+			Method:       "GET",
+			URL:          "/Students/GetAllStudentsCourse",
+			Function:     courses.GetAllStudentsCourse,
+			Body:         `{"CourseID": 56}`,
+			ExpectedBody: "(db 2) element does not exist in db",
+			StatusCode:   http.StatusNotFound,
+		},
+	}
+}
+
 // CasesAddStudent bla bla...
 func CasesAddStudent() mymodels.AllTest {
 	return mymodels.AllTest{
@@ -188,23 +235,23 @@ func CasesAddStudent() mymodels.AllTest {
 			URL:          "/Students/AddStudent",
 			Function:     courses.AddStudent,
 			Body:         `{"CourseID":1,"StudentID":10005}`,
-			ExpectedBody: `Student added`,
-			StatusCode:   http.StatusOK,
+			ExpectedBody: "",
+			StatusCode:   http.StatusCreated,
 		},
 		{
 			Method:       "POST",
 			URL:          "/Students/AddStudent",
 			Function:     courses.AddStudent,
 			Body:         `{"CourseID":1,"StudentID":10006}`,
-			ExpectedBody: `Student added`,
-			StatusCode:   http.StatusOK,
+			ExpectedBody: "",
+			StatusCode:   http.StatusCreated,
 		},
 		{
 			Method:       "POST",
 			URL:          "/Students/AddStudent",
 			Function:     courses.AddStudent,
 			Body:         `{"CourseID":1,"StudentID":10004}`,
-			ExpectedBody: `(SQL) Error 1062: Duplicate entry '1-10004' for key 'uq_Students_Courses'`,
+			ExpectedBody: `(db 2) Error 1062: Duplicate entry '1-10004' for key 'uq_Students_Courses'`,
 			StatusCode:   http.StatusConflict,
 		},
 		{
@@ -234,44 +281,6 @@ func CasesAddStudent() mymodels.AllTest {
 	}
 }
 
-// CasesGetAllStudentsCourse bla bla...
-func CasesGetAllStudentsCourse() mymodels.AllTest {
-	return mymodels.AllTest{
-		{
-			Method:       "DELETE",
-			URL:          "/Students/GetAllStudentsCourse?iddddd=1",
-			Function:     courses.GetAllStudentsCourse,
-			Body:         ``,
-			ExpectedBody: `ID is empty or not valid`,
-			StatusCode:   http.StatusBadRequest,
-		},
-		{
-			Method:       "DELETE",
-			URL:          "/Students/GetAllStudentsCourse?id=1",
-			Function:     courses.GetAllStudentsCourse,
-			Body:         ``,
-			ExpectedBody: `[{"ID":10001,"Name":"Daniel Gómez Sermeño","Email":"goma@email.com"},{"ID":10002,"Name":"Xavier Garzón López","Email":"xavgar9@email.com"},{"ID":10003,"Name":"Juan F. Gil","Email":"transfer10@email.com"},{"ID":10004,"Name":"Edgar Silva","Email":"ednosil@email.com"}]`,
-			StatusCode:   http.StatusOK,
-		},
-		{
-			Method:       "DELETE",
-			URL:          "/Students/GetAllStudentsCourse?id=2",
-			Function:     courses.GetAllStudentsCourse,
-			Body:         ``,
-			ExpectedBody: `[{"ID":10005,"Name":"Juanita María Parra Villamíl","Email":"juanitamariap@email.com"},{"ID":10006,"Name":"Sebastián Rodríguez Osorio Silva","Email":"sebasrosorio98@email.com"},{"ID":10007,"Name":"Andrés Felipe Garcés","Email":"andylukast@email.com"}]`,
-			StatusCode:   http.StatusOK,
-		},
-		{
-			Method:       "DELETE",
-			URL:          "/Students/GetAllStudentsCourse",
-			Function:     courses.GetAllStudentsCourse,
-			Body:         ``,
-			ExpectedBody: `ID is empty or not valid`,
-			StatusCode:   http.StatusBadRequest,
-		},
-	}
-}
-
 // CasesRemoveStudent bla bla...
 func CasesRemoveStudent() mymodels.AllTest {
 	return mymodels.AllTest{
@@ -280,7 +289,7 @@ func CasesRemoveStudent() mymodels.AllTest {
 			URL:          "/Courses/RemoveStudent",
 			Function:     courses.RemoveStudent,
 			Body:         `{"CourseID":1, "StudentID":10004}`,
-			ExpectedBody: `One row deleted`,
+			ExpectedBody: "",
 			StatusCode:   http.StatusOK,
 		},
 		{
@@ -288,7 +297,7 @@ func CasesRemoveStudent() mymodels.AllTest {
 			URL:          "/Courses/RemoveStudent",
 			Function:     courses.RemoveStudent,
 			Body:         `{"CourseID":1, "StudentID":10005}`,
-			ExpectedBody: `One row deleted`,
+			ExpectedBody: "",
 			StatusCode:   http.StatusOK,
 		},
 		{
@@ -296,7 +305,7 @@ func CasesRemoveStudent() mymodels.AllTest {
 			URL:          "/Courses/RemoveStudent",
 			Function:     courses.RemoveStudent,
 			Body:         `{"CourseID":1, "StudentID":10006}`,
-			ExpectedBody: `One row deleted`,
+			ExpectedBody: "",
 			StatusCode:   http.StatusOK,
 		},
 		{
@@ -304,14 +313,14 @@ func CasesRemoveStudent() mymodels.AllTest {
 			URL:          "/Courses/RemoveStudent",
 			Function:     courses.RemoveStudent,
 			Body:         `{"CourseID":1, "StudentID":10007}`,
-			ExpectedBody: `No rows deleted`,
+			ExpectedBody: "(db 5) Expected to affect 1 row, affected 0 rows",
 			StatusCode:   http.StatusOK,
 		},
 		{
 			Method:       "DELETE",
 			URL:          "/Courses/RemoveStudent",
 			Function:     courses.RemoveStudent,
-			Body:         ``,
+			Body:         "",
 			ExpectedBody: `CourseID is empty or not valid`,
 			StatusCode:   http.StatusBadRequest,
 		},

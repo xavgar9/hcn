@@ -1,3 +1,4 @@
+DELETE FROM Sessions;
 DELETE FROM CCases_HCN;
 DELETE FROM Courses_CCases;
 ALTER TABLE Courses_CCases AUTO_INCREMENT = 1;

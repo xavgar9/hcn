@@ -50,7 +50,7 @@ CREATE FUNCTION SaveToken(email VARCHAR(100), token VARCHAR(500), expirationDate
     END IF;
     RETURN s;
   END //
-DELIMITER;
+DELIMITER ;
 
 ###########################################################################################
                                     #IsValidToken
