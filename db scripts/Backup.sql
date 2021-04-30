@@ -31,9 +31,10 @@ INSERT INTO Students(ID,Name,Email) VALUES (10006,'Sebastián Rodríguez Osorio 
 INSERT INTO Students(ID,Name,Email) VALUES (10007,'Andrés Felipe Garcés','andylukast@email.com');
 
 -- Teachers
-INSERT INTO Teachers(ID,Name,Email) VALUES (50001,'Benjamín Calderón Silva','matlab@email.com');
-INSERT INTO Teachers(ID,Name,Email) VALUES (50002,'Oscar David Hurtado Zapata','oscrdh@email.com');
-INSERT INTO Teachers(ID,Name,Email) VALUES (50003,'Christian Camilo Ortiz','camilorto@email.com');
+INSERT INTO Teachers(ID,Name,Email,Password) VALUES (50001,'Gerardo Mauricio Sarria','gerardo@email.com', '4024fb06e1423da90b80f0274e8e4476');
+INSERT INTO Teachers(ID,Name,Email,Password) VALUES (50002,'Juan Carlos Martinez','juan@email.com', 'a94652aa97c7211ba8954dd15a3cf838');
+INSERT INTO Teachers(ID,Name,Email,Password) VALUES (50003,'Jhoan Lozano Rojas','jhoan@email.com', '88ca9791c0f2e27a503c23b74896b377');
+INSERT INTO Teachers(ID,Name,Email,Password) VALUES (50004,'Xavier Garzón López','xavier@email.com', '0f5366b3b19afc3184d23bc73d8cd311');
 
 -- Courses
 INSERT INTO Courses(TeacherID,Name, CreationDate) VALUES (50001,'Introducción a Matlab', '2021-01-01 12:00:00');

@@ -1,25 +1,59 @@
 package mymodels
 
+import (
+	helper "hcn/myhelpers/structValidationHelper"
+)
+
 // --------------------------------------------------------------------------------------
 // MySQL Models
 // --------------------------------------------------------------------------------------
 
 // HCN is the assessment in MySQL (Historia Clínica Nutricional)...
 type HCN struct {
-	ID        *int    `json:"ID"`
-	TeacherID *int    `json:"TeacherID"`
-	MongoID   *string `json:"MongoID"`
+	ID        *int    `json:"ID,omitempty"`
+	TeacherID *int    `json:"TeacherID,omitempty"`
+	MongoID   *string `json:"MongoID,omitempty"`
 }
 
-// HCNVinculation bla bla...
-type HCNVinculation struct {
-	ID             *int `json:"ID"`
-	ClinicalCaseID *int `json:"ClinicalCaseID"`
-	HCNID          *int `json:"HCNID"`
-}
-
-// AllHCN bla bla...
+// AllHCN slice of HCN
 type AllHCN []HCN
+
+// ValidateFields checks the fields of the struct.
+//
+// If not struct fields are given, will check all fields.
+func (model HCN) ValidateFields(structFields ...[]string) (bool, error) {
+	if len(structFields) == 0 {
+		return helper.ValidateFields(model)
+	}
+	return helper.ValidateFields(model, structFields[0])
+}
+
+// GetFields return the names and fields values of the struct.
+func (model HCN) GetFields() (string, []string, []string, error) {
+	return helper.GetFields(model)
+}
+
+// HCNVinculation struct
+type HCNVinculation struct {
+	ID             *int `json:"ID,omitempty"`
+	ClinicalCaseID *int `json:"ClinicalCaseID,omitempty"`
+	HCNID          *int `json:"HCNID,omitempty"`
+}
+
+// ValidateFields checks the fields of the struct.
+//
+// If not struct fields are given, will check all fields.
+func (model HCNVinculation) ValidateFields(structFields ...[]string) (bool, error) {
+	if len(structFields) == 0 {
+		return helper.ValidateFields(model)
+	}
+	return helper.ValidateFields(model, structFields[0])
+}
+
+// GetFields return the names and fields values of the struct.
+func (model HCNVinculation) GetFields() (string, []string, []string, error) {
+	return helper.GetFields(model)
+}
 
 // --------------------------------------------------------------------------------------
 // Mongo Models

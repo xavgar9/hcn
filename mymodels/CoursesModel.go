@@ -1,6 +1,8 @@
 package mymodels
 
-// Course bla bla...
+import helper "hcn/myhelpers/structValidationHelper"
+
+// Course struct
 type Course struct {
 	ID           *int    `json:"ID"`
 	TeacherID    *int    `json:"TeacherID"`
@@ -8,8 +10,23 @@ type Course struct {
 	CreationDate *string `json:"CreationDate"`
 }
 
-// AllCourses bla bla...
+// AllCourses slice of courses
 type AllCourses []Course
+
+// ValidateFields checks the fields of the struct.
+//
+// If not struct fields are given, will check all fields.
+func (model Course) ValidateFields(structFields ...[]string) (bool, error) {
+	if len(structFields) == 0 {
+		return helper.ValidateFields(model)
+	}
+	return helper.ValidateFields(model, structFields[0])
+}
+
+// GetFields return the names and fields values of the struct.
+func (model Course) GetFields() (string, []string, []string, error) {
+	return helper.GetFields(model)
+}
 
 // CourseHCN struct that represents the new relationship between a HCN and a Course ...
 type CourseHCN struct {
@@ -22,6 +39,21 @@ type CourseHCN struct {
 // AllCourseHCN bla bla...
 type AllCourseHCN []CourseHCN
 
+// ValidateFields checks the fields of the struct.
+//
+// If not struct fields are given, will check all fields.
+func (model CourseHCN) ValidateFields(structFields ...[]string) (bool, error) {
+	if len(structFields) == 0 {
+		return helper.ValidateFields(model)
+	}
+	return helper.ValidateFields(model, structFields[0])
+}
+
+// GetFields return the names and fields values of the struct.
+func (model CourseHCN) GetFields() (string, []string, []string, error) {
+	return helper.GetFields(model)
+}
+
 // CourseClinicalCase struct that represents the new relationship between a Clinical Case and a Course ...
 type CourseClinicalCase struct {
 	ID             *int `json:"ID"`
@@ -32,6 +64,21 @@ type CourseClinicalCase struct {
 
 // AllCourseClinicalCase bla bla...
 type AllCourseClinicalCase []CourseClinicalCase
+
+// ValidateFields checks the fields of the struct.
+//
+// If not struct fields are given, will check all fields.
+func (model CourseClinicalCase) ValidateFields(structFields ...[]string) (bool, error) {
+	if len(structFields) == 0 {
+		return helper.ValidateFields(model)
+	}
+	return helper.ValidateFields(model, structFields[0])
+}
+
+// GetFields return the names and fields values of the struct.
+func (model CourseClinicalCase) GetFields() (string, []string, []string, error) {
+	return helper.GetFields(model)
+}
 
 /*
 // HCNCCase struct that represents the new relationship between a HCN and a Clinical Case ...

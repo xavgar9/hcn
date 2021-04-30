@@ -1,0 +1,5 @@
+{"level":"info","ts":1618951078.5751588,"msg":"Server started at 2021-04-20 16:37:58.573557473 -0400 EDT"}
+{"level":"error","ts":1618951078.5760026,"msg":"listen tcp 10.0.0.4:3600: bind: address already in use"}
+{"level":"warn","ts":1618952544.0998104,"msg":"Server has been shutdown at 2021-04-20 16:37:58.573557473 -0400 EDT"}
+{"level":"info","ts":1618965521.4268968,"msg":"Server started at 2021-04-20 20:38:41.423854813 -0400 EDT"}
+{"level":"info","ts":1618965526.6892219,"msg":"Server started at 2021-04-20 20:38:46.687220591 -0400 EDT"}

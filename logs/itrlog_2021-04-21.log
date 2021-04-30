@@ -1,0 +1,6 @@
+{"level":"info","ts":1618964533.176069,"msg":"Server started at 2021-04-20 20:22:13.173212434 -0400 EDT"}
+{"level":"error","ts":1618964726.6810029,"msg":"http: Server closed"}
+{"level":"warn","ts":1618964727.1811638,"msg":"Server has been shutdown at 2021-04-20 20:22:13.173212434 -0400 EDT"}
+{"level":"info","ts":1618964804.2546685,"msg":"Server started at 2021-04-20 20:26:44.252744836 -0400 EDT"}
+{"level":"error","ts":1618964927.6554399,"msg":"http: Server closed"}
+{"level":"warn","ts":1618964928.1555884,"msg":"Server has been shutdown at 2021-04-20 20:26:44.252744836 -0400 EDT"}

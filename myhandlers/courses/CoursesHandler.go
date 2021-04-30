@@ -1,245 +1,215 @@
 package courses
 
 import (
-	"database/sql"
 	"encoding/json"
 	"fmt"
 	"hcn/config"
 	"hcn/mymodels"
 	"io/ioutil"
 	"net/http"
-	"strconv"
+	"strings"
+	"time"
+
+	dbHelper "hcn/myhelpers/databaseHelper"
+
+	"github.com/itrepablik/sakto"
 )
 
-// CreateCourse bla bla...
+// CreateCourse creates one course in db.
 func CreateCourse(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var newCourse mymodels.Course
 	reqBody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "(USER) %v", err.Error())
+		fmt.Fprintf(w, err.Error())
 		return
 	}
-
-	var Db, _ = config.MYSQLConnection()
 	json.Unmarshal(reqBody, &newCourse)
-	switch {
-	case (newCourse.TeacherID == nil) || (*newCourse.TeacherID*1 <= 0):
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "TeacherID is empty or not valid")
-		return
-	case (newCourse.Name == nil) || (len(*newCourse.Name) == 0):
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "Name is empty or not valid")
-		return
-	default:
-		rows, err := Db.Exec("INSERT INTO Courses(TeacherID,Name,CreationDate) VALUES (?,?,NOW())", newCourse.TeacherID, newCourse.Name)
-		if err != nil {
-			defer Db.Close()
-			w.WriteHeader(http.StatusConflict)
-			fmt.Fprintf(w, "(SQL) %v", err.Error())
-			return
-		}
-		cnt, _ := rows.RowsAffected()
-		if cnt == 1 {
-			int64ID, _ := rows.LastInsertId()
-			intID := int(int64ID)
-			newCourse.ID = &intID
-			w.WriteHeader(http.StatusCreated)
-			json.NewEncoder(w).Encode(newCourse)
-		}
-		return
-	}
-}
 
-// GetAllCourses bla bla...
-func GetAllCourses(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	var courses mymodels.AllCourses
-	var Db, _ = config.MYSQLConnection()
-	rows, err := Db.Query("SELECT ID, TeacherID, Name, CreationDate FROM Courses")
-	defer Db.Close()
-	if err != nil {
-		if err != sql.ErrNoRows {
-			w.WriteHeader(http.StatusInternalServerError)
-		}
-		return
-	}
-	for rows.Next() {
-		var ID, TeacherID int
-		var Name, CreationDate string
-		if err := rows.Scan(&ID, &TeacherID, &Name, &CreationDate); err != nil {
-			fmt.Fprintf(w, "(SQL) %v", err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-		var course = mymodels.Course{ID: &ID, TeacherID: &TeacherID, Name: &Name, CreationDate: &CreationDate}
-		courses = append(courses, course)
-	}
-	json.NewEncoder(w).Encode(courses)
-	w.WriteHeader(http.StatusOK)
-	return
-}
+	// Add creation date field
+	CurrentLocalTime := sakto.GetCurDT(time.Now(), "America/New_York")
+	NOW := strings.Split(CurrentLocalTime.String(), ".")[0]
+	newCourse.CreationDate = &NOW
 
-// GetCourse bla bla...
-func GetCourse(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	keys, ok := r.URL.Query()["id"]
-	if !ok || len(keys[0]) < 1 {
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "ID is empty or not valid")
-		return
-	}
-	courseID, err := strconv.Atoi(keys[0])
+	// Fields validation
+	structFields := []string{"TeacherID", "Name", "CreationDate"} // struct fields to check
+	_, err = newCourse.ValidateFields(structFields)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "ID is empty or not valid")
+		fmt.Fprintf(w, err.Error())
 		return
 	}
-	var ID, TeacherID int
-	var Name, CreationDate string
-	var Db, _ = config.MYSQLConnection()
-	err = Db.QueryRow("SELECT ID, TeacherID, Name, CreationDate FROM Courses WHERE ID=?", courseID).Scan(&ID, &TeacherID, &Name, &CreationDate)
-	defer Db.Close()
+
+	// Data insertion into db
+	_, err = dbHelper.Insert(newCourse)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			w.WriteHeader(http.StatusOK)
-		} else {
-			w.WriteHeader(http.StatusInternalServerError)
-		}
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(w, err.Error())
 		return
 	}
-	var course = mymodels.Course{ID: &ID, TeacherID: &TeacherID, Name: &Name, CreationDate: &CreationDate}
-	json.NewEncoder(w).Encode(course)
 	w.WriteHeader(http.StatusCreated)
 	return
 }
 
-// UpdateCourse bla bla...
-func UpdateCourse(w http.ResponseWriter, r *http.Request) {
+// GetAllCourses returns all courses in db.
+func GetAllCourses(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	reqBody, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "(USER) %v", err.Error())
-		return
-	}
-	var updatedCourse mymodels.Course
-	json.Unmarshal(reqBody, &updatedCourse)
-	switch {
-	case (updatedCourse.ID == nil) || (*updatedCourse.ID*1 == 0) || (*updatedCourse.ID*1 < 0):
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "ID is empty or not valid")
-		return
-	case (updatedCourse.Name == nil) || len(*updatedCourse.Name) == 0:
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "Name is empty or not valid")
-		return
-	default:
-		var Db, _ = config.MYSQLConnection()
-		row, err := Db.Exec("UPDATE Courses SET Name=? WHERE ID=?", updatedCourse.Name, updatedCourse.ID)
-		defer Db.Close()
-		if err != nil {
-			w.WriteHeader(http.StatusConflict)
-			fmt.Fprintf(w, "(SQL) %v", err.Error())
-			return
-		}
 
-		count, err := row.RowsAffected()
-		if err != nil {
-			fmt.Fprintf(w, "(SQL) %v", err.Error())
-			return
-		}
-		if count == 1 {
-			json.NewEncoder(w).Encode(updatedCourse)
-		} else {
-			fmt.Fprintf(w, "No rows updated")
-		}
-		return
-	}
-}
-
-// DeleteCourse bla bla...
-func DeleteCourse(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	reqBody, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "(USER) %v", err.Error())
-		return
-	}
-	var deletedCourse mymodels.Course
-	json.Unmarshal(reqBody, &deletedCourse)
-
-	if (deletedCourse.ID) == nil || (*deletedCourse.ID*1 == 0) || (*deletedCourse.ID*1 < 0) {
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "ID is empty or not valid")
-		return
-	}
-
-	var Db, _ = config.MYSQLConnection()
-	row, err := Db.Exec("DELETE FROM Courses WHERE ID=?", deletedCourse.ID)
-	defer Db.Close()
+	// Data from db
+	var course mymodels.Course
+	rows, err := dbHelper.GetAll(course)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(w, "(SQL) %v", err.Error())
+		fmt.Fprintf(w, err.Error())
+		return
+	}
+	var allCourses mymodels.AllCourses
+	dbHelper.RowsToStruct(rows, &allCourses)
+
+	json.NewEncoder(w).Encode(allCourses)
+	return
+}
+
+// GetCourse returns one course filtered by the id.
+func GetCourse(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	var course mymodels.Course
+	reqBody, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, err.Error())
+		return
+	}
+	json.Unmarshal(reqBody, &course)
+
+	// Fields validation
+	structFields := []string{"ID"} // struct fields to check
+	_, err = course.ValidateFields(structFields)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, err.Error())
 		return
 	}
 
-	count, err := row.RowsAffected()
+	// Data from into db
+	rows, err := dbHelper.Get(course)
 	if err != nil {
-		fmt.Fprintf(w, "(SQL) %v", err.Error())
+		if string(err.Error()[4]) == "2" {
+			w.WriteHeader(http.StatusNotFound)
+		}
+		fmt.Fprintf(w, err.Error())
 		return
 	}
-	if count == 1 {
-		fmt.Fprintf(w, "One row deleted")
-	} else {
-		fmt.Fprintf(w, "No rows deleted")
+	var allCourses mymodels.AllCourses
+	dbHelper.RowsToStruct(rows, &allCourses)
+	json.NewEncoder(w).Encode(allCourses[0])
+
+	return
+}
+
+// UpdateCourse updates fields of an course in db.
+func UpdateCourse(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	var updatedCourse mymodels.Course
+	reqBody, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, err.Error())
+		return
+	}
+	json.Unmarshal(reqBody, &updatedCourse)
+
+	// Fields validation
+	structFields := []string{"ID", "Name"} // struct fields to check
+	_, err = updatedCourse.ValidateFields(structFields)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, err.Error())
+		return
+	}
+
+	// Data update into db
+	_, err = dbHelper.Update(updatedCourse)
+	if err != nil {
+		if string(err.Error()[4]) == "2" {
+			w.WriteHeader(http.StatusNotFound)
+		}
+		fmt.Fprintf(w, err.Error())
 	}
 	return
 }
 
-// AddStudent adds an Student into a course...
+// DeleteCourse deletes one course filtered by id.
+func DeleteCourse(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	var deletedCourse mymodels.Course
+	reqBody, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, err.Error())
+		return
+	}
+	json.Unmarshal(reqBody, &deletedCourse)
+
+	// Fields validation
+	structFields := []string{"ID"} // struct fields to check
+	_, err = deletedCourse.ValidateFields(structFields)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, err.Error())
+		return
+	}
+
+	// Data insertion into db
+	_, err = dbHelper.Delete(deletedCourse)
+	if err != nil {
+		if string(err.Error()[4]) == "2" {
+			w.WriteHeader(http.StatusNotFound)
+		}
+		fmt.Fprintf(w, err.Error())
+	}
+
+	return
+}
+
+// AddStudent adds an Student into a course.
 func AddStudent(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var newStudentTuition mymodels.StudentTuition
 	reqBody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "(USER) %v", err.Error())
+		fmt.Fprintf(w, err.Error())
 		return
 	}
-	var Db, _ = config.MYSQLConnection()
 	json.Unmarshal(reqBody, &newStudentTuition)
-	switch {
-	case (newStudentTuition.CourseID == nil) || (*newStudentTuition.CourseID*1 <= 0):
+
+	// Fields validation
+	structFields := []string{"CourseID", "StudentID"} // struct fields to check
+	_, err = newStudentTuition.ValidateFields(structFields)
+	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "CourseID is empty or not valid")
-		return
-	case (newStudentTuition.StudentID == nil) || (*newStudentTuition.StudentID*1 <= 0):
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "StudentID is empty or not valid")
-		return
-	default:
-		rows, err := Db.Exec("INSERT INTO Students_Courses(CourseID,StudentID) VALUES (?,?)", newStudentTuition.CourseID, newStudentTuition.StudentID)
-		defer Db.Close()
-		if err != nil {
-			w.WriteHeader(http.StatusConflict)
-			fmt.Fprintf(w, "(SQL) %v", err.Error())
-			return
-		}
-		cnt, _ := rows.RowsAffected()
-		if cnt == 0 {
-			fmt.Fprintf(w, "Student not added")
-		} else if cnt == 1 {
-			fmt.Fprintf(w, "Student added")
-		}
+		fmt.Fprintf(w, err.Error())
 		return
 	}
+
+	// Data insertion into db
+	_, err = dbHelper.Insert(newStudentTuition)
+	if err != nil {
+		if strings.Split(err.Error(), ":")[0] == "(db 2) Error 1062" {
+			w.WriteHeader(http.StatusConflict)
+		} else {
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+		fmt.Fprintf(w, err.Error())
+		return
+	}
+	w.WriteHeader(http.StatusCreated)
+	return
 }
 
-// GetAllStudentsCourseNoHTTP get all HCN in a course...
+// GetAllStudentsCourseNoHTTP get all HCN in a course.
 func GetAllStudentsCourseNoHTTP(courseID int) (mymodels.AllStudents, error) {
 	var allStudents mymodels.AllStudents
 	var Db, _ = config.MYSQLConnection()
@@ -260,89 +230,75 @@ func GetAllStudentsCourseNoHTTP(courseID int) (mymodels.AllStudents, error) {
 	return allStudents, nil
 }
 
-// GetAllStudentsCourse get all HCN in a course...
+// GetAllStudentsCourse get all HCN in a course.
 func GetAllStudentsCourse(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	keys, ok := r.URL.Query()["id"]
-	if !ok || len(keys[0]) < 1 {
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "ID is empty or not valid")
-		return
-	}
-	courseID, err := strconv.Atoi(keys[0])
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "ID is empty or not valid")
-		return
-	}
-
-	var allStudents mymodels.AllStudents
-	var Db, _ = config.MYSQLConnection()
-	rows, err := Db.Query("SELECT ID, Name, Email FROM Students WHERE ID IN (SELECT StudentID FROM Students_Courses WHERE CourseID = ?)", courseID)
-	defer Db.Close()
-	if err != nil {
-		if err != sql.ErrNoRows {
-			fmt.Fprintf(w, "(SQL) %v", err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-		}
-		return
-	}
-	for rows.Next() {
-		var ID int
-		var Name, Email string
-		if err := rows.Scan(&ID, &Name, &Email); err != nil {
-			fmt.Fprintf(w, "(SQL) %v", err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-		var student = mymodels.Student{ID: &ID, Name: &Name, Email: &Email}
-		allStudents = append(allStudents, student)
-	}
-	json.NewEncoder(w).Encode(allStudents)
-	w.WriteHeader(http.StatusOK)
-	return
-}
-
-// RemoveStudent from a course...
-func RemoveStudent(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
+	var studentTuition mymodels.StudentTuition
 	reqBody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "ID is empty or not valid")
+		fmt.Fprintf(w, err.Error())
 		return
 	}
-	var removedStudent mymodels.StudentTuition
-	json.Unmarshal(reqBody, &removedStudent)
-	switch {
-	case (removedStudent.CourseID) == nil || (*removedStudent.CourseID*1 <= 0):
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "CourseID is empty or not valid")
-		return
-	case (removedStudent.StudentID) == nil || (*removedStudent.StudentID*1 <= 0):
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "StudentID is empty or not valid")
-		return
-	default:
-		var Db, _ = config.MYSQLConnection()
-		row, err := Db.Exec("DELETE FROM Students_Courses WHERE CourseID=? AND StudentID=?", removedStudent.CourseID, removedStudent.StudentID)
-		defer Db.Close()
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			fmt.Fprintf(w, "(SQL) %v", err.Error())
-			return
-		}
+	json.Unmarshal(reqBody, &studentTuition)
 
-		count, err := row.RowsAffected()
-		if err != nil {
-			fmt.Fprintf(w, "(SQL) %v", err.Error())
-			return
-		}
-		if count == 1 {
-			fmt.Fprintf(w, "One row deleted")
-		} else {
-			fmt.Fprintf(w, "No rows deleted")
-		}
+	// Fields validation
+	structFields := []string{"CourseID"} // struct fields to check
+	_, err = studentTuition.ValidateFields(structFields)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, err.Error())
 		return
 	}
+
+	// Data from db
+	rows, err := dbHelper.GetAll(studentTuition)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(w, err.Error())
+		return
+	}
+	var allStudentTuition mymodels.AllStudents
+	dbHelper.RowsToStruct(rows, &allStudentTuition)
+
+	if len(allStudentTuition) != 0 {
+		json.NewEncoder(w).Encode(allStudentTuition)
+	} else {
+		w.WriteHeader(http.StatusNotFound)
+		fmt.Fprintf(w, "(db 2) element does not exist in db")
+	}
+	return
+}
+
+// RemoveStudent from a course.
+func RemoveStudent(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	var deletedStudentTuition mymodels.StudentTuition
+	reqBody, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, err.Error())
+		return
+	}
+	json.Unmarshal(reqBody, &deletedStudentTuition)
+
+	// Fields validation
+	structFields := []string{"CourseID", "StudentID"} // struct fields to check
+	_, err = deletedStudentTuition.ValidateFields(structFields)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, err.Error())
+		return
+	}
+
+	// Data insertion into db
+	_, err = dbHelper.Delete(deletedStudentTuition)
+	if err != nil {
+		if string(err.Error()[4]) == "2" {
+			w.WriteHeader(http.StatusNotFound)
+		}
+		fmt.Fprintf(w, err.Error())
+	}
+
+	return
 }

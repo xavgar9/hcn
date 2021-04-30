@@ -1,216 +1,171 @@
 package announcements
 
 import (
-	"database/sql"
 	"encoding/json"
 	"fmt"
-	"hcn/config"
 	"hcn/mymodels"
 	"io/ioutil"
 	"net/http"
+	"strings"
+	"time"
 
-	"strconv"
+	dbHelper "hcn/myhelpers/databaseHelper"
+
+	"github.com/itrepablik/sakto"
 )
 
-// CreateAnnouncement bla bla...
+// CreateAnnouncement creates one announcement in db.
 func CreateAnnouncement(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var newAnnouncement mymodels.Announcement
 	reqBody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "(USER) %v", err.Error())
+		fmt.Fprintf(w, err.Error())
 		return
 	}
-
-	var Db, _ = config.MYSQLConnection()
 	json.Unmarshal(reqBody, &newAnnouncement)
-	switch {
-	case (newAnnouncement.CourseID == nil) || (*newAnnouncement.CourseID*1 == 0) || (*newAnnouncement.CourseID*1 < 0):
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "CourseID is empty or not valid")
-		return
-	case (newAnnouncement.Title == nil) || (len(*newAnnouncement.Title) == 0):
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "Title is empty or not valid")
-		return
-	case (newAnnouncement.Description == nil) || (len(*newAnnouncement.Description) == 0):
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "Description is empty or not valid")
-		return
-	default:
-		rows, err := Db.Exec("INSERT INTO Announcements(CourseID,Title,Description,CreationDate) VALUES (?,?,?,NOW())", newAnnouncement.CourseID, newAnnouncement.Title, newAnnouncement.Description)
-		defer Db.Close()
-		if err != nil {
-			w.WriteHeader(http.StatusConflict)
-			fmt.Fprintf(w, "(SQL) %v", err.Error())
-			return
-		}
-		cnt, _ := rows.RowsAffected()
-		if cnt == 1 {
-			int64ID, _ := rows.LastInsertId()
-			intID := int(int64ID)
-			newAnnouncement.ID = &intID
-			w.WriteHeader(http.StatusCreated)
-			json.NewEncoder(w).Encode(newAnnouncement)
-		}
-		return
-	}
-}
 
-// GetAllAnnouncements bla bla...
-func GetAllAnnouncements(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	var announcements mymodels.AllAnnouncements
-	var Db, _ = config.MYSQLConnection()
-	rows, err := Db.Query("SELECT ID, CourseID, Title, Description, CreationDate FROM Announcements")
-	defer Db.Close()
-	if err != nil {
-		if err != sql.ErrNoRows {
-			fmt.Fprintf(w, "(SQL) %v", err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-		}
-		return
-	}
-	for rows.Next() {
-		var ID, CourseID int
-		var Title, Description, CreationDate string
-		if err := rows.Scan(&ID, &CourseID, &Title, &Description, &CreationDate); err != nil {
-			fmt.Fprintf(w, "(SQL) %v", err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-		var announcement = mymodels.Announcement{ID: &ID, CourseID: &CourseID, Title: &Title, Description: &Description, CreationDate: &CreationDate}
-		announcements = append(announcements, announcement)
-	}
-	json.NewEncoder(w).Encode(announcements)
-	w.WriteHeader(http.StatusOK)
-	return
-}
+	// Add creation date field
+	CurrentLocalTime := sakto.GetCurDT(time.Now(), "America/New_York")
+	NOW := strings.Split(CurrentLocalTime.String(), ".")[0]
+	newAnnouncement.CreationDate = &NOW
 
-// GetAnnouncement bla bla...
-func GetAnnouncement(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	keys, ok := r.URL.Query()["id"]
-	if !ok || len(keys[0]) < 1 {
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "ID is empty or not valid")
-		return
-	}
-	announcementID, err := strconv.Atoi(keys[0])
+	// Fields validation
+	structFields := []string{"CourseID", "Title", "Description", "CreationDate"} // struct fields to check
+	_, err = newAnnouncement.ValidateFields(structFields)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "ID is empty or not valid")
+		fmt.Fprintf(w, err.Error())
 		return
 	}
-	var ID, CourseID int
-	var Title, Description, CreationDate string
-	var Db, _ = config.MYSQLConnection()
-	err = Db.QueryRow("SELECT ID,CourseID,Title,Description,CreationDate FROM Announcements WHERE ID=?", announcementID).Scan(&ID, &CourseID, &Title, &Description, &CreationDate)
-	defer Db.Close()
+
+	// Data insertion into db
+	_, err = dbHelper.Insert(newAnnouncement)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			w.WriteHeader(http.StatusOK)
-		} else {
-			w.WriteHeader(http.StatusInternalServerError)
-		}
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(w, err.Error())
 		return
 	}
-	var announcement = mymodels.Announcement{ID: &ID, CourseID: &CourseID, Title: &Title, Description: &Description, CreationDate: &CreationDate}
-	json.NewEncoder(w).Encode(announcement)
 	w.WriteHeader(http.StatusCreated)
 	return
 }
 
-// UpdateAnnouncement bla bla...
-func UpdateAnnouncement(w http.ResponseWriter, r *http.Request) {
+// GetAllAnnouncements returns all announcements in db.
+func GetAllAnnouncements(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	reqBody, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "(USER) %v", err.Error())
-		return
-	}
-	var updatedAnnouncement mymodels.Announcement
-	json.Unmarshal(reqBody, &updatedAnnouncement)
-	switch {
-	case (updatedAnnouncement.ID == nil) || (*updatedAnnouncement.ID*1 <= 0):
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "ID is empty or not valid")
-		return
-	case (updatedAnnouncement.Title == nil) || len(*updatedAnnouncement.Title) == 0:
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "Title is empty or not valid")
-		return
-	case (updatedAnnouncement.Description == nil) || len(*updatedAnnouncement.Description) == 0:
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "Description is empty or not valid")
-		return
-	case (updatedAnnouncement.CreationDate == nil) || len(*updatedAnnouncement.CreationDate) == 0:
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "CreationDate is empty or not valid")
-		return
-	default:
-		var Db, _ = config.MYSQLConnection()
-		row, err := Db.Exec("UPDATE Announcements SET Title=?, Description=?, CreationDate=? WHERE ID=?", updatedAnnouncement.Title, updatedAnnouncement.Description, updatedAnnouncement.CreationDate, updatedAnnouncement.ID)
-		defer Db.Close()
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			fmt.Fprintf(w, "(SQL) %v", err.Error())
-			return
-		}
 
-		count, err := row.RowsAffected()
-		if err != nil {
-			fmt.Fprintf(w, "(SQL) %v", err.Error())
-			return
-		}
-		if count == 1 {
-			json.NewEncoder(w).Encode(updatedAnnouncement)
-		} else {
-			fmt.Fprintf(w, "No rows updated")
-		}
-		return
-	}
-}
-
-// DeleteAnnouncement bla bla...
-func DeleteAnnouncement(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	reqBody, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "(USER) %v", err.Error())
-		return
-	}
-	var deletedAnnouncement mymodels.Announcement
-	json.Unmarshal(reqBody, &deletedAnnouncement)
-
-	if (deletedAnnouncement.ID) == nil || (*deletedAnnouncement.ID*1 <= 0) {
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "ID is empty or not valid")
-		return
-	}
-
-	var Db, _ = config.MYSQLConnection()
-	row, err := Db.Exec("DELETE FROM Announcements WHERE ID=?", deletedAnnouncement.ID)
-	defer Db.Close()
+	// Data from db
+	var announcement mymodels.Announcement
+	rows, err := dbHelper.GetAll(announcement)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(w, "(SQL) %v", err.Error())
+		fmt.Fprintf(w, err.Error())
+		return
+	}
+	var allAnnouncements mymodels.AllAnnouncements
+	dbHelper.RowsToStruct(rows, &allAnnouncements)
+
+	json.NewEncoder(w).Encode(allAnnouncements)
+	return
+}
+
+// GetAnnouncement returns one announcement filtered by the id.
+func GetAnnouncement(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	var announcement mymodels.Announcement
+	reqBody, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, err.Error())
+		return
+	}
+	json.Unmarshal(reqBody, &announcement)
+
+	// Fields validation
+	structFields := []string{"ID"} // struct fields to check
+	_, err = announcement.ValidateFields(structFields)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, err.Error())
 		return
 	}
 
-	count, err := row.RowsAffected()
+	// Data from into db
+	rows, err := dbHelper.Get(announcement)
 	if err != nil {
-		fmt.Fprintf(w, "(SQL) %v", err.Error())
+		if string(err.Error()[4]) == "2" {
+			w.WriteHeader(http.StatusNotFound)
+		}
+		fmt.Fprintf(w, err.Error())
 		return
 	}
-	if count == 1 {
-		fmt.Fprintf(w, "One row deleted")
-	} else {
-		fmt.Fprintf(w, "No rows deleted")
-	}
+	var allAnnouncements mymodels.AllAnnouncements
+	dbHelper.RowsToStruct(rows, &allAnnouncements)
+	json.NewEncoder(w).Encode(allAnnouncements[0])
+
+	return
+}
+
+// UpdateAnnouncement updates fields of an announcement in db.
+func UpdateAnnouncement(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+	var updatedAnnouncement mymodels.Announcement
+	reqBody, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, err.Error())
+		return
+	}
+	json.Unmarshal(reqBody, &updatedAnnouncement)
+
+	// Fields validation
+	_, err = updatedAnnouncement.ValidateFields()
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, err.Error())
+		return
+	}
+
+	// Data update into db
+	_, err = dbHelper.Update(updatedAnnouncement)
+	if err != nil {
+		if string(err.Error()[4]) == "2" {
+			w.WriteHeader(http.StatusNotFound)
+		}
+		fmt.Fprintf(w, err.Error())
+	}
+	return
+}
+
+// DeleteAnnouncement deletes one announcement filtered by the id.
+func DeleteAnnouncement(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	var deletedAnnouncement mymodels.Announcement
+	reqBody, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, err.Error())
+		return
+	}
+	json.Unmarshal(reqBody, &deletedAnnouncement)
+
+	// Fields validation
+	structFields := []string{"ID"} // struct fields to check
+	_, err = deletedAnnouncement.ValidateFields(structFields)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, err.Error())
+		return
+	}
+
+	// Data insertion into db
+	_, err = dbHelper.Delete(deletedAnnouncement)
+	if err != nil {
+		if string(err.Error()[4]) == "2" {
+			w.WriteHeader(http.StatusNotFound)
+		}
+		fmt.Fprintf(w, err.Error())
+	}
 	return
 }

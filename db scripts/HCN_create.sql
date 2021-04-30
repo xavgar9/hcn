@@ -1,5 +1,5 @@
 -- Created by Vertabelo (http://vertabelo.com)
--- Last modification date: 2021-02-28 22:05:35.628
+-- Last modification date: 2021-04-19 20:30:55.316
 
 -- tables
 -- Table: Activities
@@ -40,7 +40,7 @@ CREATE TABLE Clinical_Cases (
     ID int NOT NULL AUTO_INCREMENT,
     Title varchar(100) NOT NULL,
     Description varchar(3000) NOT NULL,
-    Media varchar(2000) NOT NULL,
+    Media longblob NOT NULL,
     TeacherID int NOT NULL,
     CONSTRAINT Clinical_Cases_pk PRIMARY KEY (ID)
 );
@@ -80,9 +80,19 @@ CREATE TABLE HCN (
     CONSTRAINT HCN_pk PRIMARY KEY (ID)
 );
 
+-- Table: Sessions
+CREATE TABLE Sessions (
+    ID int NOT NULL AUTO_INCREMENT,
+    TeacherID int NOT NULL,
+    Token varchar(256) NOT NULL,
+    ExpirationDate datetime NOT NULL,
+    CONSTRAINT Sessions_pk PRIMARY KEY (ID)
+);
+
 -- Table: Solved_HCN
 CREATE TABLE Solved_HCN (
     ID int NOT NULL AUTO_INCREMENT,
+    ActivityID int NOT NULL,
     OriginalHCN int NOT NULL,
     MongoID varchar(50) NOT NULL,
     Solver int NOT NULL,
@@ -111,6 +121,7 @@ CREATE TABLE Teachers (
     ID int NOT NULL,
     Name varchar(100) NOT NULL,
     Email varchar(100) NOT NULL,
+    Password varchar(100) NOT NULL,
     CONSTRAINT Teachers_pk PRIMARY KEY (ID)
 );
 
@@ -170,6 +181,14 @@ ALTER TABLE Students_Courses ADD CONSTRAINT Courses_Students_Students FOREIGN KE
 -- Reference: HCN_Teachers (table: HCN)
 ALTER TABLE HCN ADD CONSTRAINT HCN_Teachers FOREIGN KEY HCN_Teachers (TeacherID)
     REFERENCES Teachers (ID);
+
+-- Reference: Session_Teachers (table: Sessions)
+ALTER TABLE Sessions ADD CONSTRAINT Session_Teachers FOREIGN KEY Session_Teachers (TeacherID)
+    REFERENCES Teachers (ID);
+
+-- Reference: Solved_HCN_Activities (table: Solved_HCN)
+ALTER TABLE Solved_HCN ADD CONSTRAINT Solved_HCN_Activities FOREIGN KEY Solved_HCN_Activities (ActivityID)
+    REFERENCES Activities (ID);
 
 -- Reference: Solved_HCN_HCN (table: Solved_HCN)
 ALTER TABLE Solved_HCN ADD CONSTRAINT Solved_HCN_HCN FOREIGN KEY Solved_HCN_HCN (OriginalHCN)

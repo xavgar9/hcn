@@ -1,97 +1,76 @@
 package hcn
 
 import (
-	"bytes"
-	"database/sql"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"hcn/config"
+	hcnHelper "hcn/helpers/hcnHelper"
+	mongoHelper "hcn/helpers/mongoHelper"
 	"hcn/mymodels"
 	"strings"
 
 	"io/ioutil"
 	"net/http"
-	"strconv"
+
+	dbHelper "hcn/myhelpers/databaseHelper"
 
 	"github.com/tidwall/gjson"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-// CreateHCN MySQL bla bla...
+// CreateHCN MySQL creates one HCN in db.
 func CreateHCN(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var newHCN mymodels.HCN
 	reqBody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Println(err.Error())
-		fmt.Fprintf(w, "(USER) %v", err.Error())
+		fmt.Fprintf(w, err.Error())
+		return
+	}
+	json.Unmarshal(reqBody, &newHCN)
+
+	// Fields validation
+	structFields := []string{"TeacherID", "MongoID"} // struct fields to check
+	_, err = newHCN.ValidateFields(structFields)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, err.Error())
 		return
 	}
 
-	var Db, _ = config.MYSQLConnection()
-	json.Unmarshal(reqBody, &newHCN)
-	switch {
-	case (newHCN.TeacherID == nil) || (*newHCN.TeacherID*1 <= 0):
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Println("TeacherID")
-		fmt.Fprintf(w, "TeacherID is empty or not valid")
-		return
-	case (newHCN.MongoID == nil) || (len(*newHCN.MongoID) == 0):
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Println("MongoID")
-		fmt.Fprintf(w, "MongoID is empty or not valid")
-		return
-	default:
-		fmt.Println("Aja hey")
-		fmt.Println("Aja", *newHCN.TeacherID, *newHCN.MongoID)
-		rows, err := Db.Exec("INSERT INTO HCN(TeacherID, MongoID) VALUES (?, ?)", newHCN.TeacherID, newHCN.MongoID)
-		defer Db.Close()
-		if err != nil {
-			fmt.Fprintf(w, "(SQL) %v", err.Error())
-			return
+	// Data insertion into db
+	_, err = dbHelper.Insert(newHCN)
+	if err != nil {
+		if strings.Split(err.Error(), ":")[0] == "(db 2) Error 1062" {
+			w.WriteHeader(http.StatusConflict)
+		} else {
+			w.WriteHeader(http.StatusInternalServerError)
 		}
-		cnt, _ := rows.RowsAffected()
-		if cnt == 1 {
-			int64ID, _ := rows.LastInsertId()
-			intID := int(int64ID)
-			newHCN.ID = &intID
-			w.WriteHeader(http.StatusCreated)
-			json.NewEncoder(w).Encode(newHCN)
-		}
+		fmt.Fprintf(w, err.Error())
 		return
 	}
+	w.WriteHeader(http.StatusCreated)
+	return
 }
 
 // GetAllHCN MySQL bla bla...
 func GetAllHCN(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	var hcns mymodels.AllHCN
-	var Db, _ = config.MYSQLConnection()
-	rows, err := Db.Query("SELECT ID, TeacherID, MongoID FROM HCN")
-	defer Db.Close()
+
+	// Data from db
+	var hcn mymodels.HCN
+	rows, err := dbHelper.GetAll(hcn)
 	if err != nil {
-		if err != sql.ErrNoRows {
-			fmt.Fprintf(w, "(SQL) %v", err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-		}
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(w, err.Error())
 		return
 	}
-	for rows.Next() {
-		var ID, TeacherID int
-		var MongoID string
-		if err := rows.Scan(&ID, &TeacherID, &MongoID); err != nil {
-			fmt.Fprintf(w, "(SQL) %v", err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-		var hcn = mymodels.HCN{ID: &ID, TeacherID: &TeacherID, MongoID: &MongoID}
-		hcns = append(hcns, hcn)
-	}
-	json.NewEncoder(w).Encode(hcns)
-	w.WriteHeader(http.StatusOK)
+	var allHCN mymodels.AllHCN
+	dbHelper.RowsToStruct(rows, &allHCN)
+
+	json.NewEncoder(w).Encode(allHCN)
 	return
 }
 
@@ -107,124 +86,102 @@ func GetHCNMongoIDNoHTTP(hcnID int) (string, error) {
 	return MongoID, err
 }
 
-// GetHCN MySQL bla bla...
+// GetHCN MySQL returns one hcn filtered by the id.
 func GetHCN(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	keys, ok := r.URL.Query()["id"]
-	if !ok || len(keys[0]) < 1 {
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "ID is empty or not valid")
-		return
-	}
-	hcnID, err := strconv.Atoi(keys[0])
+	var hcn mymodels.HCN
+	reqBody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "ID is empty or not valid")
+		fmt.Fprintf(w, err.Error())
 		return
 	}
-	var ID, TeacherID int
-	var MongoID string
-	var Db, _ = config.MYSQLConnection()
-	err = Db.QueryRow("SELECT ID, TeacherID, MongoID FROM HCN WHERE ID=?", hcnID).Scan(&ID, &TeacherID, &MongoID)
-	defer Db.Close()
+	json.Unmarshal(reqBody, &hcn)
+
+	// Fields validation
+	structFields := []string{"ID"} // struct fields to check
+	_, err = hcn.ValidateFields(structFields)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			w.WriteHeader(http.StatusOK)
-		} else {
-			w.WriteHeader(http.StatusInternalServerError)
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, err.Error())
+		return
+	}
+
+	// Data from into db
+	rows, err := dbHelper.Get(hcn)
+	if err != nil {
+		if string(err.Error()[4]) == "2" {
+			w.WriteHeader(http.StatusNotFound)
 		}
+		fmt.Fprintf(w, err.Error())
 		return
 	}
-	var course = mymodels.HCN{ID: &ID, TeacherID: &TeacherID, MongoID: &MongoID}
-	json.NewEncoder(w).Encode(course)
-	w.WriteHeader(http.StatusCreated)
+	var allHCN mymodels.AllHCN
+	dbHelper.RowsToStruct(rows, &allHCN)
+	json.NewEncoder(w).Encode(allHCN[0])
+
 	return
 }
 
-// UpdateHCN MySQL bla bla...
+// UpdateHCN MySQL updates fields of an HCN in db.
 func UpdateHCN(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+	var updatedHCN mymodels.HCN
 	reqBody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "(USER) %v", err.Error())
+		fmt.Fprintf(w, err.Error())
 		return
 	}
-	var updatedHCN mymodels.HCN
 	json.Unmarshal(reqBody, &updatedHCN)
-	switch {
-	case (updatedHCN.ID == nil) || (*updatedHCN.ID*1 == 0) || (*updatedHCN.ID*1 < 0):
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "ID is empty or not valid")
-		return
-	case (updatedHCN.TeacherID == nil) || (*updatedHCN.TeacherID*1 == 0) || (*updatedHCN.TeacherID*1 < 0):
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "TeacherID is empty or not valid")
-		return
-	case (updatedHCN.MongoID == nil) || (len(*updatedHCN.MongoID) == 0):
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "MongoID is empty or not valid")
-		return
-	default:
-		var Db, _ = config.MYSQLConnection()
-		row, err := Db.Exec("UPDATE HCN SET TeacherID=?, MongoID=? WHERE ID=?", updatedHCN.TeacherID, updatedHCN.MongoID, updatedHCN.ID)
-		defer Db.Close()
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			fmt.Fprintf(w, "(SQL) %v", err.Error())
-			return
-		}
 
-		count, err := row.RowsAffected()
-		if err != nil {
-			fmt.Fprintf(w, "(SQL) %v", err.Error())
-			return
-		}
-		if count == 1 {
-			json.NewEncoder(w).Encode(updatedHCN)
-		} else {
-			fmt.Fprintf(w, "No rows updated")
-		}
+	// Fields validation
+	_, err = updatedHCN.ValidateFields()
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, err.Error())
 		return
 	}
+
+	// Data update into db
+	_, err = dbHelper.Update(updatedHCN)
+	if err != nil {
+		if string(err.Error()[4]) == "2" {
+			w.WriteHeader(http.StatusNotFound)
+		}
+		fmt.Fprintf(w, err.Error())
+	}
+	return
 }
 
-// DeleteHCN MySQL bla bla...
+// DeleteHCN MySQL deletes one HCN filtered by the id.
 func DeleteHCN(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+	var deletedHCN mymodels.HCN
 	reqBody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "(USER) %v", err.Error())
+		fmt.Fprintf(w, err.Error())
 		return
 	}
-	var deletedHCN mymodels.HCN
 	json.Unmarshal(reqBody, &deletedHCN)
 
-	if (deletedHCN.ID) == nil || (*deletedHCN.ID*1 == 0) || (*deletedHCN.ID*1 < 0) {
+	// Fields validation
+	structFields := []string{"ID"} // struct fields to check
+	_, err = deletedHCN.ValidateFields(structFields)
+	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "ID is empty or not valid")
+		fmt.Fprintf(w, err.Error())
 		return
 	}
 
-	var Db, _ = config.MYSQLConnection()
-	row, err := Db.Exec("DELETE FROM HCN WHERE ID=?", deletedHCN.ID)
-	defer Db.Close()
+	// Data insertion into db
+	_, err = dbHelper.Delete(deletedHCN)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(w, "(SQL) %v", err.Error())
-		return
-	}
-
-	count, err := row.RowsAffected()
-	if err != nil {
-		fmt.Fprintf(w, "(SQL) %v", err.Error())
-		return
-	}
-	if count == 1 {
-		fmt.Fprintf(w, "One row deleted")
-	} else {
-		fmt.Fprintf(w, "No rows deleted")
+		if string(err.Error()[4]) == "2" {
+			w.WriteHeader(http.StatusNotFound)
+		}
+		fmt.Fprintf(w, err.Error())
 	}
 	return
 }
@@ -311,6 +268,10 @@ func CreateHCNMongo(w http.ResponseWriter, r *http.Request) {
 	if gjson.Get(string(reqBody), "TeacherID").Exists() {
 		teacherid := gjson.Get(string(reqBody), "TeacherID")
 		json.Unmarshal([]byte(teacherid.Raw), &teacherID)
+	} else {
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, "TeacherID is empty or not valid")
+		return
 	}
 
 	// We have to create the biochemistry struct like this
@@ -334,52 +295,31 @@ func CreateHCNMongo(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if !reqEmpty {
+
 		// Insert data in mongo db
-		client, ctx := config.MongoConnection()
-		collection := client.Database("HCNProject").Collection("HCN")
-		result, err := collection.InsertOne(ctx, newHCNmongo)
-		if err != nil {
-			w.Write([]byte(`{ "error": "` + err.Error() + `" }`))
-		}
-		/*
-			rows, err := Db.Exec("INSERT INTO HCN(TeacherID) VALUES (?)", newHCN.TeacherID)
-			defer Db.Close()
-			if err != nil {
-				fmt.Fprintf(w, "(SQL) %v", err.Error())
-				return
-			}
-			cnt, _ := rows.RowsAffected()
-			if cnt == 1 {
-				int64ID, _ := rows.LastInsertId()
-				intID := int(int64ID)
-				newHCN.ID = &intID
-				w.WriteHeader(http.StatusCreated)
-				json.NewEncoder(w).Encode(newHCN)
-			}
-			return
-		*/
-		mongoID := strings.Split(fmt.Sprintf("%v", result.InsertedID), `"`)[1]
-		fmt.Println("Datos antes", *teacherID, mongoID)
-		hcn := mymodels.HCN{TeacherID: teacherID, MongoID: &mongoID}
-		endpoint := "http://" + config.ServerIP + ":" + config.ServerPort + "/HCN/CreateHCN"
-		jsonValue, _ := json.Marshal(hcn)
-		req, _ := http.NewRequest("POST", endpoint, bytes.NewBuffer(jsonValue))
-		req.Header.Set("Content-Type", "application/json")
-		clientReq := &http.Client{}
-		res, err := clientReq.Do(req)
+		mongoID, err := mongoHelper.CreateHCNMongo(newHCNmongo)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
-			fmt.Fprintf(w, err.Error())
+			fmt.Fprintf(w, "(SQL) %v", err.Error())
 			return
 		}
-		fmt.Println(res.Status)
-		if res.Status == "201 Created" {
-			w.WriteHeader(http.StatusCreated)
+		fmt.Println("Datos antes", *teacherID, mongoID)
+
+		// Insert data in mongo db
+		hcn := mymodels.HCN{TeacherID: teacherID, MongoID: &mongoID}
+		_, err = hcnHelper.CreateHCN(hcn)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			fmt.Fprintf(w, "(SQL) %v", err.Error())
+			return
 		}
+		w.WriteHeader(http.StatusCreated)
 		// Use next line for testing
 		//json.NewEncoder(w).Encode(newHCNmongo)
 		// Use next line for production
 		json.NewEncoder(w).Encode(mongoID)
+		return
+
 	}
 
 }
@@ -395,7 +335,7 @@ func GetAllHCNMongo(w http.ResponseWriter, r *http.Request) {
 	var allHCNs mymodels.AllHCNmongo
 
 	client, ctx := config.MongoConnection()
-	collection := client.Database("HCNProject").Collection("HCN")
+	collection := client.Database(config.MongoDB).Collection(config.MongoCollection)
 
 	cursor, err := collection.Find(ctx, bson.M{})
 	if err != nil {
@@ -435,52 +375,32 @@ func GetAllHCNMongo(w http.ResponseWriter, r *http.Request) {
 
 }
 
-// GetHCNMongoNoHTTP bla bla... OK
-func GetHCNMongoNoHTTP(hcnid string) (mymodels.HCNmongo, error) {
-	hcnID, _ := primitive.ObjectIDFromHex(hcnid)
-
-	var newHCN mymodels.HCNmongo
-
-	client, ctx := config.MongoConnection()
-	collection := client.Database("HCNProject").Collection("HCN")
-	collection.FindOne(ctx, bson.M{"_id": hcnID}).Decode(&newHCN)
-	if newHCN.ID == nil {
-		return newHCN, errors.New("Mongo HCN doesnt exist")
-	}
-	return newHCN, nil
-
-}
-
 // GetHCNMongo bla bla... OK
 func GetHCNMongo(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+	fmt.Println("1")
 	keys, ok := r.URL.Query()["id"]
 	if !ok || len(keys[0]) < 1 {
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, "ID is empty or not valid")
 		return
 	}
-	hcnID, _ := primitive.ObjectIDFromHex(keys[0])
-
-	var newHCN mymodels.HCNmongo
-
-	client, ctx := config.MongoConnection()
-	collection := client.Database("HCNProject").Collection("HCN")
-	collection.FindOne(ctx, bson.M{"_id": hcnID}).Decode(&newHCN)
-	if newHCN.ID == nil {
-		json.NewEncoder(w).Encode(nil)
-	} else {
-		// For testing only
-		// var newHCNnoID mymodels.HCNmongoNoID
-		// newhcn, _ := json.Marshal(newHCN)
-		// json.Unmarshal([]byte(newhcn), &newHCNnoID)
-		// json.NewEncoder(w).Encode(newHCNnoID)
-		fmt.Println()
-
-		//Use this in production
-		json.NewEncoder(w).Encode(newHCN)
+	fmt.Println("2")
+	newHCN, err := mongoHelper.GetHCN(keys[0])
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, err.Error())
+		return
 	}
+	// For testing only
+	// var newHCNnoID mymodels.HCNmongoNoID
+	// newhcn, _ := json.Marshal(newHCN)
+	// json.Unmarshal([]byte(newhcn), &newHCNnoID)
+	// json.NewEncoder(w).Encode(newHCNnoID)
 
+	//Use this in production
+	json.NewEncoder(w).Encode(newHCN)
+	return
 }
 
 // UpdateHCNMongo ...
