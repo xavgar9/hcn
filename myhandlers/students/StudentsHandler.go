@@ -128,9 +128,12 @@ func UpdateStudent(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		if string(err.Error()[4]) == "2" {
 			w.WriteHeader(http.StatusNotFound)
+		} else {
+			w.WriteHeader(http.StatusInternalServerError)
 		}
 		fmt.Fprintf(w, err.Error())
 	}
+
 	return
 }
 

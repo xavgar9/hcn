@@ -176,9 +176,20 @@ func Delete(model interface{}) (bool, error) {
 func tableName(modelName string) string {
 	var tableName string
 	dbTablesNames := map[string]string{
-		"Activity":       "Activitie",
-		"StudentTuition": "Students_Course",
+		"Activity":           "Activities",
+		"Announcement":       "Announcements",
+		"ClinicalCase":       "Clinical_Cases",
+		"Course":             "Courses",
+		"HCN":                "HCN",
+		"SolvedHCN":          "Solved_HCN",
+		"Teacher":            "Teachers",
+		"Student":            "Students",
+		"StudentTuition":     "Students_Courses",
+		"HCNVinculation":     "CCases_HCN",
+		"CourseClinicalCase": "Courses_CCases",
+		"CourseHCN":          "Courses_HCN",
 	}
+
 	if _, ok := dbTablesNames[modelName]; ok {
 		tableName = dbTablesNames[modelName]
 	} else {
@@ -191,9 +202,11 @@ func tableName(modelName string) string {
 // table in db. The filter field is not the ID PK.
 func filterField(tableName string) string {
 	dbIntermediateTables := map[string]string{
-		"Students_Course": "CourseID",
-		"Courses_HCN":     "CourseID",
-		"Courses_CCases":  "CourseID",
+		"Students_Courses": "CourseID",
+		"Courses_HCN":      "CourseID",
+		"Courses_CCases":   "CourseID",
+		"CCases_HCN":       "CourseID",
+		"Solved_HCN":       "ActivityID",
 	}
 
 	if _, ok := dbIntermediateTables[tableName]; ok {
@@ -271,6 +284,7 @@ func exists(model interface{}) bool {
 	// Prepare query
 	modelName, fieldsNames, fieldsValues, _ := helper.GetFields(model)
 	query := createExistsQuery(modelName, fieldsNames, fieldsValues)
+	//fmt.Println("exists query:", query)
 
 	// Execute query
 	rows, err := db.Query(query)
@@ -286,21 +300,25 @@ func exists(model interface{}) bool {
 }
 
 func createExistsQuery(modelName string, fieldsNames []string, fieldsValues []string) string {
-	modelName = tableName(modelName)
-	filterField := filterField(modelName)
+	tableName := tableName(modelName)
+	filterField := filterField(tableName)
 	query := "SELECT ID"
 	if filterField == "ID" {
-		query = query + " FROM " + modelName + "s" + " WHERE ID=" + fieldsValues[0]
+		query = query + " FROM " + tableName + " WHERE ID=" + fieldsValues[0]
 	} else {
-		query = query + " FROM " + modelName + "s" + " WHERE " + filterField + "=" + fieldsValues[1]
+		if tableName == "Courses_CCases" || tableName == "Courses_HCN" {
+			query = query + " FROM " + tableName + " WHERE " + fieldsNames[1] + "=" + fieldsValues[1]
+		} else {
+			query = query + " FROM " + tableName + " WHERE " + fieldsNames[1] + "=" + fieldsValues[1] + " AND " + fieldsNames[2] + "=" + fieldsValues[2]
+		}
 	}
 	return query
 }
 
 func createInsertQuery(model interface{}) string {
 	modelName, fieldsNames, fieldsValues, _ := helper.GetFields(model)
-	modelName = tableName(modelName)
-	query := "INSERT INTO " + modelName + "s("
+	tableName := tableName(modelName)
+	query := "INSERT INTO " + tableName + "("
 	for i, fieldName := range fieldsNames {
 		if i != 0 {
 			if i == len(fieldsNames)-1 {
@@ -335,7 +353,7 @@ func createInsertQuery(model interface{}) string {
 
 func createGetQuery(model interface{}) string {
 	modelName, fieldsNames, fieldsValues, _ := helper.GetFields(model)
-	modelName = tableName(modelName)
+	tableName := tableName(modelName)
 	query := "SELECT "
 
 	for i, fieldName := range fieldsNames {
@@ -346,11 +364,11 @@ func createGetQuery(model interface{}) string {
 		}
 	}
 
-	filterField := filterField(modelName)
+	filterField := filterField(tableName)
 	if filterField == "ID" {
-		query = query + " FROM " + modelName + "s" + " WHERE ID=" + fieldsValues[0]
+		query = query + " FROM " + tableName + " WHERE ID=" + fieldsValues[0]
 	} else {
-		query = query + " FROM " + modelName + "s" + " WHERE " + filterField + "=" + fieldsValues[1]
+		query = query + " FROM " + tableName + " WHERE " + filterField + "=" + fieldsValues[1]
 	}
 
 	return query
@@ -358,10 +376,10 @@ func createGetQuery(model interface{}) string {
 
 func createGetAllQuery(model interface{}) string {
 	modelName, fieldsNames, fieldsValues, _ := helper.GetFields(model)
-	modelName = tableName(modelName)
+	tableName := tableName(modelName)
 	query := "SELECT "
 
-	if modelName == "Students_Course" {
+	if tableName == "Students_Courses" {
 		query = query + "ID, Name, Email FROM Students WHERE ID IN (SELECT StudentID FROM Students_Courses WHERE CourseID=" + fieldsValues[1] + ")" //no siempre puede ser la posición 1
 	} else {
 		for i, fieldName := range fieldsNames {
@@ -371,7 +389,7 @@ func createGetAllQuery(model interface{}) string {
 				query = query + fieldName + ", "
 			}
 		}
-		query = query + " FROM " + modelName + "s"
+		query = query + " FROM " + tableName
 	}
 
 	return query
@@ -379,8 +397,15 @@ func createGetAllQuery(model interface{}) string {
 
 func createUpdateQuery(model interface{}) string {
 	modelName, fieldsNames, fieldsValues, _ := helper.GetFields(model)
-	modelName = tableName(modelName)
-	query := "UPDATE " + modelName + "s SET "
+	tableName := tableName(modelName)
+	query := "UPDATE " + tableName + " SET "
+
+	if tableName == "Courses_CCases" || tableName == "Courses_HCN" {
+		return createUpdateVisibilityQuery(model)
+	} else if tableName == "Solved_HCN" {
+		return query + fieldsNames[6] + "=" + fieldsValues[6] + " WHERE ActivityID=" + fieldsValues[1] + " AND Solver=" + fieldsValues[2]
+	}
+
 	for i, fieldName := range fieldsNames {
 		if i == len(fieldsNames)-1 {
 			query = query + fieldName + "='" + fieldsValues[i] + "' "
@@ -394,13 +419,20 @@ func createUpdateQuery(model interface{}) string {
 
 func createDeleteQuery(model interface{}) string {
 	modelName, fieldsNames, fieldsValues, _ := helper.GetFields(model)
-	modelName = tableName(modelName)
-	filterField := filterField(modelName)
+	tableName := tableName(modelName)
+	filterField := filterField(tableName)
 	query := "DELETE"
 	if filterField == "ID" {
-		query = query + " FROM " + modelName + "s" + " WHERE ID=" + fieldsValues[0]
+		query = query + " FROM " + tableName + " WHERE ID=" + fieldsValues[0]
 	} else {
-		query = query + " FROM " + modelName + "s" + " WHERE " + fieldsNames[1] + "=" + fieldsValues[1] + " AND " + fieldsNames[2] + "=" + fieldsValues[2]
+		query = query + " FROM " + tableName + " WHERE " + fieldsNames[1] + "=" + fieldsValues[1] + " AND " + fieldsNames[2] + "=" + fieldsValues[2]
 	}
+	return query
+}
+
+func createUpdateVisibilityQuery(model interface{}) string {
+	modelName, fieldsNames, fieldsValues, _ := helper.GetFields(model)
+	tableName := tableName(modelName)
+	query := "UPDATE " + tableName + " SET Displayable=" + fieldsValues[3] + " WHERE " + fieldsNames[1] + "=" + fieldsValues[1] + " AND " + fieldsNames[2] + "=" + fieldsValues[2]
 	return query
 }

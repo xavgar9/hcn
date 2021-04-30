@@ -2,13 +2,23 @@ package tests
 
 import (
 	"bytes"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
 
 	"hcn/mymodels"
+	"hcn/tests/testhelpers"
 )
+
+func printCountCases(t *testing.T, cntCases int) {
+	fmt.Println(" ")
+	fmt.Printf("<-------------- Total cases tested: %d -------------->\n", cntCases)
+	fmt.Println(" ")
+}
+
+var TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJRCI6NTAwMDMsIk5hbWUiOiJKaG9hbiBMb3phbm8gUm9qYXMiLCJFbWFpbCI6Impob2FuQGVtYWlsLmNvbSIsImV4cCI6MTYxOTc2MzY2MX0.njDKNgrX8Blm8xkd7tGZSk2erj4SWE2sppxa2YphAcE"
 
 // runTest basic test for running endpoints test.
 func runTest(t *testing.T, allTest mymodels.AllTest) {
@@ -17,6 +27,7 @@ func runTest(t *testing.T, allTest mymodels.AllTest) {
 		if err != nil {
 			t.Fatal(err)
 		}
+		req.Header.Set("Token", TOKEN)
 		rr := httptest.NewRecorder()
 		handler := http.HandlerFunc(test.Function)
 		handler.ServeHTTP(rr, req)
@@ -29,6 +40,7 @@ func runTest(t *testing.T, allTest mymodels.AllTest) {
 			t.Errorf("Test #%v: Handler returned unexpected body: got \n%v want \n%v",
 				i, responseBody, test.ExpectedBody)
 		}
+		cntCases++
 	}
 }
 
@@ -39,6 +51,7 @@ func runTestWithBody(t *testing.T, allTest mymodels.AllTest) {
 		if err != nil {
 			t.Fatal(err)
 		}
+		req.Header.Set("Token", TOKEN)
 		rr := httptest.NewRecorder()
 		handler := http.HandlerFunc(test.Function)
 		handler.ServeHTTP(rr, req)
@@ -51,10 +64,12 @@ func runTestWithBody(t *testing.T, allTest mymodels.AllTest) {
 			t.Errorf("Test #%v: Handler returned unexpected body: got \n%v want \n%v",
 				i, responseBody, test.ExpectedBody)
 		}
+		cntCases++
 	}
 }
 
-/*
+var cntCases int
+
 // Announcements test
 func TestGetAllAnnouncements(t *testing.T) {
 	runTest(t, testhelpers.CasesGetAllAnnouncements())
@@ -118,7 +133,6 @@ func TestDeleteActivity(t *testing.T) {
 	runTestWithBody(t, testhelpers.CasesDeleteActivity())
 }
 
-
 // Teachers test
 func TestGetAllTeachers(t *testing.T) {
 	runTest(t, testhelpers.CasesGetAllTeachers())
@@ -139,7 +153,6 @@ func TestUpdateTeacher(t *testing.T) {
 func TestDeleteTeacher(t *testing.T) {
 	runTestWithBody(t, testhelpers.CasesDeleteTeacher())
 }
-
 
 // Courses test
 func TestGetAllCourses(t *testing.T) {
@@ -174,29 +187,6 @@ func TestAddStudent(t *testing.T) {
 func TestRemoveStudent(t *testing.T) {
 	runTestWithBody(t, testhelpers.CasesRemoveStudent())
 }
-*/
-
-/*
-// Feedbacks test
-// func TestGetAllFeedbacks(t *testing.T) {
-// 	runTest(t, testhelpers.CasesGetAllFeedbacks())
-// }
-
-// func TestGetFeedback(t *testing.T) {
-// 	runTest(t, testhelpers.CasesGetFeedback())
-// }
-
-// func TestCreateFeedback(t *testing.T) {
-// 	runTestWithBody(t, testhelpers.CasesCreateFeedback())
-// }
-
-// func TestUpdateFeedback(t *testing.T) {
-// 	runTestWithBody(t, testhelpers.CasesUpdateFeedback())
-// }
-
-// func TestDeleteFeedback(t *testing.T) {
-// 	runTestWithBody(t, testhelpers.CasesDeleteFeedback())
-// }
 
 // HCN test
 func TestGetAllHCN(t *testing.T) {
@@ -204,7 +194,7 @@ func TestGetAllHCN(t *testing.T) {
 }
 
 func TestGetHCN(t *testing.T) {
-	runTest(t, testhelpers.CasesGetHCN())
+	runTestWithBody(t, testhelpers.CasesGetHCN())
 }
 
 func TestCreateHCN(t *testing.T) {
@@ -225,7 +215,7 @@ func TestGetAllClinicalCases(t *testing.T) {
 }
 
 func TestGetClinicalCase(t *testing.T) {
-	runTest(t, testhelpers.CasesGetClinicalCase())
+	runTestWithBody(t, testhelpers.CasesGetClinicalCase())
 }
 
 func TestCreateClinicalCase(t *testing.T) {
@@ -240,9 +230,7 @@ func TestDeleteClinicalCase(t *testing.T) {
 	runTestWithBody(t, testhelpers.CasesDeleteClinicalCase())
 }
 
-
 // CCases_HCN test
-
 func TestLinkHCN(t *testing.T) {
 	runTestWithBody(t, testhelpers.CasesLinkHCN())
 }
@@ -251,8 +239,22 @@ func TestUnlinkHCN(t *testing.T) {
 	runTestWithBody(t, testhelpers.CasesUnlinkHCN())
 }
 
-// Courses_HCN test
+func TestGetAllClinicalCasesCourse(t *testing.T) {
+	runTestWithBody(t, testhelpers.CasesGetAllClinicalCasesCourse())
+}
+func TestAddClinicalCase(t *testing.T) {
+	runTestWithBody(t, testhelpers.CasesAddClinicalCase())
+}
 
+func TestRemoveClinicalCase(t *testing.T) {
+	runTestWithBody(t, testhelpers.CasesRemoveClinicalCase())
+}
+
+func TestVisibilityClinicalCase(t *testing.T) {
+	runTestWithBody(t, testhelpers.CasesVisibilityClinicalCase())
+}
+
+// Courses_HCN test
 func TestAddHCN(t *testing.T) {
 	runTestWithBody(t, testhelpers.CasesAddHCN())
 }
@@ -269,22 +271,6 @@ func TestVisibilityHCN(t *testing.T) {
 	runTestWithBody(t, testhelpers.CasesVisibilityHCN())
 }
 
-func TestAddClinicalCase(t *testing.T) {
-	runTestWithBody(t, testhelpers.CasesAddClinicalCase())
-}
-
-func TestGetAllClinicalCasesCourse(t *testing.T) {
-	runTestWithBody(t, testhelpers.CasesGetAllClinicalCasesCourse())
-}
-
-func TestRemoveClinicalCase(t *testing.T) {
-	runTestWithBody(t, testhelpers.CasesRemoveClinicalCase())
-}
-
-func TestVisibilityClinicalCase(t *testing.T) {
-	runTestWithBody(t, testhelpers.CasesVisibilityClinicalCase())
-}
-*/
 ////////////////////////////////////////////////////////////////////
 /*
 func TestDeleteAllHCNMongo(t *testing.T) {
@@ -306,3 +292,8 @@ func TestUpdateHCNMongo(t *testing.T) {
 	runTestWithBody(t, testhelpers.CasesUpdateHCNMongo())
 }
 */
+
+////////////////////////////////////////////////////////////////////
+func TestCountCases(t *testing.T) {
+	printCountCases(t, cntCases)
+}

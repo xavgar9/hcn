@@ -12,6 +12,8 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strconv"
+
+	dbHelper "hcn/myhelpers/databaseHelper"
 )
 
 // CreateSolvedHCN creates blank hcn for the students. Takes the
@@ -159,5 +161,40 @@ func GetAllSolvedHCN(w http.ResponseWriter, r *http.Request) {
 		// Use next line for production
 		json.NewEncoder(w).Encode(allSolvedHCN)
 	}
+	return
+}
+
+// UpdateSolvedHCN updates the reviewed status of an hcn,
+func UpdateSolvedHCN(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	var updatedSolvedHCN mymodels.SolvedHCN
+	reqBody, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, err.Error())
+		return
+	}
+	json.Unmarshal(reqBody, &updatedSolvedHCN)
+
+	// Fields validation
+	structFields := []string{"ActivityID", "Solver", "Reviewed"} // struct fields to check
+	_, err = updatedSolvedHCN.ValidateFields(structFields)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, err.Error())
+		return
+	}
+
+	// Data update into db
+	_, err = dbHelper.Update(updatedSolvedHCN)
+	if err != nil {
+		if string(err.Error()[4]) == "2" {
+			w.WriteHeader(http.StatusNotFound)
+		} else {
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+		fmt.Fprintf(w, err.Error())
+	}
+
 	return
 }

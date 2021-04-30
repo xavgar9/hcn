@@ -1,239 +1,208 @@
 package ccases
 
 import (
-	"database/sql"
 	"encoding/json"
 	"fmt"
-	"hcn/config"
 	"hcn/mymodels"
 	"io/ioutil"
 	"net/http"
-	"strconv"
+	"strings"
+
+	dbHelper "hcn/myhelpers/databaseHelper"
 
 	b64 "encoding/base64"
 )
 
-// CreateClinicalCase bla bla...
+// CreateClinicalCase creates one clinical case in db.
 func CreateClinicalCase(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var newClinicalCase mymodels.ClinicalCase
 	reqBody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "(USER) %v", err.Error())
+		fmt.Fprintf(w, err.Error())
 		return
 	}
-
-	var Db, _ = config.MYSQLConnection()
 	json.Unmarshal(reqBody, &newClinicalCase)
-	switch {
-	case (newClinicalCase.TeacherID == nil) || (*newClinicalCase.TeacherID*1 <= 0):
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "TeacherID is empty or not valid")
-		return
-	case (newClinicalCase.Title == nil) || (len(*newClinicalCase.Title) == 0):
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "Title is empty or not valid")
-		return
-	case (newClinicalCase.Description == nil) || (len(*newClinicalCase.Description) == 0):
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "Description is empty or not valid")
-		return
-	case (newClinicalCase.Media == nil) || (len(*newClinicalCase.Media) == 0):
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "Media is empty or not valid")
-		return
-	default:
-		media := b64.StdEncoding.EncodeToString([]byte(*newClinicalCase.Media)) //convert to base64 (BLOB)
-		rows, err := Db.Exec("INSERT INTO Clinical_Cases(Title,Description,Media,TeacherID) VALUES (?,?,?,?)", newClinicalCase.Title, newClinicalCase.Description, media, newClinicalCase.TeacherID)
-		defer Db.Close()
-		if err != nil {
-			fmt.Fprintf(w, "(SQL) %v", err.Error())
-			return
-		}
-		cnt, _ := rows.RowsAffected()
-		if cnt == 1 {
-			int64ID, _ := rows.LastInsertId()
-			intID := int(int64ID)
-			newClinicalCase.ID = &intID
-			w.WriteHeader(http.StatusCreated)
-			json.NewEncoder(w).Encode(newClinicalCase)
-		}
-		return
-	}
-}
 
-// GetAllClinicalCases bla bla...
-func GetAllClinicalCases(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	var clinicalCases mymodels.AllClinicalCases
-	var Db, _ = config.MYSQLConnection()
-	rows, err := Db.Query("SELECT ID, Title, Description, Media, TeacherID FROM Clinical_Cases")
-	defer Db.Close()
+	// Fields validation
+	structFields := []string{"Title", "Description", "Media", "TeacherID"} // struct fields to check
+	_, err = newClinicalCase.ValidateFields(structFields)
 	if err != nil {
-		if err != sql.ErrNoRows {
-			fmt.Fprintf(w, "(SQL) %v", err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-		}
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, err.Error())
 		return
 	}
-	for rows.Next() {
-		var ID, TeacherID int
-		var Title, Description, Media string
-		if err := rows.Scan(&ID, &Title, &Description, &Media, &TeacherID); err != nil {
-			fmt.Fprintf(w, "(SQL) %v", err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-		decodedData, err := b64.StdEncoding.DecodeString(Media)
-		if err != nil {
-			fmt.Fprintf(w, "(Decoder) %v", err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-		decodedMedia := string(decodedData)
-		var clinicalCase = mymodels.ClinicalCase{ID: &ID, Title: &Title, Description: &Description, Media: &decodedMedia, TeacherID: &TeacherID}
-		clinicalCases = append(clinicalCases, clinicalCase)
-	}
-	json.NewEncoder(w).Encode(clinicalCases)
-	w.WriteHeader(http.StatusOK)
-	return
-}
 
-// GetClinicalCase bla bla...
-func GetClinicalCase(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	keys, ok := r.URL.Query()["id"]
-	if !ok || len(keys[0]) < 1 {
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "ID is empty or not valid")
-		return
-	}
-	clinicalCaseID, err := strconv.Atoi(keys[0])
+	// Code media
+	media := b64.StdEncoding.EncodeToString([]byte(*newClinicalCase.Media)) //convert to base64 (BLOB)
+	newClinicalCase.Media = &media
+
+	// Data insertion into db
+	_, err = dbHelper.Insert(newClinicalCase)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "ID is empty or not valid")
-		return
-	}
-	var ID, TeacherID int
-	var Title, Description, Media string
-	var Db, _ = config.MYSQLConnection()
-	err = Db.QueryRow("SELECT ID,Title,Description,Media,TeacherID FROM Clinical_Cases WHERE ID=?", clinicalCaseID).Scan(&ID, &Title, &Description, &Media, &TeacherID)
-	defer Db.Close()
-	if err != nil {
-		if err == sql.ErrNoRows {
-			w.WriteHeader(http.StatusOK)
+		if strings.Split(err.Error(), ":")[0] == "(db 2) Error 1062" {
+			w.WriteHeader(http.StatusConflict)
 		} else {
 			w.WriteHeader(http.StatusInternalServerError)
 		}
+		fmt.Fprintf(w, err.Error())
 		return
 	}
-	decodedData, err := b64.StdEncoding.DecodeString(Media)
+	w.WriteHeader(http.StatusCreated)
+	return
+}
+
+// GetAllClinicalCases returns all clinical cases in db.
+func GetAllClinicalCases(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	// Data from db
+	var clinicalCase mymodels.ClinicalCase
+	rows, err := dbHelper.GetAll(clinicalCase)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(w, err.Error())
+		return
+	}
+	var allClinicalCases mymodels.AllClinicalCases
+	dbHelper.RowsToStruct(rows, &allClinicalCases)
+
+	// Handle coded data
+	for i, clinicalCase := range allClinicalCases {
+		codedData := *clinicalCase.Media
+		decodedData, err := b64.StdEncoding.DecodeString(codedData)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			fmt.Fprintf(w, "(Decoder) %v", err.Error())
+			return
+		}
+		formatedDecodedData := string(decodedData)
+		clinicalCase.Media = &formatedDecodedData
+		allClinicalCases[i] = clinicalCase
+	}
+
+	json.NewEncoder(w).Encode(allClinicalCases)
+	return
+}
+
+// GetClinicalCase returns one clinical case filtered by the id.
+func GetClinicalCase(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	var clinicalCase mymodels.ClinicalCase
+	reqBody, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, err.Error())
+		return
+	}
+	json.Unmarshal(reqBody, &clinicalCase)
+
+	// Fields validation
+	structFields := []string{"ID"} // struct fields to check
+	_, err = clinicalCase.ValidateFields(structFields)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, err.Error())
+		return
+	}
+
+	// Data from into db
+	rows, err := dbHelper.Get(clinicalCase)
+	if err != nil {
+		if string(err.Error()[4]) == "2" {
+			w.WriteHeader(http.StatusNotFound)
+		}
+		fmt.Fprintf(w, err.Error())
+		return
+	}
+	var allClinicalCases mymodels.AllClinicalCases
+	dbHelper.RowsToStruct(rows, &allClinicalCases)
+
+	// Handle coded data
+	clinicalCase = allClinicalCases[0]
+
+	codedData := *clinicalCase.Media
+	decodedData, err := b64.StdEncoding.DecodeString(codedData)
 	if err != nil {
 		fmt.Fprintf(w, "(Decoder) %v", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	decodedMedia := string(decodedData)
-	var clinicalCase = mymodels.ClinicalCase{ID: &ID, Title: &Title, Description: &Description, Media: &decodedMedia, TeacherID: &TeacherID}
+	formatedDecodedData := string(decodedData)
+	clinicalCase.Media = &formatedDecodedData
+
 	json.NewEncoder(w).Encode(clinicalCase)
-	w.WriteHeader(http.StatusCreated)
+
 	return
 }
 
-// UpdateClinicalCase bla bla...
+// UpdateClinicalCase updates fields of a clinical case in db.
 func UpdateClinicalCase(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+	var updatedClinicalCase mymodels.ClinicalCase
 	reqBody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "(USER) %v", err.Error())
+		fmt.Fprintf(w, err.Error())
 		return
 	}
-	var updatedClinicalCase mymodels.ClinicalCase
 	json.Unmarshal(reqBody, &updatedClinicalCase)
-	switch {
-	case (updatedClinicalCase.ID) == nil || (*updatedClinicalCase.ID*1 <= 0):
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "ID is empty or not valid")
-		return
-	case updatedClinicalCase.Title == nil || len(*updatedClinicalCase.Title) == 0:
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "Title is empty or not valid")
-		return
-	case updatedClinicalCase.Description == nil || len(*updatedClinicalCase.Description) == 0:
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "Description is empty or not valid")
-		return
-	case updatedClinicalCase.Media == nil || len(*updatedClinicalCase.Media) == 0:
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "Media is empty or not valid")
-		return
-	case (updatedClinicalCase.TeacherID) == nil || (*updatedClinicalCase.TeacherID*1 <= 0):
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "TeacherID is empty or not valid")
-		return
-	default:
-		media := b64.StdEncoding.EncodeToString([]byte(*updatedClinicalCase.Media)) //convert to base64 (BLOB)
-		var Db, _ = config.MYSQLConnection()
-		defer Db.Close()
-		row, err := Db.Exec("UPDATE Clinical_Cases SET Title=?, Description=?, Media=?, TeacherID=? WHERE ID=?", updatedClinicalCase.Title, updatedClinicalCase.Description, media, updatedClinicalCase.TeacherID, updatedClinicalCase.ID)
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			fmt.Fprintf(w, "(SQL) %v", err.Error())
-			return
-		}
 
-		count, err := row.RowsAffected()
-		if err != nil {
-			fmt.Fprintf(w, "(SQL) %v", err.Error())
-			return
-		}
-		if count == 1 {
-			json.NewEncoder(w).Encode(updatedClinicalCase)
-		} else {
-			fmt.Fprintf(w, "No rows updated")
-		}
+	// Fields validation
+	_, err = updatedClinicalCase.ValidateFields()
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, err.Error())
 		return
 	}
+
+	// Handle uncoded data
+	codedData := b64.StdEncoding.EncodeToString([]byte(*updatedClinicalCase.Media)) //convert to base64 (BLOB)
+	updatedClinicalCase.Media = &codedData
+
+	// Data update into db
+	_, err = dbHelper.Update(updatedClinicalCase)
+	if err != nil {
+		if string(err.Error()[4]) == "2" {
+			w.WriteHeader(http.StatusNotFound)
+		} else {
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+		fmt.Fprintf(w, err.Error())
+	}
+
+	return
 }
 
-// DeleteClinicalCase bla bla...
+// DeleteClinicalCase deletes one clinical case filtered by the id.
 func DeleteClinicalCase(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+	var deletedClinicalCase mymodels.ClinicalCase
 	reqBody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "(USER) %v", err.Error())
+		fmt.Fprintf(w, err.Error())
 		return
 	}
-	var deletedClinicalCase mymodels.ClinicalCase
 	json.Unmarshal(reqBody, &deletedClinicalCase)
 
-	if (deletedClinicalCase.ID) == nil || (*deletedClinicalCase.ID*1 <= 0) {
+	// Fields validation
+	structFields := []string{"ID"} // struct fields to check
+	_, err = deletedClinicalCase.ValidateFields(structFields)
+	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "ID is empty or not valid")
+		fmt.Fprintf(w, err.Error())
 		return
 	}
 
-	var Db, _ = config.MYSQLConnection()
-	row, err := Db.Exec("DELETE FROM Clinical_Cases WHERE ID=?", deletedClinicalCase.ID)
-	defer Db.Close()
+	// Data insertion into db
+	_, err = dbHelper.Delete(deletedClinicalCase)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(w, "(SQL) %v", err.Error())
-		return
-	}
-
-	count, err := row.RowsAffected()
-	if err != nil {
-		fmt.Fprintf(w, "(SQL) %v", err.Error())
-		return
-	}
-	if count == 1 {
-		fmt.Fprintf(w, "One row deleted")
-	} else {
-		fmt.Fprintf(w, "No rows deleted")
+		if string(err.Error()[4]) == "2" {
+			w.WriteHeader(http.StatusNotFound)
+		}
+		fmt.Fprintf(w, err.Error())
 	}
 	return
 }
@@ -241,87 +210,67 @@ func DeleteClinicalCase(w http.ResponseWriter, r *http.Request) {
 // LinkHCN adds an HCN into a Clinical Case...
 func LinkHCN(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	var newHCNVinculation mymodels.HCNVinculation
+	var newVinculation mymodels.HCNVinculation
 	reqBody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "(USER) %v", err.Error())
+		fmt.Fprintf(w, err.Error())
 		return
 	}
-	var Db, _ = config.MYSQLConnection()
-	json.Unmarshal(reqBody, &newHCNVinculation)
-	switch {
-	case (newHCNVinculation.ClinicalCaseID == nil) || (*newHCNVinculation.ClinicalCaseID*1 <= 0):
+	json.Unmarshal(reqBody, &newVinculation)
+
+	// Fields validation
+	structFields := []string{"ClinicalCaseID", "HCNID"} // struct fields to check
+	_, err = newVinculation.ValidateFields(structFields)
+	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "ClinicalCaseID is empty or not valid")
+		fmt.Fprintf(w, err.Error())
 		return
-	case (newHCNVinculation.HCNID == nil) || (*newHCNVinculation.HCNID*1 <= 0):
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "HCNID is empty or not valid")
-		return
-	default:
-		rows, err := Db.Exec("INSERT INTO CCases_HCN(ClinicalCaseID,HCNID) VALUES (?,?)", newHCNVinculation.ClinicalCaseID, newHCNVinculation.HCNID)
-		defer Db.Close()
-		if err != nil {
+	}
+
+	// Data insertion into db
+	_, err = dbHelper.Insert(newVinculation)
+	if err != nil {
+		if strings.Split(err.Error(), ":")[0] == "(db 2) Error 1062" {
 			w.WriteHeader(http.StatusConflict)
-			fmt.Fprintf(w, "(SQL) %v", err.Error())
-			return
+		} else {
+			w.WriteHeader(http.StatusInternalServerError)
 		}
-		cnt, _ := rows.RowsAffected()
-		if cnt == 0 {
-			fmt.Fprintf(w, "HCN not added")
-		} else if cnt == 1 {
-			fmt.Fprintf(w, "HCN added")
-		}
+		fmt.Fprintf(w, err.Error())
 		return
 	}
-}
-
-// UnlinkHCN from a Clnical Case...
-func UnlinkHCN(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	reqBody, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "(USER) %v", err.Error())
-		return
-	}
-	var removeHCNVinculation mymodels.HCNVinculation
-	json.Unmarshal(reqBody, &removeHCNVinculation)
-	if (removeHCNVinculation.ClinicalCaseID) == nil || (*removeHCNVinculation.ClinicalCaseID*1 <= 0) {
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "ClinicalCaseID is empty or not valid")
-		return
-	}
-	if (removeHCNVinculation.HCNID) == nil || (*removeHCNVinculation.HCNID*1 <= 0) {
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "HCNID is empty or not valid")
-		return
-	}
-
-	var Db, _ = config.MYSQLConnection()
-	row, err := Db.Exec("DELETE FROM CCases_HCN WHERE ClinicalCaseID=? AND HCNID=?", removeHCNVinculation.ClinicalCaseID, removeHCNVinculation.HCNID)
-	defer Db.Close()
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(w, "(SQL) %v", err.Error())
-		return
-	}
-
-	count, err := row.RowsAffected()
-	if err != nil {
-		fmt.Fprintf(w, "(SQL) %v", err.Error())
-		return
-	}
-	if count == 1 {
-		fmt.Fprintf(w, "One row deleted")
-	} else {
-		fmt.Fprintf(w, "No rows deleted")
-	}
+	w.WriteHeader(http.StatusCreated)
 	return
 }
 
-// DownloadPDF bla bla...
-func DownloadPDFFF(w http.ResponseWriter, r *http.Request) {
+// UnlinkHCN from a clinical case.
+func UnlinkHCN(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+	var deletedVinculation mymodels.HCNVinculation
+	reqBody, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, err.Error())
+		return
+	}
+	json.Unmarshal(reqBody, &deletedVinculation)
+
+	// Fields validation
+	structFields := []string{"ClinicalCaseID", "HCNID"} // struct fields to check
+	_, err = deletedVinculation.ValidateFields(structFields)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, err.Error())
+		return
+	}
+
+	// Data insertion into db
+	_, err = dbHelper.Delete(deletedVinculation)
+	if err != nil {
+		if string(err.Error()[4]) == "2" {
+			w.WriteHeader(http.StatusNotFound)
+		}
+		fmt.Fprintf(w, err.Error())
+	}
+	return
 }

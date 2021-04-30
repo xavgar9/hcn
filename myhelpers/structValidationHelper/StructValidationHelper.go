@@ -34,6 +34,21 @@ func ValidateFields(model interface{}, structFields ...[]string) (bool, error) {
 				switch fieldType {
 				case "*int":
 					value := fmt.Sprintf("%v", field.Elem()) // we have to extract the value this way for the if statement
+
+					// check for CourseClinicalCase and CourseHCN
+					structName, _, _, err := GetFields(model)
+					if err != nil {
+						return false, err
+					}
+					if structName == "CourseClinicalCase" || structName == "CourseHCN" || structName == "SolvedHCN" {
+						if fieldName == "Displayable" || fieldName == "Reviewed" {
+							if value == "1" || value == "0" {
+								return true, nil
+							}
+							return false, errors.New(fieldName + " is empty or not valid")
+						}
+					}
+
 					numberSign := fmt.Sprintf("%c", value[0])
 					if value == "0" || numberSign == "-" {
 						return false, errors.New(fieldName + " is empty or not valid")

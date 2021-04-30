@@ -1,4 +1,4 @@
-package middlewarehelper
+package middlewareHelper
 
 import (
 	"encoding/json"
@@ -11,7 +11,7 @@ import (
 )
 
 // Middleware for checking user authorization
-func Middleware(handler http.HandlerFunc, endpoint string) http.HandlerFunc {
+func Middleware(handler http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		reqBody, err := ioutil.ReadAll(r.Body)
 		if err != nil {
@@ -29,7 +29,7 @@ func Middleware(handler http.HandlerFunc, endpoint string) http.HandlerFunc {
 		}
 		fmt.Println("A", r.Header.Get("Token"))
 		isAuth, err := token.IsValid(r.Header.Get("Token"))
-		fmt.Println("IP -> ", originIP, "Endpoint ->", endpoint, "        isAuth:", isAuth, err)
+		fmt.Println("IP ->", originIP, "  Endpoint ->", r.RequestURI)
 		if !isAuth {
 			w.WriteHeader(http.StatusUnauthorized)
 			json.NewEncoder(w).Encode("Middleware authentication error: " + err.Error())

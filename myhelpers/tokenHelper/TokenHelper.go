@@ -46,7 +46,7 @@ func getTime(expirationTime interface{}) time.Time {
 // CreateToken function receives a teacher model
 // Returns the teacher signed token
 func CreateToken(teacher mymodels.Teacher) (string, error) {
-	expirationTime := time.Now().Add(10 * time.Minute)
+	expirationTime := time.Now().Add(120 * time.Minute)
 	claims := claims{
 		*teacher.ID,
 		*teacher.Name,
