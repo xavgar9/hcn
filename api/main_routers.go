@@ -24,7 +24,7 @@ func PingPong(w http.ResponseWriter, r *http.Request) {
 
 // MainRouters are the collection of all URLs for the Main App.
 func MainRouters(router *mux.Router) {
-	router.HandleFunc("/", PingPong).Methods("GET")
+	router.HandleFunc("/", PingPong).Methods("GET", "OPTIONS")
 
 	// Authentication URLs
 	router.HandleFunc("/Authentication/Login", authentication.Login).Methods("POST", "OPTIONS")

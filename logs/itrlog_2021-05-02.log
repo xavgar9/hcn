@@ -1,3 +1,8 @@
 {"level":"info","ts":1619995187.828092,"msg":"Server started at 2021-05-02 18:39:47.824873769 -0400 EDT"}
 {"level":"info","ts":1619995227.9351342,"msg":"Server started at 2021-05-02 18:40:27.932118306 -0400 EDT"}
 {"level":"error","ts":1619995237.494169,"msg":"http: Server closed"}
+{"level":"info","ts":1619996860.2369697,"msg":"Server started at 2021-05-02 19:07:40.175671331 -0400 EDT"}
+{"level":"info","ts":1619997006.9121332,"msg":"Server started at 2021-05-02 19:10:06.909956022 -0400 EDT"}
+{"level":"error","ts":1619997808.3948736,"msg":"http: Server closed"}
+{"level":"info","ts":1619997825.4960866,"msg":"Server started at 2021-05-02 19:23:45.49405485 -0400 EDT"}
+{"level":"info","ts":1619997871.6081727,"msg":"Server started at 2021-05-02 19:24:31.606303315 -0400 EDT"}
