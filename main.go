@@ -58,17 +58,17 @@ func main() {
 	// This is related to the CORS config to allow all origins []string{"*"} or specify only allowed IP or hostname.
 	cors := handlers.CORS(
 		handlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization", "Access-Control-Allow-Origin"}),
-		handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE"}),
+		handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}),
 		handlers.AllowedOrigins([]string{config.SiteDomainName}),
 	)
 
-	router.Use(cors)
+	//router.Use(cors)
 	//router.Use(csrfMiddleware)
 	//router.Use(loggingMiddleware)
-	router.Use(mux.CORSMethodMiddleware(router))
+	//router.Use(mux.CORSMethodMiddleware(router))
 
 	// This will serve the files under http://localhost:3000/static/<filename>
-	router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir(dir))))
+	//router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir(dir))))
 
 	// Initialize the APIs here
 	api.MainRouters(router) // URLs for the main app.
@@ -89,7 +89,7 @@ func main() {
 		WriteTimeout: time.Second * 15,
 		ReadTimeout:  time.Second * 15,
 		IdleTimeout:  time.Second * 60,
-		Handler:      router, // Pass our instance of gorilla/mux in.
+		Handler:      cors(router), // Pass our instance of gorilla/mux in.
 	}
 
 	// Run our server in a goroutine so that it doesn't block.
