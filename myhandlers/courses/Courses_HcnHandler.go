@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	dbHelper "hcn/myhelpers/databaseHelper"
+	stuctHelper "hcn/myhelpers/structValidationHelper"
 )
 
 // AddHCN adds a relationship between a course and a HCN.
@@ -50,14 +51,13 @@ func AddHCN(w http.ResponseWriter, r *http.Request) {
 // GetAllHCNCourse returns all hcns filtered by id.
 func GetAllHCNCourse(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	var courseCourseHCN mymodels.CourseHCN
-	reqBody, err := ioutil.ReadAll(r.Body)
+	id, err := stuctHelper.GetURLParameter("ID", r)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, err.Error())
 		return
 	}
-	json.Unmarshal(reqBody, &courseCourseHCN)
+	courseCourseHCN := mymodels.CourseHCN{CourseID: &id}
 
 	// Fields validation
 	structFields := []string{"CourseID"} // struct fields to check

@@ -1,7 +1,7 @@
 // Author(s): Xavier Garzón
 // Some of the next code was taken from Maharlikans Code's YouTube Channel
 // Maharlikans Code
-// Novemeber 2020
+// November 2020
 // Golang Web Application Project Structure - Golang Web Development
 // Golang Web Server Using Gorilla Package - Golang Web Development
 // Golang URL Router Using Gorilla Mux - Golang Web Development
@@ -27,14 +27,13 @@ import (
 
 	//"github.com/gorilla/csrf"
 
+	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/itrepablik/itrlog"
 	"github.com/itrepablik/sakto"
-
-	"github.com/gorilla/handlers"
 )
 
-//CurrentLocalTime ...
+//CurrentLocalTime bla bla...
 var CurrentLocalTime = sakto.GetCurDT(time.Now(), "America/New_York")
 
 func main() {
@@ -49,7 +48,6 @@ func main() {
 	router := mux.NewRouter()
 
 	// This is related to the CORS config to allow all origins []string{"*"} or specify only allowed IP or hostname.
-
 	cors := handlers.CORS(
 		handlers.AllowedHeaders([]string{"Origin", "Content-Type", "Authorization", "Access-Control-Allow-Origin", "Token"}),
 		handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}),
@@ -68,7 +66,7 @@ func main() {
 	}
 	defer conn.Close()
 	IP := conn.LocalAddr().(*net.UDPAddr).IP.String()
-	var PORT = "3600"
+	var PORT = config.ServerPort
 
 	srv := &http.Server{
 		//Addr: "localhost:3600",
@@ -107,4 +105,16 @@ func main() {
 	fmt.Println("Shutdown web server at " + CurrentLocalTime.String())
 	itrlog.Warn("Server has been shutdown at ", CurrentLocalTime.String())
 	os.Exit(0)
+}
+
+func loggingMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, router *http.Request) {
+		// Do stuff here
+		req := "IP:" + sakto.GetIP(router) + ":" + router.RequestURI + ":" + CurrentLocalTime.String()
+		fmt.Println(req)
+		itrlog.Info(req)
+
+		// Call the next handler, which can be another middleware in the chain, or the final handler.
+		next.ServeHTTP(w, router)
+	})
 }

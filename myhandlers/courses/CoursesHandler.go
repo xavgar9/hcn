@@ -11,6 +11,7 @@ import (
 	"time"
 
 	dbHelper "hcn/myhelpers/databaseHelper"
+	stuctHelper "hcn/myhelpers/structValidationHelper"
 
 	"github.com/itrepablik/sakto"
 )
@@ -74,14 +75,13 @@ func GetAllCourses(w http.ResponseWriter, r *http.Request) {
 // GetCourse returns one course filtered by the id.
 func GetCourse(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	var course mymodels.Course
-	reqBody, err := ioutil.ReadAll(r.Body)
+	id, err := stuctHelper.GetURLParameter("ID", r)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, err.Error())
 		return
 	}
-	json.Unmarshal(reqBody, &course)
+	course := mymodels.Course{ID: &id}
 
 	// Fields validation
 	structFields := []string{"ID"} // struct fields to check
@@ -233,14 +233,13 @@ func GetAllStudentsCourseNoHTTP(courseID int) (mymodels.AllStudents, error) {
 // GetAllStudentsCourse get all HCN in a course.
 func GetAllStudentsCourse(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	var studentTuition mymodels.StudentTuition
-	reqBody, err := ioutil.ReadAll(r.Body)
+	id, err := stuctHelper.GetURLParameter("ID", r)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, err.Error())
 		return
 	}
-	json.Unmarshal(reqBody, &studentTuition)
+	studentTuition := mymodels.StudentTuition{CourseID: &id}
 
 	// Fields validation
 	structFields := []string{"CourseID"} // struct fields to check

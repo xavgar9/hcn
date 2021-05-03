@@ -10,6 +10,7 @@ import (
 	"time"
 
 	dbHelper "hcn/myhelpers/databaseHelper"
+	stuctHelper "hcn/myhelpers/structValidationHelper"
 
 	"github.com/itrepablik/sakto"
 )
@@ -73,14 +74,13 @@ func GetAllActivities(w http.ResponseWriter, r *http.Request) {
 // GetActivity returns one activity filtered by the id.
 func GetActivity(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	var activity mymodels.Activity
-	reqBody, err := ioutil.ReadAll(r.Body)
+	id, err := stuctHelper.GetURLParameter("ID", r)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, err.Error())
 		return
 	}
-	json.Unmarshal(reqBody, &activity)
+	activity := mymodels.Activity{ID: &id}
 
 	// Fields validation
 	structFields := []string{"ID"} // struct fields to check
