@@ -13,6 +13,7 @@ import (
 	"net/http"
 
 	dbHelper "hcn/myhelpers/databaseHelper"
+	stuctHelper "hcn/myhelpers/structValidationHelper"
 
 	"github.com/tidwall/gjson"
 	"go.mongodb.org/mongo-driver/bson"
@@ -89,14 +90,13 @@ func GetHCNMongoIDNoHTTP(hcnID int) (string, error) {
 // GetHCN MySQL returns one hcn filtered by the id.
 func GetHCN(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	var hcn mymodels.HCN
-	reqBody, err := ioutil.ReadAll(r.Body)
+	id, err := stuctHelper.GetURLParameter("ID", r)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, err.Error())
 		return
 	}
-	json.Unmarshal(reqBody, &hcn)
+	hcn := mymodels.HCN{ID: &id}
 
 	// Fields validation
 	structFields := []string{"ID"} // struct fields to check

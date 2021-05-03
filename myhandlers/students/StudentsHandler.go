@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	dbHelper "hcn/myhelpers/databaseHelper"
+	stuctHelper "hcn/myhelpers/structValidationHelper"
 )
 
 // CreateStudent creates one announcement in db.
@@ -69,14 +70,13 @@ func GetAllStudents(w http.ResponseWriter, r *http.Request) {
 // GetStudent returns one announcement filtered by the id.
 func GetStudent(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	var student mymodels.Student
-	reqBody, err := ioutil.ReadAll(r.Body)
+	id, err := stuctHelper.GetURLParameter("ID", r)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, err.Error())
 		return
 	}
-	json.Unmarshal(reqBody, &student)
+	student := mymodels.Student{ID: &id}
 
 	// Fields validation
 	structFields := []string{"ID"} // struct fields to check

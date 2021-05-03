@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	dbHelper "hcn/myhelpers/databaseHelper"
+	stuctHelper "hcn/myhelpers/structValidationHelper"
 )
 
 // AddClinicalCase adds a relationship between a course and a clinical case.
@@ -51,14 +52,13 @@ func AddClinicalCase(w http.ResponseWriter, r *http.Request) {
 // GetAllClinicalCases returns all clinical cases filtered by id.
 func GetAllClinicalCases(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	var courseClinicalCase mymodels.CourseClinicalCase
-	reqBody, err := ioutil.ReadAll(r.Body)
+	id, err := stuctHelper.GetURLParameter("ID", r)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, err.Error())
 		return
 	}
-	json.Unmarshal(reqBody, &courseClinicalCase)
+	courseClinicalCase := mymodels.CourseClinicalCase{CourseID: &id}
 
 	// Fields validation
 	structFields := []string{"CourseID"} // struct fields to check

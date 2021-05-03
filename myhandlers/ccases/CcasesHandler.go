@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	dbHelper "hcn/myhelpers/databaseHelper"
+	stuctHelper "hcn/myhelpers/structValidationHelper"
 
 	b64 "encoding/base64"
 )
@@ -89,14 +90,13 @@ func GetAllClinicalCases(w http.ResponseWriter, r *http.Request) {
 // GetClinicalCase returns one clinical case filtered by the id.
 func GetClinicalCase(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	var clinicalCase mymodels.ClinicalCase
-	reqBody, err := ioutil.ReadAll(r.Body)
+	id, err := stuctHelper.GetURLParameter("ID", r)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, err.Error())
 		return
 	}
-	json.Unmarshal(reqBody, &clinicalCase)
+	clinicalCase := mymodels.ClinicalCase{ID: &id}
 
 	// Fields validation
 	structFields := []string{"ID"} // struct fields to check

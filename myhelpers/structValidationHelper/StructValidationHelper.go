@@ -3,7 +3,9 @@ package structValidationHelper
 import (
 	"errors"
 	"fmt"
+	"net/http"
 	"reflect"
+	"strconv"
 
 	set "hcn/myhelpers/setHelper"
 )
@@ -86,4 +88,18 @@ func GetFields(model interface{}) (string, []string, []string, error) {
 		fieldValues = append(fieldValues, fieldValue)
 	}
 	return structName, fieldNames, fieldValues, nil
+}
+
+// GetURLParameter returns the parameter of the url
+// Normally is an int variable
+func GetURLParameter(param string, r *http.Request) (int, error) {
+	keys, ok := r.URL.Query()[param]
+	if !ok || len(keys[0]) < 1 {
+		return 0, errors.New("ID is empty or not valid 1")
+	}
+	id, err := strconv.Atoi(keys[0])
+	if err != nil {
+		return 0, errors.New("ID is empty or not valid 2")
+	}
+	return id, nil
 }

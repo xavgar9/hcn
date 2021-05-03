@@ -1,1 +1,21 @@
 {"level":"info","ts":1620053467.868309,"msg":"Server started at 2021-05-03 10:51:07.865334969 -0400 EDT"}
+{"level":"info","ts":1620063477.7318265,"msg":"Server started at 2021-05-03 13:37:57.729928374 -0400 EDT"}
+{"level":"info","ts":1620063831.0242689,"msg":"Server started at 2021-05-03 13:43:51.022277925 -0400 EDT"}
+{"level":"info","ts":1620063885.0927749,"msg":"Server started at 2021-05-03 13:44:45.089951757 -0400 EDT"}
+{"level":"error","ts":1620064818.718297,"msg":"http: Server closed"}
+{"level":"info","ts":1620074685.8269174,"msg":"Server started at 2021-05-03 16:44:45.825112457 -0400 EDT"}
+{"level":"info","ts":1620074877.7753863,"msg":"Server started at 2021-05-03 16:47:57.773111592 -0400 EDT"}
+{"level":"info","ts":1620075171.1487541,"msg":"Server started at 2021-05-03 16:52:51.146853738 -0400 EDT"}
+{"level":"error","ts":1620075987.2652836,"msg":"http: Server closed"}
+{"level":"info","ts":1620076008.819051,"msg":"Server started at 2021-05-03 17:06:48.779447727 -0400 EDT"}
+{"level":"info","ts":1620076120.1224682,"msg":"Server started at 2021-05-03 17:08:40.119781291 -0400 EDT"}
+{"level":"info","ts":1620076333.6447432,"msg":"Server started at 2021-05-03 17:12:13.642994918 -0400 EDT"}
+{"level":"info","ts":1620076865.0367317,"msg":"Server started at 2021-05-03 17:21:05.034808635 -0400 EDT"}
+{"level":"info","ts":1620076947.947878,"msg":"Server started at 2021-05-03 17:22:27.945882522 -0400 EDT"}
+{"level":"info","ts":1620076984.183866,"msg":"Server started at 2021-05-03 17:23:04.181833214 -0400 EDT"}
+{"level":"info","ts":1620077071.3774128,"msg":"Server started at 2021-05-03 17:24:31.374662618 -0400 EDT"}
+{"level":"info","ts":1620077113.4280467,"msg":"Server started at 2021-05-03 17:25:13.424598757 -0400 EDT"}
+{"level":"info","ts":1620077171.2221425,"msg":"Server started at 2021-05-03 17:26:11.220037109 -0400 EDT"}
+{"level":"info","ts":1620077228.151873,"msg":"Server started at 2021-05-03 17:27:08.149215983 -0400 EDT"}
+{"level":"info","ts":1620077287.7110686,"msg":"Server started at 2021-05-03 17:28:07.708690496 -0400 EDT"}
+{"level":"error","ts":1620077346.9141388,"msg":"http: Server closed"}

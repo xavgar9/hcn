@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	dbHelper "hcn/myhelpers/databaseHelper"
+	stuctHelper "hcn/myhelpers/structValidationHelper"
 )
 
 // CreateTeacher bla bla...
@@ -69,14 +70,13 @@ func GetAllTeachers(w http.ResponseWriter, r *http.Request) {
 // GetTeacher bla bla...
 func GetTeacher(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	var teacher mymodels.Teacher
-	reqBody, err := ioutil.ReadAll(r.Body)
+	id, err := stuctHelper.GetURLParameter("ID", r)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, err.Error())
 		return
 	}
-	json.Unmarshal(reqBody, &teacher)
+	teacher := mymodels.Teacher{ID: &id}
 
 	// Fields validation
 	structFields := []string{"ID"} // struct fields to check
