@@ -52,7 +52,7 @@ func AddClinicalCase(w http.ResponseWriter, r *http.Request) {
 // GetAllClinicalCases returns all clinical cases filtered by id.
 func GetAllClinicalCases(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	id, err := stuctHelper.GetURLParameter("ID", r)
+	id, err := stuctHelper.GetURLParameter("CourseID", r)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, err.Error())

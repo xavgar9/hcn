@@ -51,7 +51,7 @@ func AddHCN(w http.ResponseWriter, r *http.Request) {
 // GetAllHCNCourse returns all hcns filtered by id.
 func GetAllHCNCourse(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	id, err := stuctHelper.GetURLParameter("ID", r)
+	id, err := stuctHelper.GetURLParameter("CourseID", r)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, err.Error())
