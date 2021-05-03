@@ -11,6 +11,7 @@ import (
 )
 
 func setupResponse(w *http.ResponseWriter, r *http.Request) {
+	fmt.Println("Erdaaa")
 	(*w).Header().Set("Access-Control-Allow-Origin", "*")
 	(*w).Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
 	(*w).Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
@@ -19,12 +20,14 @@ func setupResponse(w *http.ResponseWriter, r *http.Request) {
 // Middleware for checking user authorization
 func Middleware(handler http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		fmt.Println("Ajaaa 1")
 		setupResponse(&w, r)
+		fmt.Println("Ajaaa 2", (*r).Method)
 		if (*r).Method == "OPTIONS" {
+			fmt.Println("Ajaaa 3")
 			return
 		}
-		//w.Header().Set("Access-Control-Allow-Origin", "*")
-		//w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+		fmt.Println("Ajaaa 4")
 
 		reqBody, err := ioutil.ReadAll(r.Body)
 		if err != nil {
