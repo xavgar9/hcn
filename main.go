@@ -26,10 +26,12 @@ import (
 	"time"
 
 	//"github.com/gorilla/csrf"
-	"github.com/gorilla/handlers"
+
 	"github.com/gorilla/mux"
 	"github.com/itrepablik/itrlog"
 	"github.com/itrepablik/sakto"
+
+	"github.com/gorilla/handlers"
 )
 
 //CurrentLocalTime ...
@@ -45,30 +47,16 @@ func main() {
 	flag.Parse()
 
 	router := mux.NewRouter()
-	// Create cross-site request forgery (CSRF) protection in every http requests
-	// 32-byte-long-auth-key []string{config.SiteDomainName}
-	/*
-		csrfMiddleware := csrf.Protect(
-			[]byte(config.SecretKeyCORS),
-			csrf.Secure(false),
-			csrf.TrustedOrigins([]string{config.SiteDomainName}), // Change this in production
-		)
 
-	*/
 	// This is related to the CORS config to allow all origins []string{"*"} or specify only allowed IP or hostname.
+
 	cors := handlers.CORS(
-		handlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization", "Access-Control-Allow-Origin"}),
+		handlers.AllowedHeaders([]string{"Origin", "Content-Type", "Authorization", "Access-Control-Allow-Origin", "Token"}),
 		handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}),
-		handlers.AllowedOrigins([]string{config.SiteDomainName}),
+		handlers.AllowedOrigins([]string{"*"}),
 	)
 
-	//router.Use(cors)
-	//router.Use(csrfMiddleware)
-	//router.Use(loggingMiddleware)
-	//router.Use(mux.CORSMethodMiddleware(router))
-
-	// This will serve the files under http://localhost:3000/static/<filename>
-	//router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir(dir))))
+	router.Use(cors)
 
 	// Initialize the APIs here
 	api.MainRouters(router) // URLs for the main app.
@@ -89,7 +77,7 @@ func main() {
 		WriteTimeout: time.Second * 15,
 		ReadTimeout:  time.Second * 15,
 		IdleTimeout:  time.Second * 60,
-		Handler:      cors(router), // Pass our instance of gorilla/mux in.
+		Handler:      router, // Pass our instance of gorilla/mux in.
 	}
 
 	// Run our server in a goroutine so that it doesn't block.
@@ -119,16 +107,4 @@ func main() {
 	fmt.Println("Shutdown web server at " + CurrentLocalTime.String())
 	itrlog.Warn("Server has been shutdown at ", CurrentLocalTime.String())
 	os.Exit(0)
-}
-
-func loggingMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, router *http.Request) {
-		// Do stuff here
-		req := "IP:" + sakto.GetIP(router) + ":" + router.RequestURI + ":" + CurrentLocalTime.String()
-		fmt.Println(req)
-		itrlog.Info(req)
-
-		// Call the next handler, which can be another middleware in the chain, or the final handler.
-		next.ServeHTTP(w, router)
-	})
 }

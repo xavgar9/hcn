@@ -80,46 +80,46 @@ func UserAuthentication(teacher mymodels.Teacher) (mymodels.Token, error) {
 		if err != nil {
 			return finalToken, err
 		}
-		fmt.Println("user 2", newToken)
+		//fmt.Println("user 2", newToken)
 		ok, err := token.VerifyAuthenticity(newToken)
 		if err != nil {
 			return finalToken, err
 		}
-		fmt.Println("user 3", ok)
-		fmt.Println("user 3", err)
+		//fmt.Println("user 3", ok)
+		//	fmt.Println("user 3", err)
 		// Save the token in bd for further verifications
 		if ok {
 			if AreCredentialsValid(teacher) {
 				claims, err := token.GetTokenClaims(newToken)
-				fmt.Println("user 4", claims)
+				//fmt.Println("user 4", claims)
 				if err != nil {
 					return finalToken, err
 				}
 
 				Db, err := config.MYSQLConnection()
 				defer Db.Close()
-				fmt.Println("user 5", err)
+				//fmt.Println("user 5", err)
 				if err != nil {
 					return finalToken, err
 				}
-				fmt.Println("user 5.1", *claims.ExpirationDate)
+				//fmt.Println("user 5.1", *claims.ExpirationDate)
 				rows, err := Db.Query("SELECT SaveToken(?,?,?)", claims.Email, newToken, claims.ExpirationDate)
 				defer rows.Close()
-				fmt.Println("user 6", err)
+				//fmt.Println("user 6", err)
 				if err != nil {
 					fmt.Println("(SQL) ", err.Error())
 					return finalToken, err
 				}
 				for rows.Next() {
 					var result string
-					fmt.Println("user 6.3", err)
+					//fmt.Println("user 6.3", err)
 					err := rows.Scan(&result)
-					fmt.Println("user 6.5", err)
+					//fmt.Println("user 6.5", err)
 					if err != nil {
 						fmt.Println("(SQL) ", err.Error())
 						return finalToken, err
 					}
-					fmt.Println("user 7", result)
+					//fmt.Println("user 7", result)
 					id := claims.ID
 					name := claims.Name
 					email := claims.Email
@@ -134,7 +134,7 @@ func UserAuthentication(teacher mymodels.Teacher) (mymodels.Token, error) {
 					}
 					return finalToken, fmt.Errorf("Teacher does not exist")
 				}
-				fmt.Println("errors", rows.Err())
+				//fmt.Println("errors", rows.Err())
 			}
 			return finalToken, fmt.Errorf("Credentials invalid")
 		}
