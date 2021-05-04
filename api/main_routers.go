@@ -52,29 +52,29 @@ func MainRouters(router *mux.Router) {
 	router.HandleFunc("/Teachers/DeleteTeacher", middleware.Middleware(teachers.DeleteTeacher)).Methods("DELETE", "OPTIONS")
 
 	// Courses URLs
-	router.HandleFunc("/Courses/GetAllCourses", middleware.Middleware(courses.GetAllCourses)).Methods("GET")
-	router.HandleFunc("/Courses/GetCourse", middleware.Middleware(courses.GetCourse)).Methods("GET")
+	router.HandleFunc("/Courses/GetAllCourses", middleware.Middleware(courses.GetAllCourses)).Methods("GET", "OPTIONS")
+	router.HandleFunc("/Courses/GetCourse", middleware.Middleware(courses.GetCourse)).Methods("GET", "OPTIONS")
 	router.HandleFunc("/Courses/UpdateCourse", middleware.Middleware(courses.UpdateCourse)).Methods("PUT", "OPTIONS")
 	router.HandleFunc("/Courses/CreateCourse", middleware.Middleware(courses.CreateCourse)).Methods("POST", "OPTIONS")
 	router.HandleFunc("/Courses/DeleteCourse", middleware.Middleware(courses.DeleteCourse)).Methods("DELETE", "OPTIONS")
 
 	router.HandleFunc("/Courses/AddHCN", middleware.Middleware(courses.AddHCN)).Methods("POST", "OPTIONS")
-	router.HandleFunc("/Courses/GetAllHCN", middleware.Middleware(courses.GetAllHCNCourse)).Methods("GET")
+	router.HandleFunc("/Courses/GetAllHCN", middleware.Middleware(courses.GetAllHCNCourse)).Methods("GET", "OPTIONS")
 	router.HandleFunc("/Courses/RemoveHCN", middleware.Middleware(courses.RemoveHCN)).Methods("DELETE", "OPTIONS")
 	router.HandleFunc("/Courses/VisibilityHCN", middleware.Middleware(courses.VisibilityHCN)).Methods("POST", "OPTIONS")
 
 	router.HandleFunc("/Courses/AddClinicalCase", middleware.Middleware(courses.AddClinicalCase)).Methods("POST", "OPTIONS")
-	router.HandleFunc("/Courses/GetAllClinicalCases", middleware.Middleware(courses.GetAllClinicalCases)).Methods("GET")
+	router.HandleFunc("/Courses/GetAllClinicalCases", middleware.Middleware(courses.GetAllClinicalCases)).Methods("GET", "OPTIONS")
 	router.HandleFunc("/Courses/RemoveClinicalCase", middleware.Middleware(courses.RemoveClinicalCase)).Methods("DELETE", "OPTIONS")
 	router.HandleFunc("/Courses/VisibilityClinicalCase", middleware.Middleware(courses.VisibilityClinicalCase)).Methods("POST", "OPTIONS")
 
 	router.HandleFunc("/Courses/AddStudent", middleware.Middleware(courses.AddStudent)).Methods("POST", "OPTIONS")
-	router.HandleFunc("/Courses/GetAllStudentsCourse", middleware.Middleware(courses.GetAllStudentsCourse)).Methods("GET")
+	router.HandleFunc("/Courses/GetAllStudentsCourse", middleware.Middleware(courses.GetAllStudentsCourse)).Methods("GET", "OPTIONS")
 	router.HandleFunc("/Courses/RemoveStudent", middleware.Middleware(courses.RemoveStudent)).Methods("DELETE", "OPTIONS")
 
 	// Announcements URLs
-	router.HandleFunc("/Announcements/GetAllAnnouncements", middleware.Middleware(announcements.GetAllAnnouncements)).Methods("GET")
-	router.HandleFunc("/Announcements/GetAnnouncement", middleware.Middleware(announcements.GetAnnouncement)).Methods("GET")
+	router.HandleFunc("/Announcements/GetAllAnnouncements", middleware.Middleware(announcements.GetAllAnnouncements)).Methods("GET", "OPTIONS")
+	router.HandleFunc("/Announcements/GetAnnouncement", middleware.Middleware(announcements.GetAnnouncement)).Methods("GET", "OPTIONS")
 	router.HandleFunc("/Announcements/UpdateAnnouncement", middleware.Middleware(announcements.UpdateAnnouncement)).Methods("PUT", "OPTIONS")
 	router.HandleFunc("/Announcements/CreateAnnouncement", middleware.Middleware(announcements.CreateAnnouncement)).Methods("POST", "OPTIONS")
 	router.HandleFunc("/Announcements/DeleteAnnouncement", middleware.Middleware(announcements.DeleteAnnouncement)).Methods("DELETE", "OPTIONS")
@@ -89,8 +89,8 @@ func MainRouters(router *mux.Router) {
 	*/
 
 	// Clinical Cases URLs
-	router.HandleFunc("/ClinicalCases/GetAllClinicalCases", middleware.Middleware(ccases.GetAllClinicalCases)).Methods("GET")
-	router.HandleFunc("/ClinicalCases/GetClinicalCase", middleware.Middleware(ccases.GetClinicalCase)).Methods("GET")
+	router.HandleFunc("/ClinicalCases/GetAllClinicalCases", middleware.Middleware(ccases.GetAllClinicalCases)).Methods("GET", "OPTIONS")
+	router.HandleFunc("/ClinicalCases/GetClinicalCase", middleware.Middleware(ccases.GetClinicalCase)).Methods("GET", "OPTIONS")
 	router.HandleFunc("/ClinicalCases/UpdateClinicalCase", middleware.Middleware(ccases.UpdateClinicalCase)).Methods("PUT", "OPTIONS")
 	router.HandleFunc("/ClinicalCases/CreateClinicalCase", middleware.Middleware(ccases.CreateClinicalCase)).Methods("POST", "OPTIONS")
 	router.HandleFunc("/ClinicalCases/DeleteClinicalCase", middleware.Middleware(ccases.DeleteClinicalCase)).Methods("DELETE", "OPTIONS")
@@ -102,15 +102,15 @@ func MainRouters(router *mux.Router) {
 	//router.HandleFunc("/ClinicalCases/UnlinkHCN", ccases.UnlinkHCN)).Methods("DELETE", "OPTIONS")
 
 	// HCN URLs
-	router.HandleFunc("/HCN/GetAllHCN", middleware.Middleware(hcn.GetAllHCN)).Methods("GET")
-	router.HandleFunc("/HCN/GetHCN", middleware.Middleware(hcn.GetHCN)).Methods("GET")
+	router.HandleFunc("/HCN/GetAllHCN", middleware.Middleware(hcn.GetAllHCN)).Methods("GET", "OPTIONS")
+	router.HandleFunc("/HCN/GetHCN", middleware.Middleware(hcn.GetHCN)).Methods("GET", "OPTIONS")
 	router.HandleFunc("/HCN/UpdateHCN", middleware.Middleware(hcn.UpdateHCN)).Methods("PUT", "OPTIONS")
 	router.HandleFunc("/HCN/CreateHCN", middleware.Middleware(hcn.CreateHCN)).Methods("POST", "OPTIONS")
 	router.HandleFunc("/HCN/DeleteHCN", middleware.Middleware(hcn.DeleteHCN)).Methods("DELETE", "OPTIONS")
 
 	// HCN Mongo URLs
-	router.HandleFunc("/HCN/GetAllHCNMongo", middleware.Middleware(hcn.GetAllHCNMongo)).Methods("GET")
-	router.HandleFunc("/HCN/GetHCNMongo", middleware.Middleware(hcn.GetHCNMongo)).Methods("GET")
+	router.HandleFunc("/HCN/GetAllHCNMongo", middleware.Middleware(hcn.GetAllHCNMongo)).Methods("GET", "OPTIONS")
+	router.HandleFunc("/HCN/GetHCNMongo", middleware.Middleware(hcn.GetHCNMongo)).Methods("GET", "OPTIONS")
 	router.HandleFunc("/HCN/UpdateHCNMongo", middleware.Middleware(hcn.UpdateHCNMongo)).Methods("PUT", "OPTIONS")
 	router.HandleFunc("/HCN/CreateHCNMongo", middleware.Middleware(hcn.CreateHCNMongo)).Methods("POST", "OPTIONS")
 	router.HandleFunc("/HCN/DeleteHCNMongo", middleware.Middleware(hcn.DeleteHCNMongo)).Methods("DELETE", "OPTIONS")
@@ -118,6 +118,6 @@ func MainRouters(router *mux.Router) {
 
 	// SolvedHCN URLs
 	router.HandleFunc("/SolvedHCN/CreateSolvedHCN", middleware.Middleware(solvedhcn.CreateSolvedHCN)).Methods("POST", "OPTIONS")
-	router.HandleFunc("/SolvedHCN/GetAllSolvedHCN", middleware.Middleware(solvedhcn.GetAllSolvedHCN)).Methods("GET")
+	router.HandleFunc("/SolvedHCN/GetAllSolvedHCN", middleware.Middleware(solvedhcn.GetAllSolvedHCN)).Methods("GET", "OPTIONS")
 	router.HandleFunc("/SolvedHCN/UpdateSolvedHCN", middleware.Middleware(solvedhcn.UpdateSolvedHCN)).Methods("PUT", "OPTIONS")
 }
