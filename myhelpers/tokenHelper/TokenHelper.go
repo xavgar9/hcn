@@ -165,7 +165,7 @@ func IsValid(receivedToken string) (bool, error) {
 			}
 			//fmt.Println("IsValid Error 2.1", receivedToken)
 			rows, err := Db.Query("SELECT IsValidToken(?,?)", claims.ID, receivedToken)
-			rows.Close()
+			defer rows.Close()
 			//fmt.Println("IsValid Error 2.11")
 			if err == nil {
 				//fmt.Println("IsValid Error 2.12")
