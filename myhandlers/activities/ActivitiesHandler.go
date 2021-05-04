@@ -50,7 +50,7 @@ func CreateActivity(w http.ResponseWriter, r *http.Request) {
 	}
 	newActivity.ID = &lastID
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(allActivities)
+	json.NewEncoder(w).Encode(newActivity)
 	return
 }
 
