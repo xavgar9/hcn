@@ -162,9 +162,12 @@ func Delete(model interface{}) (bool, error) {
 	}
 	if cnt == 1 {
 		return true, nil
-	} else {
-		return false, errors.New("(db 5) Expected to affect 1 row, affected " + strconv.Itoa(int(cnt)) + " rows")
 	}
+	modelName, _, _, _ := helper.GetFields(model)
+	if modelName == "SolvedHCN" {
+		return true, nil
+	}
+	return false, errors.New("(db 5) Expected to affect 1 row, affected " + strconv.Itoa(int(cnt)) + " rows")
 }
 
 // -------------------------------------------------------
@@ -306,7 +309,7 @@ func createExistsQuery(modelName string, fieldsNames []string, fieldsValues []st
 	if filterField == "ID" {
 		query = query + " FROM " + tableName + " WHERE ID=" + fieldsValues[0]
 	} else {
-		if tableName == "Courses_CCases" || tableName == "Courses_HCN" {
+		if tableName == "Courses_CCases" || tableName == "Courses_HCN" || tableName == "Solved_HCN" {
 			query = query + " FROM " + tableName + " WHERE " + fieldsNames[1] + "=" + fieldsValues[1]
 		} else {
 			query = query + " FROM " + tableName + " WHERE " + fieldsNames[1] + "=" + fieldsValues[1] + " AND " + fieldsNames[2] + "=" + fieldsValues[2]
@@ -422,7 +425,9 @@ func createDeleteQuery(model interface{}) string {
 	tableName := tableName(modelName)
 	filterField := filterField(tableName)
 	query := "DELETE"
-	if filterField == "ID" {
+	if tableName == "Solved_HCN" {
+		query = query + " FROM " + tableName + " WHERE " + fieldsNames[1] + "=" + fieldsValues[1]
+	} else if filterField == "ID" {
 		query = query + " FROM " + tableName + " WHERE ID=" + fieldsValues[0]
 	} else {
 		query = query + " FROM " + tableName + " WHERE " + fieldsNames[1] + "=" + fieldsValues[1] + " AND " + fieldsNames[2] + "=" + fieldsValues[2]

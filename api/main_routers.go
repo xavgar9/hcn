@@ -120,4 +120,5 @@ func MainRouters(router *mux.Router) {
 	router.HandleFunc("/SolvedHCN/CreateSolvedHCN", middleware.Middleware(solvedhcn.CreateSolvedHCN)).Methods("POST", "OPTIONS")
 	router.HandleFunc("/SolvedHCN/GetAllSolvedHCN", middleware.Middleware(solvedhcn.GetAllSolvedHCN)).Methods("GET", "OPTIONS")
 	router.HandleFunc("/SolvedHCN/UpdateSolvedHCN", middleware.Middleware(solvedhcn.UpdateSolvedHCN)).Methods("PUT", "OPTIONS")
+	router.HandleFunc("/SolvedHCN/DeleteSolvedHCN", middleware.Middleware(solvedhcn.DeleteSolvedHCN)).Methods("DELETE", "OPTIONS")
 }
