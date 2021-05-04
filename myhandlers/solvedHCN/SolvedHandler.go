@@ -198,3 +198,36 @@ func UpdateSolvedHCN(w http.ResponseWriter, r *http.Request) {
 
 	return
 }
+
+// DeleteSolvedHCN all solved hcns filtered by activity id.
+func DeleteSolvedHCN(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	var deletedSolvedHCN mymodels.SolvedHCN
+	reqBody, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, err.Error())
+		return
+	}
+	json.Unmarshal(reqBody, &deletedSolvedHCN)
+
+	// Fields validation
+	structFields := []string{"SolvedID"} // struct fields to check
+	_, err = deletedSolvedHCN.ValidateFields(structFields)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, err.Error())
+		return
+	}
+
+	// Data insertion into db
+	_, err = dbHelper.Delete(deletedSolvedHCN)
+	if err != nil {
+		if string(err.Error()[4]) == "2" {
+			w.WriteHeader(http.StatusNotFound)
+		}
+		fmt.Fprintf(w, err.Error())
+	}
+
+	return
+}
