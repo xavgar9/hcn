@@ -42,13 +42,15 @@ func CreateActivity(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Data insertion into db
-	_, err = dbHelper.Insert(newActivity)
+	lastID, err := dbHelper.Insert(newActivity)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprintf(w, err.Error())
 		return
 	}
+	newActivity.ID = &lastID
 	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(allActivities)
 	return
 }
 
