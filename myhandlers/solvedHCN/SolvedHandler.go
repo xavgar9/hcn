@@ -212,7 +212,7 @@ func DeleteSolvedHCN(w http.ResponseWriter, r *http.Request) {
 	json.Unmarshal(reqBody, &deletedSolvedHCN)
 
 	// Fields validation
-	structFields := []string{"SolvedID"} // struct fields to check
+	structFields := []string{"ActivityID"} // struct fields to check
 	_, err = deletedSolvedHCN.ValidateFields(structFields)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
